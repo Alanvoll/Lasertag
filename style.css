@@ -102,7 +102,7 @@ thead th[aria-sort="ascending"] button::after { content: " ↑"; color: var(--go
 .strip .sw { width: 2px; height: 26px; background: var(--fg); margin: 0 6px; border-radius: 1px }
 
 /* номинации */
-.noms { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden }
+.noms { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden }
 .nom { background: var(--panel); box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; min-width: 0 }
 .nom .nt { font: 400 16px/1.2 var(--display); color: var(--gold) }
 .nom .lab { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted) }
@@ -344,8 +344,15 @@ thead tr.grp th.gsep { text-align: left }
 /* сортировка дуэлей игрока */
 .drows[data-sortable] .drow.hd button { all: unset; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit }
 .drows[data-sortable] .drow.hd button:hover, .drows[data-sortable] .drow.hd button[aria-pressed="true"] { color: var(--fg) }
-.drows[data-sortable] .drow.hd button[aria-pressed="true"]::after { content: " ↓" }
-.drows[data-sortable] .drow.hd button[aria-pressed="true"][data-dir="asc"]::after { content: " ↑" }
+.drows[data-sortable] .drow { grid-template-columns: 72px minmax(0, 1fr) minmax(0, 1fr) 64px 64px; column-gap: 0 }
+.drows[data-sortable] .drow.hd { align-items: end; padding-bottom: 4px; border-bottom: 1px solid var(--line); margin-bottom: 2px }
+.drows[data-sortable] .drow.hd .half.lft { justify-content: flex-end; padding-right: 8px }
+.drows[data-sortable] .drow.hd .half.rgt { padding-left: 8px }
+.drows[data-sortable] .drow.hd button { position: relative }
+/* стрелка сортировки не сдвигает заголовок: висит слева от него */
+.drows[data-sortable] .drow.hd button[aria-pressed="true"]::before { content: "↓"; position: absolute; right: 100%; margin-right: 3px }
+.drows[data-sortable] .drow.hd button[aria-pressed="true"][data-dir="asc"]::before { content: "↑" }
+.drows[data-sortable] .drow.hd .half.rgt button[aria-pressed="true"]::before { right: auto; left: 100%; margin: 0 0 0 3px }
 .drows[data-sortable] .drow.hd button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px }
 [data-npane] { display: flex; flex-direction: column; gap: 14px }
 /* MVP */
