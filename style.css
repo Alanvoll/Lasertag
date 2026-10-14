@@ -312,6 +312,7 @@ thead tr.grp th.gsep { text-align: left }
 :root .fx-rails { filter: grayscale(1) brightness(1.6) }
 
 /* ---------- графики прогресса игрока ---------- */
+[hidden] { display: none !important }
 .prog { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line) }
 .pchart { margin: 0; background: var(--panel); padding: 14px 14px 8px; position: relative; display: flex; flex-direction: column; gap: 8px; min-width: 0 }
 .pchart figcaption { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px }

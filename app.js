@@ -347,7 +347,11 @@ function progressCharts(games) {
   }).join("")}</div>
   <div class="plegend"><span><i class="me"></i>игрок</span><span><i class="avg"></i>среднее по всем игрокам этой игры</span></div>`;
 }
+let playerTab = "table";
 function progressInit() {
+  const tabs = document.querySelectorAll("[data-ptab]");
+  const pick = () => { tabs.forEach(b => b.setAttribute("aria-pressed", b.dataset.ptab === playerTab)); document.querySelectorAll("[data-pane]").forEach(el => el.hidden = el.dataset.pane !== playerTab); };
+  tabs.forEach(b => b.onclick = () => { playerTab = b.dataset.ptab; pick(); }); pick();
   const box = document.querySelector(".prog"); if (!box) return;
   let tip = document.getElementById("ptip");
   if (!tip) { tip = document.createElement("div"); tip.id = "ptip"; tip.className = "ptip"; document.body.appendChild(tip); }
@@ -369,8 +373,9 @@ function viewPlayer(S, key) {
     <div class="fact"><span class="v">${fmt(s.dealt)}</span><span class="k">попаданий</span></div>
     <div class="fact"><span class="v">${r2(s.ratio)}</span><span class="k">попал / получил</span></div>
     <div class="fact"><span class="v">${pct(s.acc)}</span><span class="k">точность</span></div></div></section>
-  <section><h2>Прогресс</h2>${progressCharts(games)}<p class="note">Одна точка — одна игра. Пунктир — среднее по всем игрокам той же игры, чтобы было видно, лучше или хуже остальных. Наведите на точку, чтобы увидеть значения.</p></section>
-  <section><h2>По играм</h2><div class="scroll"><table><thead><tr><th class="l">Игра</th><th class="l">Команда</th><th>Попал</th><th>Получил</th><th>Попал / получил</th><th>Смерти</th><th>Выстрелы</th><th>Точность</th></tr></thead>
+  <section><div class="head"><h2>По играм</h2><div class="seg" role="group" aria-label="Вид"><button data-ptab="table">Таблица</button><button data-ptab="prog">Прогресс</button></div></div>
+  <div data-pane="prog">${progressCharts(games)}<p class="note">Одна точка — одна игра. Пунктир — среднее по всем игрокам той же игры, чтобы было видно, лучше или хуже остальных. Наведите на точку, чтобы увидеть значения.</p></div>
+  <div data-pane="table" class="scroll"><table><thead><tr><th class="l">Игра</th><th class="l">Команда</th><th>Попал</th><th>Получил</th><th>Попал / получил</th><th>Смерти</th><th>Выстрелы</th><th>Точность</th></tr></thead>
   <tbody>${games.map(({ g, key, p }) => `<tr><th class="l"><a class="plink" href="#${key}">${dateShort(g.date)}</a> <span class="muted">${esc(g.title || "")}</span></th><td class="l"><span class="dots">${p.teams.map(dot).join("")}</span> <span class="muted">${esc(p.gun)}</span></td>
     <td class="num">${p.dealt}</td><td class="num">${p.recv}</td><td class="num">${r2(p.ratio)}</td><td class="num">${p.deaths}</td><td class="num">${fmt(p.shots)}</td><td class="num">${pct(p.acc)}</td></tr>`).join("")}</tbody></table></div></section>
   ${(() => { const names = [...new Set([...Object.keys(s.pairs), ...Object.keys(s.against)])];
