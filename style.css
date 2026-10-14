@@ -1,6 +1,6 @@
 /* Layout: тёмная «арена». Шапка с переключателем разделов, дальше одна колонка: сезон (игры, таблица, номинации, рекорды), страница игры, страница игрока. */
 :root {
-  --bg: #0d1116; --panel: #151b22; --panel2: #1b232c; --line: #26303a; --fg: #e9eef2; --muted: #93a0ab; --gold: #e2b84a;
+  --bg: #0d1116; --panel: #151b22; --panel2: #1b232c; --line: #26303a; --fg: #e9eef2; --muted: #93a0ab; --gold: #b48cff; /* общий акцент: не цвет команды */
   --red: #ff4d4f; --blue: #3d8bff; --yellow: #f2c230; --green: #2fc27a;
   --display: "Russo One", "Arial Black", "Segoe UI", sans-serif;
   --body: "Golos Text", "Segoe UI", system-ui, sans-serif;
@@ -18,7 +18,7 @@ h3 { font-size: 17px }
 p { margin: 0; max-width: 70ch }
 a { color: inherit }
 button { font: inherit; color: inherit }
-:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px }
 section { display: flex; flex-direction: column; gap: 14px; min-width: 0 }
 .muted { color: var(--muted) }
 .note { color: var(--muted); font-size: 13px; max-width: 80ch }
@@ -34,22 +34,22 @@ section { display: flex; flex-direction: column; gap: 14px; min-width: 0 }
 /* шапка */
 .top { display: flex; justify-content: space-between; align-items: center; gap: 12px 20px; flex-wrap: wrap }
 .logo { font: 400 18px var(--display); display: flex; align-items: center; gap: 10px; text-decoration: none }
-.logo i { width: 22px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--red) 50%, var(--blue) 50%); box-shadow: 0 0 12px rgba(255,77,79,.5) }
+.logo i { width: 22px; height: 6px; border-radius: 3px; background: var(--gold); box-shadow: 0 0 12px rgba(180,140,255,.5) }
 .tabs { display: flex; gap: 4px; flex-wrap: wrap }
 .tab, .btn { all: unset; box-sizing: border-box; cursor: pointer; padding: 8px 14px; border-radius: 6px; font: 500 14px var(--body); color: var(--muted); border: 1px solid transparent }
 .tab:hover { color: var(--fg) }
 .tab[aria-current="page"] { color: var(--fg); background: var(--panel2); border-color: var(--line) }
 .btn { color: var(--fg); border-color: var(--line); background: var(--panel) }
 .btn:hover { border-color: var(--muted) }
-.btn.main { background: var(--red); border-color: var(--red); color: #fff; box-shadow: 0 0 18px rgba(255,77,79,.35) }
-.btn.danger { color: var(--red) }
-.btn:focus-visible, .tab:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px }
+.btn.main { background: var(--gold); border-color: var(--gold); color: #120d1c; box-shadow: 0 0 18px rgba(180,140,255,.35) }
+.btn.danger { color: var(--gold) }
+.btn:focus-visible, .tab:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px }
 .btn[disabled] { opacity: .5; cursor: default }
 .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center }
 
 /* герой сезона */
 .hero { border: 1px solid var(--line); border-radius: 10px; padding: clamp(22px, 4vw, 40px); display: flex; flex-direction: column; gap: 22px;
-  background: radial-gradient(90% 140% at 0% 0%, rgba(255,77,79,.13), transparent 60%), radial-gradient(90% 140% at 100% 100%, rgba(61,139,255,.15), transparent 60%), var(--panel) }
+  background: radial-gradient(90% 140% at 0% 0%, rgba(180,140,255,.14), transparent 60%), radial-gradient(90% 140% at 100% 100%, rgba(180,140,255,.07), transparent 60%), var(--panel) }
 .facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px }
 .fact { display: flex; flex-direction: column; gap: 2px; min-width: 0 }
 .fact .v { font: 600 clamp(22px, 3.6vw, 32px)/1.1 var(--mono); font-variant-numeric: tabular-nums }
@@ -60,7 +60,7 @@ section { display: flex; flex-direction: column; gap: 14px; min-width: 0 }
 .games { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px }
 .gcard { all: unset; box-sizing: border-box; cursor: pointer; border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px; background: var(--panel); min-width: 0 }
 .gcard:hover { border-color: var(--muted) }
-.gcard:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px }
+.gcard:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px }
 .gcard .date { font: 600 12px var(--mono); color: var(--muted); letter-spacing: .06em }
 .gscore { display: flex; align-items: baseline; gap: 8px; font: 400 34px/1 var(--display) }
 .gscore small { font: 400 12px var(--body); color: var(--muted) }
@@ -77,7 +77,7 @@ thead th { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; co
 td.num { font-family: var(--mono); font-variant-numeric: tabular-nums }
 thead button { all: unset; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; padding: 2px 0 }
 thead button:hover, thead th[aria-sort] button { color: var(--fg) }
-thead button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px }
+thead button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px }
 thead th[aria-sort="descending"] button::after { content: " ↓"; color: var(--gold) }
 thead th[aria-sort="ascending"] button::after { content: " ↑"; color: var(--gold) }
 .bar { display: inline-block; height: 8px; background: var(--c); vertical-align: middle; border-radius: 0 3px 3px 0 }
@@ -171,12 +171,12 @@ thead th[aria-sort="ascending"] button::after { content: " ↑"; color: var(--go
 .admin input, .admin textarea, .admin select { font: 14px var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 7px 9px; min-width: 0 }
 .admin textarea { font: 13px/1.5 var(--mono); min-height: 120px; resize: vertical }
 .admin input[type="file"] { padding: 6px }
-.admin input:focus-visible, .admin textarea:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px }
+.admin input:focus-visible, .admin textarea:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px }
 .admin td input { width: 100% }
 .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px }
 .msg { font-size: 13px }
-.msg.err { color: var(--red) }
-.msg.ok { color: var(--green) }
+.msg.err { color: var(--gold); font-weight: 600 }
+.msg.ok { color: var(--fg) }
 .empty { border: 1px dashed var(--line); border-radius: 8px; padding: 28px; text-align: center; color: var(--muted) }
 .foot { font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important } }
