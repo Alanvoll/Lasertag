@@ -359,3 +359,14 @@ thead tr.grp th.gsep { text-align: left }
 .gmvp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 14px }
 .gmvp .tag { font: 600 10px var(--mono); letter-spacing: .16em; text-transform: uppercase; background: var(--gold); color: var(--on-acc, #0e0e10); padding: 3px 7px }
 .team .gmvp { border-top: 1px solid var(--line); padding-top: 12px; margin-top: auto }
+/* сортировка противостояний */
+.prow.hd { font: 600 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); padding-bottom: 4px; border-bottom: 1px solid var(--line) }
+.prow.hd button { all: unset; cursor: pointer; position: relative; color: inherit }
+.prow.hd button:hover, .prow.hd button[aria-pressed="true"] { color: var(--fg) }
+.prow.hd button[aria-pressed="true"]::before { content: "↓"; position: absolute; right: 100%; margin-right: 3px }
+.prow.hd button[aria-pressed="true"][data-dir="asc"]::before { content: "↑" }
+.prow.hd button:focus-visible, .pmore:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px }
+.pmore { all: unset; cursor: pointer; align-self: flex-start; font: 600 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); padding: 6px 12px; margin-top: 4px }
+.pmore:hover { color: var(--fg); border-color: var(--muted) }
+@media (max-width: 560px) { .prow.hd > span:nth-child(-n+2) { display: none } .prow.hd { grid-template-columns: 1fr 52px 56px 76px } .prow.hd .ptot { grid-column: 2 } }
+:root .prow.hd :is(.ptot, .pavg, .pk) { font: 600 10px/1.3 var(--mono); letter-spacing: .14em; color: var(--muted); text-align: right }
