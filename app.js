@@ -168,21 +168,21 @@ function season() {
   models.forEach((m, gi) => {
     for (const p of m.P) {
       const s = S.get(p.name) || { name: p.name, games: 0, dealt: 0, recv: 0, deaths: 0, shots: 0, alive: 0, rounds: 0, teams: [], best: 0, pairs: {}, against: {} };
-      s.games++; s.dealt += p.dealt; s.recv += p.recv; s.deaths += p.deaths; s.shots += p.shots;
+      s.games++; if (isFinite(p.ratio)) (s.gameRatios = s.gameRatios || []).push(p.ratio); s.dealt += p.dealt; s.recv += p.recv; s.deaths += p.deaths; s.shots += p.shots;
       if (p.alive != null) { s.alive += p.alive; s.rounds += p.died.length; }
       s.teams.push(...p.teams); s.best = Math.max(s.best, p.dealt);
-      for (const o of m.P) { if (o === p) continue; const x = m.val(p, o), y = m.val(o, p); if (x) s.pairs[o.name] = (s.pairs[o.name] || 0) + x; if (y) s.against[o.name] = (s.against[o.name] || 0) + y; }
+      for (const o of m.P) { if (o === p) continue; const x = m.val(p, o), y = m.val(o, p); if (x || y) { s.meet = s.meet || {}; s.meet[o.name] = (s.meet[o.name] || 0) + 1; } if (x) s.pairs[o.name] = (s.pairs[o.name] || 0) + x; if (y) s.against[o.name] = (s.against[o.name] || 0) + y; }
       S.set(p.name, s);
     }
   });
   const rows = [...S.values()].sort((a, b) => a.name.localeCompare(b.name, "ru"));
-  rows.forEach((s, k) => { s.key = "p" + k; s.acc = div(s.dealt, s.shots); s.ratio = div(s.dealt, s.recv); s.lastTeam = s.teams[s.teams.length - 1] ?? 0; });
+  rows.forEach((s, k) => { s.key = "p" + k; s.acc = div(s.dealt, s.shots); s.ratio = div(s.dealt, s.recv); s.lastTeam = s.teams[s.teams.length - 1] ?? 0; s.ratioPerGame = s.gameRatios && s.gameRatios.length ? sum(s.gameRatios, x => x) / s.gameRatios.length : 0; });
   return { models, rows };
 }
 const playerLink = (name, rows, teams) => {
   const s = rows.find(r => r.name === name);
   const d = (teams || []).map(dot).join("");
-  return s ? `<a class="who plink" href="#${s.key}"><span class="dots">${d}</span>${esc(name)}</a>` : `<span class="who"><span class="dots">${d}</span>${esc(name)}</span>`;
+  return s ? `<a class="who plink" href="#${s.key}">${d ? `<span class="dots">${d}</span>` : ""}${esc(name)}</a>` : `<span class="who">${d ? `<span class="dots">${d}</span>` : ""}${esc(name)}</span>`;
 };
 
 // ---------- номинации ----------
@@ -233,13 +233,13 @@ function gameCards(S) {
 }
 
 // ---------- таблица с сортировкой ----------
-function sortable(id, cols, rows, rowHtml, initial) {
+function sortable(id, cols, rows, rowHtml, initial, group = "") {
   let key = initial, dir = -1;
   const draw = () => {
     const c = cols.find(x => x[0] === key);
     const sorted = [...rows].sort((a, b) => key === "name" ? dir * a.name.localeCompare(b.name, "ru") : dir * ((c[2](a) ?? -1) - (c[2](b) ?? -1)));
     const el = document.getElementById(id); if (!el) return;
-    el.innerHTML = `<thead><tr>${cols.map(([k, label]) => `<th class="${k === "name" ? "l" : ""}" ${k === key ? `aria-sort="${dir < 0 ? "descending" : "ascending"}"` : ""}><button data-k="${k}">${label}</button></th>`).join("")}</tr></thead><tbody>${sorted.map(rowHtml).join("")}</tbody>`;
+    el.innerHTML = `<thead>${group}<tr>${cols.map(([k, label, , cls]) => `<th class="${k === "name" ? "l" : ""} ${cls || ""}" ${k === key ? `aria-sort="${dir < 0 ? "descending" : "ascending"}"` : ""}><button data-k="${k}">${label}</button></th>`).join("")}</tr></thead><tbody>${sorted.map(rowHtml).join("")}</tbody>`;
   };
   setTimeout(() => {
     const el = document.getElementById(id); if (!el) return;
@@ -251,7 +251,7 @@ function sortable(id, cols, rows, rowHtml, initial) {
 // ---------- страницы ----------
 function viewSeason(S) {
   const rounds = sum(S.models, m => m.winners.length), hits = sum(S.models, m => sum(m.P, p => p.dealt)), shots = sum(S.models, m => sum(m.P, p => p.shots));
-  const who = r => playerLink(r.name, S.rows, [r.lastTeam]);
+  const who = r => playerLink(r.name, S.rows, []);
   // рекорды за одну игру
   const per = S.models.flatMap((m, gi) => m.P.map(p => ({ p, m, gi })));
   const rec = (title, label, f, show, filter = () => true) => {
@@ -268,29 +268,24 @@ function viewSeason(S) {
   <section><h2>Игры</h2>${gameCards(S)}</section>
   ${S.rows.length ? `<section><h2>Игроки за сезон</h2><div class="scroll"><table id="seasonTable"></table></div><p class="note">Нажмите на имя, чтобы открыть страницу игрока. Заголовки столбцов сортируют таблицу.</p></section>
   <section><h2>Номинации сезона</h2><div class="noms">${nomTiles(S.rows.filter(r => r.games >= Math.ceil(Math.max(...S.rows.map(z => z.games)) * 0.6)), who)}</div><p class="note">По сумме всех игр, среди тех, кто сыграл не меньше 60% игр сезона. «Без смерти» считается только по тагерам с журналом событий.</p></section>
-  ${(() => { const pr = []; S.rows.forEach((a, i) => S.rows.slice(i + 1).forEach(b => { const x = a.pairs[b.name] || 0, y = b.pairs[a.name] || 0; if (x + y) pr.push({ a, b, x, y, n: x + y }); }));
+  ${(() => { const pr = []; S.rows.forEach((a, i) => S.rows.slice(i + 1).forEach(b => { const x = a.pairs[b.name] || 0, y = b.pairs[a.name] || 0; if (x + y) pr.push({ a, b, x, y, n: x + y, g: (a.meet || {})[b.name] || 1 }); }));
     pr.sort((p, q) => q.n - p.n); const top = pr.slice(0, 10), mx = top.length ? top[0].n : 1;
-    return top.length ? `<section><h2>Главные противостояния</h2><div class="frags">${top.map(z => `<div class="prow"><span class="pn">${playerLink(z.a.name, S.rows, [z.a.lastTeam])}<span class="muted">и</span>${playerLink(z.b.name, S.rows, [z.b.lastTeam])}</span>
-      <span class="ptrack"><i style="--c:${TEAMS[z.a.lastTeam].c};width:${(z.x / mx * 100).toFixed(1)}%"></i><i style="--c:${TEAMS[z.b.lastTeam].c};width:${(z.y / mx * 100).toFixed(1)}%"></i></span>
-      <span class="ptot num">${z.n}<small>${z.x} : ${z.y}</small></span></div>`).join("")}</div><p class="note">Кто с кем чаще всего сходился в бою за сезон: сумма попаданий друг в друга во всех играх. Под суммой — счёт в паре.</p></section>` : ""; })()}
-  <section><h2>Рекорды за одну игру</h2><div class="noms">
-    ${rec("Сольный концерт", "Больше всех попаданий за игру", x => x.p.dealt, fmt)}
-    ${rec("Снайпер вечера", "Лучшая точность за игру", x => x.p.acc, pct, x => x.p.shots >= 300)}
-    ${rec("Неприкасаемый", "Лучший КД за игру", x => x.p.ratio, r2, x => x.p.recv >= 20)}
-    ${rec("Пулемётчик", "Больше всех выстрелов за игру", x => x.p.shots, fmt)}
-    ${rec("Мясорубка", "Больше всех смертей за игру", x => x.p.deaths, fmt)}
-    ${(() => { const b = per.flatMap(x => x.m.P.map(o => ({ ...x, o, n: x.m.val(x.p, o) }))).reduce((a, y) => !a || y.n > a.n ? y : a, null);
-      return b ? `<div class="nom"><span class="nt">Охота открыта</span><span class="lab">Больше всех в одного соперника</span><span class="ws">${playerLink(b.p.name, S.rows, b.p.teams)}<span class="muted">→ ${esc(b.o.name)}</span></span><span class="v">${b.n}</span><span class="sub">${dateRu(b.m.g.date)}</span></div>` : ""; })()}
-  </div></section>` : ""}
+    return top.length ? `<section><h2>Главные противостояния</h2><div class="frags">${top.map(z => `<div class="prow"><span class="pn">${playerLink(z.a.name, S.rows, [])}<span class="muted">и</span>${playerLink(z.b.name, S.rows, [])}</span>
+      <span class="ptrack"><i style="--c:var(--gold);width:${(z.x / mx * 100).toFixed(1)}%"></i><i style="--c:var(--muted);width:${(z.y / mx * 100).toFixed(1)}%"></i></span>
+      <span class="ptot num">${z.n}<small>${z.x} : ${z.y}</small></span><span class="pavg num">${(z.n / z.g).toFixed(1).replace(".", ",")}<small>${plural(z.g, ["игра", "игры", "игр"])}</small></span></div>`).join("")}</div><p class="note">Кто с кем чаще всего сходился в бою за сезон: сумма попаданий друг в друга во всех играх, под ней счёт в паре. Справа — в среднем за игру и сколько игр пара встречалась как соперники.</p></section>` : ""; })()}
+` : ""}
   ${footer()}`;
 }
 function seasonTableInit(S) {
   const cols = [["name", "Игрок", r => r.name], ["games", "Игр", r => r.games], ["dealt", "Попал", r => r.dealt], ["recv", "Получил", r => r.recv], ["ratio", "Попал / получил", r => r.ratio],
-    ["deaths", "Смерти", r => r.deaths], ["shots", "Выстрелы", r => r.shots], ["acc", "Точность", r => r.acc], ["perGame", "Попаданий за игру", r => r.dealt / r.games]];
+    ["deaths", "Смерти", r => r.deaths], ["shots", "Выстрелы", r => r.shots], ["acc", "Точность", r => r.acc],
+    ["perGame", "Попал", r => r.dealt / r.games, "gsep"], ["ratioPerGame", "Попал / получил", r => r.ratioPerGame]];
   const max = Math.max(...S.rows.map(r => r.dealt), 1);
-  sortable("seasonTable", cols, S.rows, r => `<tr><th class="l">${playerLink(r.name, S.rows, [r.lastTeam])}</th><td class="num">${r.games}</td>
-    <td class="num barcell"><span class="bar" style="--c:${TEAMS[r.lastTeam].c};width:${Math.round(r.dealt / max * 80)}px;margin-right:8px"></span>${fmt(r.dealt)}</td>
-    <td class="num">${fmt(r.recv)}</td><td class="num">${r2(r.ratio)}</td><td class="num">${fmt(r.deaths)}</td><td class="num">${fmt(r.shots)}</td><td class="num">${pct(r.acc)}</td><td class="num">${(r.dealt / r.games).toFixed(1).replace(".", ",")}</td></tr>`, "dealt");
+  const group = `<tr class="grp"><th colspan="8"></th><th colspan="2" class="gsep">В среднем за игру</th></tr>`;
+  sortable("seasonTable", cols, S.rows, r => `<tr><th class="l">${playerLink(r.name, S.rows, [])}</th><td class="num">${r.games}</td>
+    <td class="num barcell"><span class="bar" style="--c:var(--gold);width:${Math.round(r.dealt / max * 80)}px;margin-right:8px"></span>${fmt(r.dealt)}</td>
+    <td class="num">${fmt(r.recv)}</td><td class="num">${r2(r.ratio)}</td><td class="num">${fmt(r.deaths)}</td><td class="num">${fmt(r.shots)}</td><td class="num">${pct(r.acc)}</td>
+    <td class="num gsep">${(r.dealt / r.games).toFixed(1).replace(".", ",")}</td><td class="num">${r2(r.ratioPerGame)}</td></tr>`, "dealt", group);
 }
 
 function viewGames(S) { return `${header("games")}<section><h1>Игры</h1>${gameCards(S)}</section>${footer()}`; }
@@ -318,7 +313,7 @@ function viewPlayer(S, key) {
     const rows = names.map(n => ({ n, gave: s.pairs[n] || 0, took: s.against[n] || 0 })).sort((a, b) => (b.gave + b.took) - (a.gave + a.took));
     if (!rows.length) return ""; const mx = Math.max(...rows.map(r => Math.max(r.gave, r.took)), 1);
     return `<section><h2>Дуэли за сезон</h2><div class="duel" style="max-width:620px"><div class="drows"><div class="drow hd"><span></span><span class="half lft">попал</span><span class="half rgt">получил</span><span class="bal">всего</span><span class="bal">коэф.</span></div>
-    ${rows.map(r => `<div class="drow"><span class="nm">${esc(r.n)}</span><span class="half lft"><span class="num">${r.gave}</span><i style="--c:${TEAMS[s.lastTeam].c};width:${(r.gave / mx * 72).toFixed(1)}%"></i></span><span class="half rgt"><i style="--c:var(--muted);width:${(r.took / mx * 72).toFixed(1)}%"></i><span class="num">${r.took}</span></span><span class="bal">${r.gave + r.took}</span><span class="bal">${r.took ? r2(r.gave / r.took) : "∞"}</span></div>`).join("")}</div></div>
+    ${rows.map(r => `<div class="drow"><span class="nm">${esc(r.n)}</span><span class="half lft"><span class="num">${r.gave}</span><i style="--c:var(--gold);width:${(r.gave / mx * 72).toFixed(1)}%"></i></span><span class="half rgt"><i style="--c:var(--muted);width:${(r.took / mx * 72).toFixed(1)}%"></i><span class="num">${r.took}</span></span><span class="bal">${r.gave + r.took}</span><span class="bal">${r.took ? r2(r.gave / r.took) : "∞"}</span></div>`).join("")}</div></div>
     <p class="note">Все соперники за сезон. Сверху те, с кем чаще всего были стычки: «всего» — сумма попаданий в обе стороны.</p></section>`; })()}
   <section><h2>Личные счёты за сезон</h2><div class="noms">
     ${tg ? `<div class="nom"><span class="nt">Груша для битья</span><span class="lab">В кого попадал чаще всего</span><span class="ws">${playerLink(tg[0], S.rows)}</span><span class="v">${plural(tg[1], HIT)}</span></div>` : ""}

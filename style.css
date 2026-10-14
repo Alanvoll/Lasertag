@@ -186,11 +186,18 @@ thead th[aria-sort="ascending"] button::after { content: " ↑"; color: var(--go
 .dpart-h { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 13px }
 .dpart-h > * { white-space: nowrap }
 .dpart-s { margin-left: auto; color: var(--muted); font-size: 12px }
-.prow { display: grid; grid-template-columns: minmax(150px, 260px) minmax(0, 1fr) 70px; gap: 12px; align-items: center }
+.prow { display: grid; grid-template-columns: minmax(150px, 260px) minmax(0, 1fr) 64px 70px; gap: 12px; align-items: center }
 .pn { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0 }
 .ptrack { display: flex; height: 14px; border-radius: 3px; background: var(--panel2); overflow: hidden }
 .ptrack i { display: block; height: 100%; background: var(--c) }
 .ptrack i + i { box-shadow: inset 2px 0 0 var(--panel) }
 .ptot { font: 600 16px var(--mono); text-align: right; line-height: 1.2 }
 .ptot small { display: block; font: 400 11px var(--mono); color: var(--muted) }
-@media (max-width: 560px) { .prow { grid-template-columns: 1fr 70px } .prow .ptrack { grid-column: 1 / -1; grid-row: 2 } }
+@media (max-width: 560px) { .prow { grid-template-columns: 1fr 56px 64px } .prow .ptrack { grid-column: 1 / -1; grid-row: 2 } }
+
+.gsep { border-left: 1px solid var(--line) }
+th.gsep, td.gsep { padding-left: 18px }
+thead tr.grp th { border-bottom: 0; padding-bottom: 0; font-size: 10px; color: var(--gold) }
+thead tr.grp th.gsep { text-align: left }
+.pavg { font: 600 16px var(--mono); text-align: right; line-height: 1.2; color: var(--gold) }
+.pavg small { display: block; font: 400 11px var(--body); color: var(--muted) }
