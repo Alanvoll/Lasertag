@@ -129,7 +129,8 @@ const MONTHS = ["января", "февраля", "марта", "апреля", 
 const dateRu = d => { const [y, m, dd] = (d || "").split("-").map(Number); return y ? `${dd} ${MONTHS[m - 1]} ${y}` : "без даты"; };
 const dateShort = d => { const [y, m, dd] = (d || "").split("-"); return y ? `${dd}.${m}.${y}` : "—"; };
 const dot = t => `<span class="dot" style="--c:${TEAMS[t].c}"></span>`;
-const state = { canEdit: true };
+// Загрузка игр скрыта, пока разбор не автоматизирован; редактор открывается по адресу с ?admin
+const state = { canEdit: new URLSearchParams(location.search).has("admin") };
 
 // ---------- модель игры ----------
 function gameModel(g) {
