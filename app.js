@@ -225,10 +225,11 @@ function gameCards(S) {
   const list = allGames();
   if (!list.length) return `<div class="empty">Игр пока нет.${state.canEdit ? ' <a href="#upload">Добавьте первую</a>.' : ""}</div>`;
   return `<div class="games">${list.map(({ g, i, key }) => {
-    const m = S.models[i], sc = scoreOf(m), top = [...m.P].sort((a, b) => b.dealt - a.dealt)[0];
+    const m = S.models[i], sc = scoreOf(m), top = [...m.P].sort((a, b) => b.dealt - a.dealt)[0], topR = [...m.P].filter(p => isFinite(p.ratio)).sort((a, b) => b.ratio - a.ratio)[0];
     return `<a class="gcard" href="#${key}"><span class="date">${dateShort(g.date)}</span><h3>${esc(g.title || "Игра " + dateShort(g.date))}</h3>
       <span class="gscore">${sc.parts.map(([t, n]) => `<span class="num" style="color:${TEAMS[t].c}">${n}</span>`).join('<span class="muted">:</span>')}<small>${sc.kind}</small></span>
-      <span class="gmeta">${plural(m.P.length, ["игрок", "игрока", "игроков"])}${m.winners.length ? " · " + plural(m.winners.length, ["раунд", "раунда", "раундов"]) : ""} · лучший: ${esc(top ? top.name : "—")} (${top ? top.dealt : 0})</span></a>`;
+      <span class="gmeta">${plural(m.P.length, ["игрок", "игрока", "игроков"])}${m.winners.length ? " · " + plural(m.winners.length, ["раунд", "раунда", "раундов"]) : ""}</span>
+      <span class="gbest">${top ? `<span><span class="muted">Попаданий</span> ${esc(top.name)} (${top.dealt})</span>` : ""}${topR ? `<span><span class="muted">Коэф.</span> ${esc(topR.name)} (${r2(topR.ratio)})</span>` : ""}</span></a>`;
   }).join("")}</div>`;
 }
 
