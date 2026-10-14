@@ -291,6 +291,7 @@ thead tr.grp th.gsep { text-align: left }
 :root .board { gap: 1px; background: var(--line) }
 :root .team { border-top: 0 }
 :root .team-name { margin: -18px -20px 0; padding: 14px 20px; background: linear-gradient(110deg, color-mix(in srgb, var(--c) 85%, #000), color-mix(in srgb, var(--c) 60%, #000)) }
+:root .team-name { flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; min-height: 100px }
 :root .team-name b { font: 800 26px var(--display); text-transform: uppercase; color: #fff }
 :root .team-name span { color: rgba(255,255,255,.8) }
 :root .score { font: 700 clamp(56px, 10vw, 96px)/.95 var(--display); letter-spacing: -.03em; margin-top: 10px }
@@ -370,3 +371,5 @@ thead tr.grp th.gsep { text-align: left }
 .pmore:hover { color: var(--fg); border-color: var(--muted) }
 @media (max-width: 560px) { .prow.hd > span:nth-child(-n+2) { display: none } .prow.hd { grid-template-columns: 1fr 52px 56px 76px } .prow.hd .ptot { grid-column: 2 } }
 :root .prow.hd :is(.ptot, .pavg, .pk) { font: 600 10px/1.3 var(--mono); letter-spacing: .14em; color: var(--muted); text-align: right }
+.grounds { display: flex; align-items: baseline; gap: 6px; font: 600 15px var(--mono); margin-top: -4px }
+.grounds .muted { font: 600 11px var(--mono); letter-spacing: .14em; text-transform: uppercase; margin-right: 4px }

@@ -161,6 +161,7 @@ function gameModel(g) {
 }
 const gameKey = g => "game-" + String(g.file || g.date || "x").replace(/\.json$/i, "");
 const allGames = () => DATA.games.map((g, i) => ({ g, i, key: gameKey(g) })).sort((a, b) => (b.g.date || "").localeCompare(a.g.date || "") || b.i - a.i);
+const hitsOf = m => m.teamIds.map(t => [t, sum(m.P, a => sum(m.P, v => m.valT(a, v, t)))]);
 function scoreOf(m) {
   const w = m.winners.filter(x => x !== null);
   if (w.length && w.length >= m.winners.length * 0.8) return { kind: "раунды", parts: m.teamIds.map(t => [t, w.filter(x => x === t).length]) };
@@ -255,7 +256,8 @@ function gameCards(S) {
   return `<div class="games">${list.map(({ g, i, key }) => {
     const m = S.models[i], sc = scoreOf(m), top = [...m.P].sort((a, b) => b.dealt - a.dealt)[0], topR = [...m.P].filter(p => isFinite(p.ratio)).sort((a, b) => b.ratio - a.ratio)[0];
     return `<a class="gcard" href="#${key}"><span class="date">${dateShort(g.date)}</span><h3>${esc(g.title || "Игра " + dateShort(g.date))}</h3>
-      <span class="gscore">${sc.parts.map(([t, n]) => `<span class="num" style="color:${TEAMS[t].c}">${n}</span>`).join('<span class="muted">:</span>')}<small>${sc.kind}</small></span>
+      <span class="gscore">${hitsOf(m).map(([t, n]) => `<span class="num" style="color:${TEAMS[t].c}">${n}</span>`).join('<span class="muted">:</span>')}<small>попадания</small></span>
+      ${sc.kind === "раунды" ? `<span class="grounds"><span class="muted">Раунды</span> ${sc.parts.map(([t, n]) => `<b style="color:${TEAMS[t].c}">${n}</b>`).join('<span class="muted">:</span>')}</span>` : ""}
       <span class="gmeta">${plural(m.P.length, ["игрок", "игрока", "игроков"])}${m.winners.length ? " · " + plural(m.winners.length, ["раунд", "раунда", "раундов"]) : ""}</span>
       <span class="gbest">${m.mvp ? `<span><span class="muted">MVP</span> ${esc(m.mvp.name)} (${fmt(m.mvp.mvp)})</span>` : ""}${top ? `<span><span class="muted">Попадания</span> ${esc(top.name)} (${top.dealt})</span>` : ""}${topR ? `<span><span class="muted">Коэффициент</span> ${esc(topR.name)} (${r2(topR.ratio)})</span>` : ""}</span></a>`;
   }).join("")}</div>`;
