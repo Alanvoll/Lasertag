@@ -137,7 +137,7 @@ function gameModel(g) {
   const P = g.players.map((p, i) => {
     const raw = sum(p.segs, s => s.shots), k = p.shotsAdj != null && raw ? p.shotsAdj / raw : 1;
     const segs = p.segs.map(s => ({ ...s, shots: Math.round(s.shots * k) }));
-    return { i, name: p.name || cap(p.gun), gun: cap(p.gun), gen: p.gen, segs, teams: [...new Set(segs.map(s => s.team))],
+    return { i, name: p.name || cap(p.gun), gun: cap(p.gun), gkey: p.key || p.gun, gen: p.gen, segs, teams: [...new Set(segs.map(s => s.team))],
       swap: new Set(segs.map(s => s.team)).size > 1, shots: sum(segs, s => s.shots), deaths: sum(segs, s => s.deaths), recv: sum(segs, s => s.recv), died: p.died };
   });
   const HT = {}, HA = {};
@@ -151,9 +151,13 @@ function gameModel(g) {
     p.alive = p.died ? p.died.length - sum(p.died, x => x) : null;
     p.fragEx = sum(P, v => (FA[`${p.i}:${v.i}`] || [0, 0])[0]); p.fragEs = sum(P, v => (FA[`${p.i}:${v.i}`] || [0, 0])[1]);
   }
+  // рейтинг MVP (временная формула): 100 — средний игрок этой игры; половина — попадания, половина — коэффициент (не больше 3)
+  const rc = p => Math.min(isFinite(p.ratio) ? p.ratio : 3, 3), avgD = sum(P, p => p.dealt) / P.length || 1, avgR = sum(P, rc) / P.length || 1;
+  for (const p of P) p.mvp = 50 * p.dealt / avgD + 50 * rc(p) / avgR;
   const teamIds = [...new Set(P.flatMap(p => p.teams))].sort();
   const winners = (g.rounds && g.rounds.winners) || [];
-  return { g, P, teamIds, val, valT, FT, FA, winners, swaps: (g.rounds && g.rounds.swaps) || [] };
+  const mvp = [...P].sort((a, b) => b.mvp - a.mvp)[0];
+  return { g, P, teamIds, val, valT, FT, FA, winners, mvp, swaps: (g.rounds && g.rounds.swaps) || [] };
 }
 const gameKey = g => "game-" + String(g.file || g.date || "x").replace(/\.json$/i, "");
 const allGames = () => DATA.games.map((g, i) => ({ g, i, key: gameKey(g) })).sort((a, b) => (b.g.date || "").localeCompare(a.g.date || "") || b.i - a.i);
@@ -165,21 +169,34 @@ function scoreOf(m) {
 
 // ---------- сезон ----------
 function season() {
-  const models = DATA.games.map(gameModel), S = new Map();
+  const models = DATA.games.map(gameModel), S = new Map(), G = new Map();
   models.forEach((m, gi) => {
     for (const p of m.P) {
-      const s = S.get(p.name) || { name: p.name, games: 0, dealt: 0, recv: 0, deaths: 0, shots: 0, alive: 0, rounds: 0, teams: [], best: 0, pairs: {}, against: {} };
-      s.games++; if (isFinite(p.ratio)) (s.gameRatios = s.gameRatios || []).push(p.ratio); if (p.shots) (s.gameAcc = s.gameAcc || []).push(p.acc); s.dealt += p.dealt; s.recv += p.recv; s.deaths += p.deaths; s.shots += p.shots;
+      const s = S.get(p.name) || { name: p.name, games: 0, mvp: 0, mvps: 0, dealt: 0, recv: 0, deaths: 0, shots: 0, alive: 0, rounds: 0, teams: [], best: 0, pairs: {}, against: {} };
+      s.games++; if (isFinite(p.ratio)) (s.gameRatios = s.gameRatios || []).push(p.ratio); if (p.shots) (s.gameAcc = s.gameAcc || []).push(p.acc); s.mvp += p.mvp; if (m.mvp === p) s.mvps++; s.dealt += p.dealt; s.recv += p.recv; s.deaths += p.deaths; s.shots += p.shots;
       if (p.alive != null) { s.alive += p.alive; s.rounds += p.died.length; }
       s.teams.push(...p.teams); s.best = Math.max(s.best, p.dealt);
       for (const o of m.P) { if (o === p) continue; const x = m.val(p, o), y = m.val(o, p); if (x || y) { s.meet = s.meet || {}; s.meet[o.name] = (s.meet[o.name] || 0) + 1; } if (x) s.pairs[o.name] = (s.pairs[o.name] || 0) + x; if (y) s.against[o.name] = (s.against[o.name] || 0) + y; }
       S.set(p.name, s);
+      // пушки: тагер узнаём по MAC, поэтому переименования не разбивают статистику
+      const gn = G.get(p.gkey) || { gkey: p.gkey, aliases: {}, gen: p.gen, by: {} };
+      gn.aliases[p.gun.toLowerCase()] = (gn.aliases[p.gun.toLowerCase()] || 0) + 1;
+      addStat(gn, p); addStat(gn.by[p.name] = gn.by[p.name] || { name: p.name }, p);
+      addStat((s.guns = s.guns || {})[p.gkey] = s.guns[p.gkey] || { gkey: p.gkey }, p);
+      G.set(p.gkey, gn);
     }
   });
   const rows = [...S.values()].sort((a, b) => a.name.localeCompare(b.name, "ru"));
   rows.forEach((s, k) => { s.key = "p" + k; s.acc = div(s.dealt, s.shots); s.ratio = div(s.dealt, s.recv); s.lastTeam = s.teams[s.teams.length - 1] ?? 0; s.ratioPerGame = s.gameRatios && s.gameRatios.length ? sum(s.gameRatios, x => x) / s.gameRatios.length : 0; s.accPerGame = s.gameAcc && s.gameAcc.length ? sum(s.gameAcc, x => x) / s.gameAcc.length : 0; });
-  return { models, rows };
+  const guns = [...G.values()].map(g => ({ ...g, name: cap(Object.entries(g.aliases).sort((a, b) => b[1] - a[1])[0][0]) }))
+    .sort((a, b) => a.name.localeCompare(b.name, "ru"));
+  guns.forEach((g, k) => { g.key = "gun" + k; finStat(g); g.players = Object.values(g.by).map(finStat); });
+  rows.forEach(s => s.gunList = Object.values(s.guns || {}).map(x => finStat({ ...x, gun: guns.find(g => g.gkey === x.gkey) })));
+  return { models, rows, guns };
 }
+const addStat = (a, p) => { a.games = (a.games || 0) + 1; for (const k of ["dealt", "recv", "deaths", "shots"]) a[k] = (a[k] || 0) + p[k]; return a; };
+const finStat = a => { a.acc = div(a.dealt, a.shots); a.ratio = div(a.dealt, a.recv); return a; };
+const gunLink = g => g ? `<a class="plink" href="#${g.key}">${esc(g.name)}</a>` : "";
 const playerLink = (name, rows, teams) => {
   const s = rows.find(r => r.name === name);
   const d = (teams || []).map(dot).join("");
@@ -188,6 +205,7 @@ const playerLink = (name, rows, teams) => {
 
 // ---------- номинации ----------
 const NOMS = [
+  ["MVP", "Лучший рейтинг", r => r.mvp, 1, fmt],
   ["Терминатор", "Больше всех попаданий", r => r.dealt, 1, fmt],
   ["Спонсор патронного завода", "Больше всех выстрелов", r => r.shots, 1, fmt],
   ["Бережливый", "Меньше всех выстрелов", r => r.shots, -1, fmt],
@@ -200,8 +218,16 @@ const NOMS = [
   ["Горец", "Меньше всех смертей", r => r.deaths, -1, fmt],
   ["Последний герой", "Больше всех раундов без смерти", r => r.alive, 1, fmt, r => r.alive != null && r.rounds],
 ];
-function nomTiles(rows, who, extra = []) {
-  return NOMS.map(([title, label, f, dir, show, ok]) => {
+// для сезона счётные номинации берутся в среднем за игру, иначе сыгравшие меньше игр выигрывают «меньше всех»
+const one = x => x.toFixed(1).replace(".", ",");
+const HERO = ["Последний герой", "Чаще всех доживал до конца раунда", r => r.alive / r.rounds, 1, pct, r => r.alive != null && r.rounds];
+const SEASON_NOMS = NOMS.map(([t, l, f, dir, show, ok]) => t === HERO[0] ? HERO
+  : show === fmt ? [t, l + " за игру", r => f(r) / r.games, dir, /выстрел|рейтинг/.test(l) ? fmt : one, ok]
+  : [t, l + " за игру", show === pct ? r => r.accPerGame : r => r.ratioPerGame, dir, show, ok]);
+// рекорды: лучшее значение за одну игру среди всех игроков всех игр
+const REC_NOMS = NOMS.map(n => n[0] === HERO[0] ? [HERO[0], "Больше всех раундов без смерти", r => r.alive, 1, fmt, HERO[5]] : n);
+function nomTiles(rows, who, extra = [], noms = NOMS) {
+  return noms.map(([title, label, f, dir, show, ok]) => {
     const list = rows.filter(r => (ok ? ok(r) : true) && isFinite(f(r)));
     if (!list.length) return "";
     const best = dir > 0 ? Math.max(...list.map(f)) : Math.min(...list.map(f));
@@ -217,6 +243,7 @@ function header(active) {
     <a class="tab" href="#season" ${active === "season" ? 'aria-current="page"' : ""}>Сезон</a>
     <a class="tab" href="#games" ${active === "games" ? 'aria-current="page"' : ""}>Игры</a>
     <a class="tab" href="#players" ${active === "players" ? 'aria-current="page"' : ""}>Игроки</a>
+    <a class="tab" href="#guns" ${active === "guns" ? 'aria-current="page"' : ""}>Пушки</a>
     ${state.canEdit ? `<a class="tab" href="#upload" ${active === "upload" ? 'aria-current="page"' : ""}>+ Добавить игру</a>` : ""}
   </nav></header>`;
 }
@@ -230,7 +257,7 @@ function gameCards(S) {
     return `<a class="gcard" href="#${key}"><span class="date">${dateShort(g.date)}</span><h3>${esc(g.title || "Игра " + dateShort(g.date))}</h3>
       <span class="gscore">${sc.parts.map(([t, n]) => `<span class="num" style="color:${TEAMS[t].c}">${n}</span>`).join('<span class="muted">:</span>')}<small>${sc.kind}</small></span>
       <span class="gmeta">${plural(m.P.length, ["игрок", "игрока", "игроков"])}${m.winners.length ? " · " + plural(m.winners.length, ["раунд", "раунда", "раундов"]) : ""}</span>
-      <span class="gbest">${top ? `<span><span class="muted">Попадания</span> ${esc(top.name)} (${top.dealt})</span>` : ""}${topR ? `<span><span class="muted">Коэффициент</span> ${esc(topR.name)} (${r2(topR.ratio)})</span>` : ""}</span></a>`;
+      <span class="gbest">${m.mvp ? `<span><span class="muted">MVP</span> ${esc(m.mvp.name)} (${fmt(m.mvp.mvp)})</span>` : ""}${top ? `<span><span class="muted">Попадания</span> ${esc(top.name)} (${top.dealt})</span>` : ""}${topR ? `<span><span class="muted">Коэффициент</span> ${esc(topR.name)} (${r2(topR.ratio)})</span>` : ""}</span></a>`;
   }).join("")}</div>`;
 }
 
@@ -269,14 +296,24 @@ function viewSeason(S) {
     <div class="fact"><span class="v">${fmt(shots)}</span><span class="k">выстрелов</span></div></div></section>
   <section><h2>Игры</h2>${gameCards(S)}</section>
   ${S.rows.length ? `<section><div class="head"><h2>Игроки за сезон</h2><div class="seg" role="group" aria-label="Режим таблицы"><button data-mode="avg">Среднее за игру</button><button data-mode="tot">Всего</button></div></div><div class="scroll"><table id="seasonTable"></table></div><p class="note">Нажмите на имя, чтобы открыть страницу игрока. Заголовки столбцов сортируют таблицу.</p></section>
-  <section><h2>Номинации сезона</h2><div class="noms">${nomTiles(S.rows.filter(r => r.games >= Math.ceil(Math.max(...S.rows.map(z => z.games)) * 0.6)), who)}</div><p class="note">По сумме всех игр, среди тех, кто сыграл не меньше 60% игр сезона. «Без смерти» считается только по тагерам с журналом событий.</p></section>
+  <section><div class="head"><h2>Номинации сезона</h2><div class="seg" role="group" aria-label="Режим номинаций"><button data-nmode="avg">Среднее</button><button data-nmode="rec">Рекорд за игру</button></div></div>
+    <div data-npane="avg"><div class="noms">${nomTiles(S.rows.filter(r => r.games >= Math.ceil(Math.max(...S.rows.map(z => z.games)) * 0.6)), who, (() => { const mx = Math.max(...S.rows.map(r => r.mvps)); return mx ? [`<div class="nom"><span class="nt">Коллекционер MVP</span><span class="lab">Чаще всех MVP игры</span><span class="ws">${S.rows.filter(r => r.mvps === mx).map(who).join("")}</span><span class="v">${plural(mx, ["раз", "раза", "раз"])}</span></div>`] : []; })(), SEASON_NOMS)}</div>
+    <p class="note">В среднем за игру: каждая цифра — среднее по играм игрока. Рейтинг MVP: 100 — средний игрок игры, половина — попадания, половина — коэффициент. Учитываются те, кто сыграл не меньше 60% игр сезона. Доля раундов без смерти считается только по тагерам с журналом событий.</p></div>
+    <div data-npane="rec"><div class="noms">${nomTiles(per.map(({ p, m }) => ({ ...p, rounds: p.died ? p.died.length : 0, date: m.g.date })), r => `${playerLink(r.name, S.rows, [])}<span class="muted">${dateShort(r.date).slice(0, 5)}</span>`, [], REC_NOMS)}</div>
+    <p class="note">Лучший результат за одну игру среди всех игроков сезона, рядом дата игры.</p></div></section>
   ${(() => { const pr = []; S.rows.forEach((a, i) => S.rows.slice(i + 1).forEach(b => { const x = a.pairs[b.name] || 0, y = b.pairs[a.name] || 0; if (x + y) pr.push(x >= y ? { a, b, x, y, n: x + y, g: (a.meet || {})[b.name] || 1 } : { a: b, b: a, x: y, y: x, n: x + y, g: (a.meet || {})[b.name] || 1 }); }));
-    pr.sort((p, q) => q.n - p.n); const top = pr.slice(0, 10), mx = top.length ? top[0].n : 1;
-    return top.length ? `<section><h2>Главные противостояния</h2><div class="frags">${top.map(z => `<div class="prow"><span class="pn">${playerLink(z.a.name, S.rows, [])}<span class="muted">и</span>${playerLink(z.b.name, S.rows, [])}</span>
+    pr.sort((p, q) => q.n - p.n); const top = pr, mx = top.length ? top[0].n : 1;
+    return top.length ? `<section><h2>Главные противостояния</h2><div class="frags" data-psort><div class="prow hd"><span></span><span></span><span class="ptot"><button data-sk="n" aria-pressed="true">всего</button></span><span class="pavg"><button data-sk="avg">за игру</button></span><span class="pk"><button data-sk="k">коэф.</button></span></div>
+    ${top.map((z, i) => `<div class="prow" data-n="${z.n}" data-avg="${z.n / z.g}" data-k="${z.y ? z.x / z.y : 1e9}"${i >= 10 ? " hidden" : ""}><span class="pn">${playerLink(z.a.name, S.rows, [])}<span class="muted">и</span>${playerLink(z.b.name, S.rows, [])}</span>
       <span class="ptrack"><i style="--c:var(--gold);width:${(z.x / mx * 100).toFixed(1)}%"></i><i style="--c:var(--muted);width:${(z.y / mx * 100).toFixed(1)}%"></i></span>
-      <span class="ptot num">${z.n}<small>${z.x} : ${z.y}</small></span><span class="pavg num">${(z.n / z.g).toFixed(1).replace(".", ",")}<small>${plural(z.g, ["игра", "игры", "игр"])}</small></span><span class="pk num">${z.y ? r2(z.x / z.y) : "∞"}<small>коэф.</small></span></div>`).join("")}</div><p class="note">Кто с кем чаще всего сходился в бою за сезон: сумма попаданий друг в друга во всех играх, под ней счёт в паре. Справа — в среднем за игру, сколько игр пара встречалась как соперники, и коэффициент «попал / получил» первого в паре.</p></section>` : ""; })()}
+      <span class="ptot num">${z.n}<small>${z.x} : ${z.y}</small></span><span class="pavg num">${(z.n / z.g).toFixed(1).replace(".", ",")}<small>${plural(z.g, ["игра", "игры", "игр"])}</small></span><span class="pk num">${z.y ? r2(z.x / z.y) : "∞"}<small>коэф.</small></span></div>`).join("")}${top.length > 10 ? `<button class="pmore">Все пары (${top.length})</button>` : ""}</div><p class="note">Заголовки столбцов сортируют список, показаны первые 10 пар. Кто с кем чаще всего сходился в бою за сезон: сумма попаданий друг в друга во всех играх, под ней счёт в паре. Справа — в среднем за игру, сколько игр пара встречалась как соперники, и коэффициент «попал / получил» первого в паре.</p></section>` : ""; })()}
 ` : ""}
   ${footer()}`;
+}
+let nomMode = "avg";
+function nomsInit() {
+  const pick = () => { document.querySelectorAll("[data-nmode]").forEach(b => b.setAttribute("aria-pressed", b.dataset.nmode === nomMode)); document.querySelectorAll("[data-npane]").forEach(el => el.hidden = el.dataset.npane !== nomMode); };
+  document.querySelectorAll("[data-nmode]").forEach(b => b.onclick = () => { nomMode = b.dataset.nmode; pick(); }); pick();
 }
 let seasonMode = "avg";
 function seasonTableInit(S) {
@@ -305,6 +342,57 @@ function viewGames(S) { return `${header("games")}<section><h1>Игры</h1>${ga
 
 function viewPlayers(S) {
   return `${header("players")}<section><div class="head"><h1>Игроки</h1><div class="seg" role="group" aria-label="Режим таблицы"><button data-mode="avg">Среднее за игру</button><button data-mode="tot">Всего</button></div></div><div class="scroll"><table id="seasonTable"></table></div><p class="note">Нажмите на имя, чтобы открыть страницу игрока.</p></section>${footer()}`;
+}
+
+// ---------- пушки ----------
+const statCols = (first, avg) => [first, ["games", "Игр", r => r.games, String],
+  avg ? ["dealtPG", "Попал за игру", r => r.dealt / r.games, x => x.toFixed(1).replace(".", ",")] : ["dealt", "Попал", r => r.dealt, fmt],
+  avg ? ["recvPG", "Получил за игру", r => r.recv / r.games, x => x.toFixed(1).replace(".", ",")] : ["recv", "Получил", r => r.recv, fmt],
+  ["ratio", "Попал / получил", r => r.ratio, r2], ["acc", "Точность", r => r.acc, pct],
+  avg ? ["shotsPG", "Выстрелы за игру", r => r.shots / r.games, fmt] : ["shots", "Выстрелы", r => r.shots, fmt],
+  avg ? ["deathsPG", "Смерти за игру", r => r.deaths / r.games, x => x.toFixed(1).replace(".", ",")] : ["deaths", "Смерти", r => r.deaths, fmt]];
+function statTable(id, cols, rows, nameHtml, initial) {
+  const max = Object.fromEntries(cols.slice(1).map(([k, , f]) => [k, Math.max(1e-9, ...rows.map(f).filter(isFinite))]));
+  const td = (r, key, [k, , f, show]) => k === key && isFinite(f(r)) && k !== "games"
+    ? `<td class="num barcell"><span class="bar" style="--c:var(--gold);width:${Math.round(f(r) / max[k] * 70)}px;margin-right:8px"></span>${show(f(r))}</td>`
+    : `<td class="num">${show(f(r))}</td>`;
+  sortable(id, cols, rows, (r, key) => `<tr><th class="l">${nameHtml(r)}</th>${cols.slice(1).map(c => td(r, key, c)).join("")}</tr>`, initial);
+}
+const genLabel = g => g.gen === 8 ? "журнал" : "7 пок.";
+function viewGuns(S) {
+  const top = (f, filt = () => true) => { const l = S.guns.filter(g => filt(g) && isFinite(f(g))); return l.length ? l.reduce((a, b) => f(b) > f(a) ? b : a) : null; };
+  const tile = (t, lab, g, v) => g ? `<div class="nom"><span class="nt">${t}</span><span class="lab">${lab}</span><span class="ws">${gunLink(g)}</span><span class="v">${v}</span></div>` : "";
+  const many = g => g.games >= 2, a = top(g => g.dealt / g.games, many), b = top(g => g.ratio, many), c = top(g => g.acc, many), d = top(g => g.players.length);
+  return `${header("guns")}<section class="hero"><span class="eyebrow">Тагеры</span><h1>Пушки</h1>
+    <div class="facts"><div class="fact"><span class="v">${S.guns.length}</span><span class="k">${plural(S.guns.length, ["тагер", "тагера", "тагеров"]).split(" ")[1]}</span></div>
+    <div class="fact"><span class="v">${sum(S.guns, g => g.players.length)}</span><span class="k">пар «игрок — пушка»</span></div></div></section>
+  <section><div class="head"><h2>Пушки за сезон</h2><div class="seg" role="group" aria-label="Режим таблицы"><button data-gmode="avg">Среднее за игру</button><button data-gmode="tot">Всего</button></div></div><div class="scroll"><table id="gunTable"></table></div>
+  <p class="note">Тагер узнаётся по его адресу Bluetooth, так что статистика не теряется, если пушку переименовали. Цифры зависят и от пушки, и от того, кто с ней играл: состав по каждой пушке есть на её странице.</p></section>
+  <section><h2>Рекорды пушек</h2><div class="noms">${tile("Главный калибр", "Больше всего попаданий за игру в среднем", a, a && (a.dealt / a.games).toFixed(1).replace(".", ","))}
+    ${tile("Убойная", "Лучший коэффициент попал / получил", b, b && r2(b.ratio))}${tile("Снайперская", "Лучшая точность", c, c && pct(c.acc))}
+    ${tile("Переходящее знамя", "Больше всего разных игроков", d, d && d.players.length)}</div><p class="note">Среди пушек, сыгравших хотя бы две игры.</p></section>${footer()}`;
+}
+let gunMode = "avg";
+function gunsInit(S) {
+  const draw = () => { document.querySelectorAll("[data-gmode]").forEach(b => b.setAttribute("aria-pressed", b.dataset.gmode === gunMode));
+    statTable("gunTable", statCols(["name", "Пушка", r => r.name], gunMode === "avg"), S.guns, g => `${gunLink(g)} <small class="muted">${genLabel(g)}</small>`, gunMode === "avg" ? "dealtPG" : "dealt"); };
+  document.querySelectorAll("[data-gmode]").forEach(b => b.onclick = () => { gunMode = b.dataset.gmode; draw(); }); draw();
+}
+function viewGun(S, key) {
+  const g = S.guns.find(z => z.key === key); if (!g) return viewGuns(S);
+  const games = allGames().map(x => ({ ...x, m: S.models[x.i] })).map(x => ({ ...x, p: x.m.P.find(p => p.gkey === g.gkey) })).filter(x => x.p);
+  const best = [...g.players].filter(r => isFinite(r.ratio)).sort((a, b) => b.ratio - a.ratio)[0];
+  const alias = Object.keys(g.aliases).map(cap).filter(n => n !== g.name);
+  return `${header("guns")}<section class="hero"><span class="eyebrow">Пушка · ${genLabel(g)}</span><h1>${esc(g.name)}</h1>
+    <div class="facts"><div class="fact"><span class="v">${g.games}</span><span class="k">${plural(g.games, ["игра", "игры", "игр"]).split(" ")[1]}</span></div>
+    <div class="fact"><span class="v">${fmt(g.dealt)}</span><span class="k">попаданий</span></div>
+    <div class="fact"><span class="v">${r2(g.ratio)}</span><span class="k">попал / получил</span></div>
+    <div class="fact"><span class="v">${pct(g.acc)}</span><span class="k">точность</span></div></div>
+</section>
+  <section><h2>Кто с ней играл</h2><div class="scroll"><table id="gunPlayers"></table></div><p class="note">${best && g.players.length > 1 ? `Лучше всех с этой пушкой по коэффициенту — ${esc(best.name)} (${r2(best.ratio)}). ` : ""}Заголовки столбцов сортируют таблицу.${alias.length ? ` В журналах пушка встречалась и как ${alias.map(esc).join(", ")}.` : ""}</p></section>
+  <section><h2>По играм</h2><div class="scroll"><table><thead><tr><th class="l">Игра</th><th class="l">Игрок</th><th>Попал</th><th>Получил</th><th>Попал / получил</th><th>Смерти</th><th>Выстрелы</th><th>Точность</th></tr></thead>
+  <tbody>${games.map(({ g: gm, key, p }) => `<tr><th class="l"><a class="plink" href="#${key}">${dateShort(gm.date)}</a></th><td class="l">${playerLink(p.name, S.rows, p.teams)}</td>
+    <td class="num">${p.dealt}</td><td class="num">${p.recv}</td><td class="num">${r2(p.ratio)}</td><td class="num">${p.deaths}</td><td class="num">${fmt(p.shots)}</td><td class="num">${pct(p.acc)}</td></tr>`).join("")}</tbody></table></div></section>${footer()}`;
 }
 
 // ---------- графики прогресса игрока ----------
@@ -376,8 +464,9 @@ function viewPlayer(S, key) {
   <section><div class="head"><h2>По играм</h2><div class="seg" role="group" aria-label="Вид"><button data-ptab="table">Таблица</button><button data-ptab="prog">Прогресс</button></div></div>
   <div data-pane="prog">${progressCharts(games)}<p class="note">Одна точка — одна игра. Пунктир — среднее по всем игрокам той же игры, чтобы было видно, лучше или хуже остальных. Наведите на точку, чтобы увидеть значения.</p></div>
   <div data-pane="table" class="scroll"><table><thead><tr><th class="l">Игра</th><th class="l">Команда</th><th>Попал</th><th>Получил</th><th>Попал / получил</th><th>Смерти</th><th>Выстрелы</th><th>Точность</th></tr></thead>
-  <tbody>${games.map(({ g, key, p }) => `<tr><th class="l"><a class="plink" href="#${key}">${dateShort(g.date)}</a> <span class="muted">${esc(g.title || "")}</span></th><td class="l"><span class="dots">${p.teams.map(dot).join("")}</span> <span class="muted">${esc(p.gun)}</span></td>
+  <tbody>${games.map(({ g, key, p }) => `<tr><th class="l"><a class="plink" href="#${key}">${dateShort(g.date)}</a> <span class="muted">${esc(g.title || "")}</span></th><td class="l"><span class="dots">${p.teams.map(dot).join("")}</span> <a class="plink muted" href="#${(S.guns.find(z => z.gkey === p.gkey) || {}).key}">${esc(p.gun)}</a></td>
     <td class="num">${p.dealt}</td><td class="num">${p.recv}</td><td class="num">${r2(p.ratio)}</td><td class="num">${p.deaths}</td><td class="num">${fmt(p.shots)}</td><td class="num">${pct(p.acc)}</td></tr>`).join("")}</tbody></table></div></section>
+  <section><h2>На каких пушках</h2><div class="scroll"><table id="pGunTable"></table></div><p class="note">Сумма по всем играм игрока с этим тагером. Нажмите на название, чтобы открыть страницу пушки.</p></section>
   ${(() => { const names = [...new Set([...Object.keys(s.pairs), ...Object.keys(s.against)])];
     const rows = names.map(n => ({ n, gave: s.pairs[n] || 0, took: s.against[n] || 0 })).sort((a, b) => (b.gave + b.took) - (a.gave + a.took));
     if (!rows.length) return ""; const mx = Math.max(...rows.map(r => Math.max(r.gave, r.took)), 1);
@@ -404,11 +493,12 @@ function viewGame(S, key) {
   const board = teamIds.map(t => {
     const mem = inTeam(t), dealt = sum(P, a => sum(P, v => valT(a, v, t)));
     const recv = sum(mem, p => sum(segOf(p, t), s => s.recv)), shots = sum(mem, p => sum(segOf(p, t), s => s.shots)), deaths = sum(mem, p => sum(segOf(p, t), s => s.deaths));
-    const won = m.winners.filter(w => w === t).length;
+    const won = m.winners.filter(w => w === t).length, tm = [...mem].sort((a, b) => b.mvp - a.mvp)[0];
     return `<div class="team" style="--c:${TEAMS[t].c}"><div class="team-name"><b>${TEAMS[t].name}</b><span>${mem.map(p => esc(p.name) + (p.swap ? ` (${when(p, t)})` : "")).join(", ")}</span></div>
       <div class="score">${fmt(dealt)}<small>попаданий</small></div>
       <dl class="kv"><div><dt>Получил</dt><dd>${fmt(recv)}</dd></div><div><dt>Попал / получил</dt><dd>${r2(div(dealt, recv))}</dd></div>
-      ${m.winners.length ? `<div><dt>Раундов</dt><dd>${won}</dd></div>` : ""}<div><dt>Смертей</dt><dd>${deaths}</dd></div><div><dt>Выстрелов</dt><dd>${fmt(shots)}</dd></div><div><dt>Точность</dt><dd>${pct(div(dealt, shots))}</dd></div></dl></div>`;
+      ${m.winners.length ? `<div><dt>Раундов</dt><dd>${won}</dd></div>` : ""}<div><dt>Смертей</dt><dd>${deaths}</dd></div><div><dt>Выстрелов</dt><dd>${fmt(shots)}</dd></div><div><dt>Точность</dt><dd>${pct(div(dealt, shots))}</dd></div></dl>
+      ${tm ? `<p class="gmvp"><span class="tag">MVP команды</span>${who(tm)}<span class="muted num">${fmt(tm.mvp)}</span></p>` : ""}</div>`;
   }).join("");
   const swapNote = swappers.length ? `<p class="note">По ходу игры ${swappers.map(p => esc(p.name)).join(" и ")} ${swappers.length > 1 ? "сменили" : "сменил(а)"} команду${m.swaps.length ? ` после ${m.swaps[0]}-го раунда` : ""}. Попадания, смерти и выстрелы засчитаны той команде, за которую игрок был в тот момент. Цветные точки у имени показывают команды по порядку.</p>` : "";
   // раунды
@@ -427,8 +517,8 @@ function viewGame(S, key) {
   // дуэли
   const maxPair = Math.max(1, ...pairs.map(z => z.n));
   const coefS = (a, b) => b ? r2(a / b) : "∞";
-  const dhd = `<div class="drow hd"><span></span><span class="half lft">попал</span><span class="half rgt">получил</span><span class="bal">всего</span><span class="bal">коэф.</span></div>`;
-  const drowsHtml = (rows, mx) => rows.map(r => `<div class="drow" title="попал ${r.gave}, получил ${r.took}, всего ${r.gave + r.took}"><span class="nm">${esc(r.o.name)}</span><span class="half lft"><span class="num">${r.gave}</span><i style="--c:${r.cp};width:${(r.gave / mx * 72).toFixed(1)}%"></i></span>
+  const dhd = `<div class="drow hd"><span></span><span class="half lft"><button data-sk="gave">попал</button></span><span class="half rgt"><button data-sk="took">получил</button></span><span class="bal"><button data-sk="tot">всего</button></span><span class="bal"><button data-sk="ratio" aria-pressed="true">коэф.</button></span></div>`;
+  const drowsHtml = (rows, mx) => rows.map(r => `<div class="drow" data-gave="${r.gave}" data-took="${r.took}" data-tot="${r.gave + r.took}" data-ratio="${r.took ? r.gave / r.took : 1e9 + r.gave}" title="попал ${r.gave}, получил ${r.took}, всего ${r.gave + r.took}"><span class="nm">${esc(r.o.name)}</span><span class="half lft"><span class="num">${r.gave}</span><i style="--c:${r.cp};width:${(r.gave / mx * 72).toFixed(1)}%"></i></span>
         <span class="half rgt"><i style="--c:${r.co};width:${(r.took / mx * 72).toFixed(1)}%"></i><span class="num">${r.took}</span></span><span class="bal">${r.gave + r.took}</span><span class="bal">${coefS(r.gave, r.took)}</span></div>`).join("");
   const byRatio = rows => rows.sort((a, b) => b.gave / (b.took || .5) - a.gave / (a.took || .5));
   const otherTeam = t => teamIds.find(z => z !== t) ?? t;
@@ -442,7 +532,7 @@ function viewGame(S, key) {
       return `<div class="dpart"><div class="dpart-h">${dot(t)}<b>За ${TEAMS[t].name.toLowerCase().replace(/е$/, "х")}</b><span class="muted">${when(p, t)}</span><span class="dpart-s num">${gs} : ${ks} · ${coefS(gs, ks)}</span></div>${dhd}${drowsHtml(rows, maxPair)}</div>`;
     }).join("");
     return `<div class="duel"><div class="duel-head"><div>${who(p)}<span class="duel-sum">попал ${p.dealt} · получил ${p.recv}</span></div><div class="ratio">${r2(p.ratio)}<small>попал / получил</small></div></div>
-      <div class="drows">${body}</div></div>`;
+      <div class="drows" data-sortable>${body}</div></div>`;
   }).join("");
   // кто в кого
   const maxT = Math.max(1, ...g.hits.map(h => h[3]));
@@ -471,13 +561,14 @@ function viewGame(S, key) {
   }).join("");
   const awards = (g.awards || []).filter(a => a && a[0]);
   return `${header("games")}
-  <section><span class="eyebrow">${dateRu(g.date)}</span><h1>${esc(g.title || "Игра " + dateShort(g.date))}</h1></section>
+  <section><span class="eyebrow">${dateRu(g.date)}</span><h1>${esc(g.title || "Игра " + dateShort(g.date))}</h1>
+    ${m.mvp ? `<p class="gmvp"><span class="tag">MVP игры</span>${who(m.mvp)}<span class="muted num">рейтинг ${fmt(m.mvp.mvp)}</span></p>` : ""}</section>
   <section><div class="board">${board}</div>${swapNote}</section>
   ${roundsHtml}
-  <section><h2>Игроки</h2><div class="scroll"><table id="gameTable"></table></div></section>
+  <section><h2>Игроки</h2><div class="scroll"><table id="gameTable"></table></div><p class="note">Рейтинг MVP — пока простая формула: 100 — средний игрок этой игры. Половина рейтинга — попадания относительно среднего в игре, половина — коэффициент попал / получил относительно среднего (коэффициент выше 3 считается за 3). Например, рейтинг 150 — заметно лучше среднего.</p></section>
   <section><h2>Номинации</h2><div class="noms">${nomTiles(nomRows, who, extraNom)}</div></section>
   ${awards.length ? `<section><h2>Ачивки</h2><div class="awards">${awards.map(([t, names, stat, txt]) => `<div class="award"><span class="nt">${esc(t)}</span><span class="row">${String(names || "").split(",").map(n => n.trim()).filter(Boolean).map(n => { const p = P.find(z => z.name === n); return p ? who(p) : esc(n); }).join(" ")}</span><span class="stat">${esc(stat)}</span><span class="txt">${esc(txt)}</span></div>`).join("")}</div></section>` : ""}
-  <section><h2>Дуэли</h2><div class="duels">${duels}</div><p class="note">Слева — сколько раз игрок попал в соперника, справа — сколько раз соперник попал в него. «Всего» — сумма, то есть как часто эти двое сходились в бою. У сменивших команду отдельный блок за каждую команду.</p></section>
+  <section><h2>Дуэли</h2><div class="duels">${duels}</div><p class="note">Заголовки столбцов в карточке сортируют её список. Слева — сколько раз игрок попал в соперника, справа — сколько раз соперник попал в него. «Всего» — сумма, то есть как часто эти двое сходились в бою. У сменивших команду отдельный блок за каждую команду.</p></section>
   <section><h2>Кто в кого</h2><div class="grids">${grids}</div><p class="note">Строка — кто стрелял, столбец — в кого попал.</p></section>
   <section><h2>Фраги</h2>${frags}<p class="note">Фраг засчитан тому, кто попал последним перед смертью. Тагеры 7-го поколения не пишут журнал, их смерти поделены между стрелявшими пропорционально попаданиям с поправкой на то, как часто стрелок добивал.</p></section>
   <section><h2>Личные счёты</h2><div class="scroll"><table><thead><tr><th class="l">Игрок</th><th class="l">Груша для битья</th><th class="l">Личный кошмар</th></tr></thead><tbody>${feuds}</tbody></table></div></section>
@@ -490,9 +581,10 @@ function gameTableInit(S, key) {
   const cols = [["name", "Игрок", p => p.name], ["dealt", "Попал", p => p.dealt], ["recv", "Получил", p => p.recv], ["ratio", "Попал / получил", p => p.ratio],
     ["deaths", "Смерти", p => p.deaths], ["shots", "Выстрелы", p => p.shots], ["acc", "Точность", p => p.acc]];
   if (m.winners.length) cols.push(["alive", "Раундов без смерти", p => p.alive]);
+  cols.push(["mvp", "Рейтинг", p => p.mvp]);
   sortable("gameTable", cols, m.P, p => `<tr><th class="l"><span class="row" style="gap:6px">${playerLink(p.name, S.rows, p.teams)}<small class="muted num">${esc(p.gun !== p.name ? p.gun : "")}${p.swap ? " · смена команды" : ""}</small></span></th>
     <td class="num barcell">${p.segs.map(s => { const n = sum(m.P, v => m.valT(p, v, s.team)); return `<span class="bar" style="--c:${TEAMS[s.team].c};width:${Math.round(n / max * 80)}px;margin-right:${p.swap ? 1 : 0}px"></span>`; }).join("")}<span style="margin-left:8px">${p.dealt}</span></td>
-    <td class="num">${p.recv}</td><td class="num">${r2(p.ratio)}</td><td class="num">${p.deaths}</td><td class="num">${fmt(p.shots)}</td><td class="num">${pct(p.acc)}</td>${m.winners.length ? `<td class="num">${p.alive == null ? "—" : p.alive}</td>` : ""}</tr>`, "dealt");
+    <td class="num">${p.recv}</td><td class="num">${r2(p.ratio)}</td><td class="num">${p.deaths}</td><td class="num">${fmt(p.shots)}</td><td class="num">${pct(p.acc)}</td>${m.winners.length ? `<td class="num">${p.alive == null ? "—" : p.alive}</td>` : ""}<td class="num">${fmt(p.mvp)}${m.mvp === p ? " ★" : ""}</td></tr>`, "mvp");
 }
 
 // ---------- загрузка и правка ----------
@@ -594,11 +686,13 @@ function render() {
   let html, after = () => {};
   if (h === "games") html = viewGames(S);
   else if (h === "players") { html = viewPlayers(S); after = () => seasonTableInit(S); }
-  else if (/^p\d+$/.test(h)) { html = viewPlayer(S, h); after = progressInit; }
+  else if (/^p\d+$/.test(h)) { const s = S.rows.find(r => r.key === h); html = viewPlayer(S, h); after = () => { progressInit(); if (s) statTable("pGunTable", statCols(["name", "Пушка", r => r.gun.name]), s.gunList, r => gunLink(r.gun), "games"); }; }
+  else if (h === "guns") { html = viewGuns(S); after = () => gunsInit(S); }
+  else if (/^gun\d+$/.test(h)) { const g = S.guns.find(z => z.key === h); html = viewGun(S, h); after = () => g && statTable("gunPlayers", statCols(["name", "Игрок", r => r.name]), g.players, r => playerLink(r.name, S.rows, []), "ratio"); }
   else if (h.startsWith("game-")) { html = viewGame(S, h); after = () => gameTableInit(S, h); }
   else if (h === "upload" && state.canEdit) { html = editorHtml(draft, "Добавить игру", true); after = () => editorInit(true); }
   else if (h.startsWith("edit-") && state.canEdit) { const x = allGames().find(z => z.key === h.slice(5)); html = x ? editorHtml(DATA.games[x.i], "Изменить игру", false) : viewSeason(S); after = () => x && editorInit(false, x.i); }
-  else { html = viewSeason(S); after = () => seasonTableInit(S); }
+  else { html = viewSeason(S); after = () => { seasonTableInit(S); nomsInit(); }; }
   app.innerHTML = html; after();
 }
 addEventListener("hashchange", () => { render(); scrollTo(0, 0); });
@@ -632,9 +726,23 @@ loadGames().then(render, e => { render(); app.insertAdjacentHTML("afterbegin", `
 // Сортировка дуэлей игрока по заголовкам: повторный клик меняет направление
 app.addEventListener("click", e => {
   const b = e.target.closest(".drows[data-sortable] .drow.hd button"); if (!b) return;
-  const box = b.closest(".drows"), k = b.dataset.sk, desc = !(b.getAttribute("aria-pressed") === "true" && b.dataset.dir !== "asc");
+  const box = b.closest(".dpart") || b.closest(".drows"), k = b.dataset.sk, desc = !(b.getAttribute("aria-pressed") === "true" && b.dataset.dir !== "asc");
   box.querySelectorAll(".drow.hd button").forEach(x => { x.setAttribute("aria-pressed", x === b); delete x.dataset.dir; });
   b.dataset.dir = desc ? "desc" : "asc";
   const rows = [...box.querySelectorAll(".drow:not(.hd)")].sort((x, y) => (desc ? -1 : 1) * (x.dataset[k] - y.dataset[k]) || (y.dataset.tot - x.dataset.tot));
   box.append(...rows);
+});
+
+// Сортировка «Главных противостояний»: по сумме, в среднем за игру или по коэффициенту; видны первые 10, «Все пары» раскрывает список
+app.addEventListener("click", e => {
+  const box = e.target.closest(".frags[data-psort]"); if (!box) return;
+  const rows = () => [...box.querySelectorAll(".prow:not(.hd)")];
+  if (e.target.closest(".pmore")) { box.dataset.all = "1"; rows().forEach(r => r.hidden = false); e.target.closest(".pmore").remove(); return; }
+  const b = e.target.closest(".prow.hd button"); if (!b) return;
+  const k = b.dataset.sk, desc = !(b.getAttribute("aria-pressed") === "true" && b.dataset.dir !== "asc");
+  box.querySelectorAll(".prow.hd button").forEach(x => { x.setAttribute("aria-pressed", x === b); delete x.dataset.dir; });
+  b.dataset.dir = desc ? "desc" : "asc";
+  const sorted = rows().sort((x, y) => (desc ? -1 : 1) * (x.dataset[k] - y.dataset[k]) || (y.dataset.n - x.dataset.n));
+  sorted.forEach((r, i) => r.hidden = !box.dataset.all && i >= 10);
+  box.querySelector(".prow.hd").after(...sorted);
 });
