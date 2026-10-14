@@ -548,3 +548,27 @@ function render() {
 addEventListener("hashchange", () => { render(); scrollTo(0, 0); });
 app.innerHTML = `<div class="empty">Загружаю игры…</div>`;
 loadGames().then(render, e => { render(); app.insertAdjacentHTML("afterbegin", `<p class="msg err">Не получилось загрузить игры: ${esc(e.message)}. Обновите страницу через минуту.</p>`); });
+
+// ---------- эффекты оформления: подсветка карточек под курсором и отсчёт больших чисел ----------
+(() => {
+  const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const countUp = () => {
+    if (calm) return;
+    app.querySelectorAll(".fact .v, .score").forEach(el => {
+      const node = [...el.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
+      if (!node || node.__done) return;
+      const raw = node.textContent, target = +raw.replace(/[\s  ]/g, "");
+      if (!Number.isInteger(target) || target < 2) return;
+      node.__done = true; const t0 = performance.now(), dur = 900;
+      const step = t => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+        node.textContent = k < 1 ? fmt(target * e) : raw; if (k < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    });
+  };
+  new MutationObserver(countUp).observe(app, { childList: true });
+  const SPOT = ".gcard, .duel, .nom, .fact, .frags, .team, .award";
+  addEventListener("pointermove", e => {
+    const el = e.target.closest && e.target.closest(SPOT); if (!el) return;
+    const r = el.getBoundingClientRect(); el.style.setProperty("--mx", (e.clientX - r.left) + "px"); el.style.setProperty("--my", (e.clientY - r.top) + "px");
+  }, { passive: true });
+})();
