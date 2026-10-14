@@ -239,7 +239,7 @@ function sortable(id, cols, rows, rowHtml, initial, group = "") {
     const c = cols.find(x => x[0] === key);
     const sorted = [...rows].sort((a, b) => key === "name" ? dir * a.name.localeCompare(b.name, "ru") : dir * ((c[2](a) ?? -1) - (c[2](b) ?? -1)));
     const el = document.getElementById(id); if (!el) return;
-    el.innerHTML = `<thead>${group}<tr>${cols.map(([k, label, , cls]) => `<th class="${k === "name" ? "l" : ""} ${cls || ""}" ${k === key ? `aria-sort="${dir < 0 ? "descending" : "ascending"}"` : ""}><button data-k="${k}">${label}</button></th>`).join("")}</tr></thead><tbody>${sorted.map(rowHtml).join("")}</tbody>`;
+    el.innerHTML = `<thead>${group}<tr>${cols.map(([k, label, , cls]) => `<th class="${k === "name" ? "l" : ""} ${cls || ""}" ${k === key ? `aria-sort="${dir < 0 ? "descending" : "ascending"}"` : ""}><button data-k="${k}">${label}</button></th>`).join("")}</tr></thead><tbody>${sorted.map(r => rowHtml(r, key)).join("")}</tbody>`;
   };
   setTimeout(() => {
     const el = document.getElementById(id); if (!el) return;
@@ -280,12 +280,15 @@ function seasonTableInit(S) {
   const cols = [["name", "Игрок", r => r.name], ["games", "Игр", r => r.games], ["dealt", "Попал", r => r.dealt], ["recv", "Получил", r => r.recv], ["ratio", "Попал / получил", r => r.ratio],
     ["deaths", "Смерти", r => r.deaths], ["shots", "Выстрелы", r => r.shots], ["acc", "Точность", r => r.acc],
     ["perGame", "Попал", r => r.dealt / r.games, "gsep"], ["ratioPerGame", "Попал / получил", r => r.ratioPerGame]];
-  const max = Math.max(...S.rows.map(r => r.dealt), 1);
+  const show = { games: r => r.games, dealt: r => fmt(r.dealt), recv: r => fmt(r.recv), ratio: r => r2(r.ratio), deaths: r => fmt(r.deaths), shots: r => fmt(r.shots),
+    acc: r => pct(r.acc), perGame: r => (r.dealt / r.games).toFixed(1).replace(".", ","), ratioPerGame: r => r2(r.ratioPerGame) };
+  const max = Object.fromEntries(cols.slice(1).map(([k, , f]) => [k, Math.max(1e-9, ...S.rows.map(f).filter(isFinite))]));
   const group = `<tr class="grp"><th colspan="8"></th><th colspan="2" class="gsep">В среднем за игру</th></tr>`;
-  sortable("seasonTable", cols, S.rows, r => `<tr><th class="l">${playerLink(r.name, S.rows, [])}</th><td class="num">${r.games}</td>
-    <td class="num barcell"><span class="bar" style="--c:var(--gold);width:${Math.round(r.dealt / max * 80)}px;margin-right:8px"></span>${fmt(r.dealt)}</td>
-    <td class="num">${fmt(r.recv)}</td><td class="num">${r2(r.ratio)}</td><td class="num">${fmt(r.deaths)}</td><td class="num">${fmt(r.shots)}</td><td class="num">${pct(r.acc)}</td>
-    <td class="num gsep">${(r.dealt / r.games).toFixed(1).replace(".", ",")}</td><td class="num">${r2(r.ratioPerGame)}</td></tr>`, "dealt", group);
+  // полоса — в столбце, по которому отсортирована таблица
+  const td = (r, key, k, f, cls) => k === key && isFinite(f(r))
+    ? `<td class="num barcell ${cls || ""}"><span class="bar" style="--c:var(--gold);width:${Math.round(f(r) / max[k] * 70)}px;margin-right:8px"></span>${show[k](r)}</td>`
+    : `<td class="num ${cls || ""}">${show[k](r)}</td>`;
+  sortable("seasonTable", cols, S.rows, (r, key) => `<tr><th class="l">${playerLink(r.name, S.rows, [])}</th>${cols.slice(1).map(([k, , f, cls]) => td(r, key, k, f, cls)).join("")}</tr>`, "perGame", group);
 }
 
 function viewGames(S) { return `${header("games")}<section><h1>Игры</h1>${gameCards(S)}</section>${footer()}`; }
