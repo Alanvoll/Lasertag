@@ -347,3 +347,4 @@ thead tr.grp th.gsep { text-align: left }
 .drows[data-sortable] .drow.hd button[aria-pressed="true"]::after { content: " ↓" }
 .drows[data-sortable] .drow.hd button[aria-pressed="true"][data-dir="asc"]::after { content: " ↑" }
 .drows[data-sortable] .drow.hd button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px }
+[data-npane] { display: flex; flex-direction: column; gap: 14px }
