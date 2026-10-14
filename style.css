@@ -310,3 +310,33 @@ thead tr.grp th.gsep { text-align: left }
 :root .nom .lab { color: #0c0d13 }
 :root .logo i { background: #fff }
 :root .fx-rails { filter: grayscale(1) brightness(1.6) }
+
+/* ---------- графики прогресса игрока ---------- */
+[hidden] { display: none !important }
+.prog { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line) }
+.pchart { margin: 0; background: var(--panel); padding: 14px 14px 8px; position: relative; display: flex; flex-direction: column; gap: 8px; min-width: 0 }
+.pchart figcaption { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px }
+.pchart .pl { font: 600 11px var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted) }
+.pchart .pl small { display: block; letter-spacing: .08em; font-size: 10px; opacity: .75; margin-top: 2px }
+.pchart .pv { display: flex; flex-direction: column; align-items: flex-end; text-align: right }
+.pchart .pv b { font: 700 26px/1 var(--display); color: var(--fg) }
+.pchart .pd { font-size: 11px; color: var(--muted); margin-top: 3px; white-space: nowrap }
+.pchart .pd.up { color: var(--fg) }
+.pchart .pd.up::after { content: " ✓" }
+.pchart svg, .pchart .pdots { width: 100%; height: 150px; display: block }
+.pchart .pdots { position: absolute; left: 14px; right: 14px; bottom: 8px; width: auto }
+.pchart .grid { stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke }
+.pchart .avg { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 4; opacity: .7; vector-effect: non-scaling-stroke }
+.pchart .me { fill: none; stroke: var(--gold); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke }
+.pchart .xl { position: absolute; bottom: 2px; color: var(--muted); font: 500 10px var(--mono); letter-spacing: .06em; white-space: nowrap }
+.pdot { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; cursor: pointer; outline: none }
+.pdot::before { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 2px var(--panel); transition: transform .15s }
+.pdot:hover::before, .pdot:focus-visible::before { transform: scale(1.35) }
+.plegend { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); font-size: 13px }
+.plegend i { display: inline-block; width: 22px; height: 0; vertical-align: middle; margin-right: 8px; border-top: 2.5px solid var(--gold) }
+.plegend i.avg { border-top: 1.5px dashed var(--muted) }
+.ptip { position: absolute; z-index: 50; pointer-events: none; background: #0a0b10; border: 1px solid var(--line); color: var(--fg); padding: 8px 10px; font-size: 12px; line-height: 1.45; white-space: nowrap; box-shadow: 0 10px 30px -10px #000 }
+.ptip b { display: block; font-family: var(--mono); letter-spacing: .1em; color: var(--muted); font-weight: 600 }
+.ptip span { color: var(--muted) }
+@media (max-width: 900px) { .prog { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+@media (max-width: 560px) { .prog { grid-template-columns: 1fr } }

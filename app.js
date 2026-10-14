@@ -307,6 +307,60 @@ function viewPlayers(S) {
   return `${header("players")}<section><div class="head"><h1>Игроки</h1><div class="seg" role="group" aria-label="Режим таблицы"><button data-mode="avg">Среднее за игру</button><button data-mode="tot">Всего</button></div></div><div class="scroll"><table id="seasonTable"></table></div><p class="note">Нажмите на имя, чтобы открыть страницу игрока.</p></section>${footer()}`;
 }
 
+// ---------- графики прогресса игрока ----------
+const PROG = [
+  ["dealt", "Попал", p => p.dealt, fmt, 1],
+  ["ratio", "Попал / получил", p => p.ratio, r2, 1],
+  ["acc", "Точность", p => p.acc, pct, 1],
+  ["recv", "Получил", p => p.recv, fmt, -1],
+  ["deaths", "Смерти", p => p.deaths, fmt, -1],
+  ["shots", "Выстрелы", p => p.shots, fmt, 0],
+];
+function progressCharts(games) {
+  const list = [...games].reverse(); // по времени: старые слева
+  if (list.length < 2) return `<p class="note">Графики прогресса появятся, когда у игрока будет хотя бы две игры.</p>`;
+  const W = 320, H = 150, L = 8, R = 8, T = 16, B = 26;
+  const x = i => L + (list.length === 1 ? (W - L - R) / 2 : i * (W - L - R) / (list.length - 1));
+  return `<div class="prog">${PROG.map(([k, label, f, show, better]) => {
+    const pts = list.map(({ g, m, p }) => {
+      const others = m.P.map(f).filter(isFinite), avg = others.length ? sum(others, v => v) / others.length : 0;
+      return { g, v: f(p), avg };
+    });
+    const fin = pts.filter(q => isFinite(q.v)), vals = [...fin.map(q => q.v), ...pts.map(q => q.avg)];
+    let lo = Math.min(...vals), hi = Math.max(...vals); const pad = (hi - lo || hi || 1) * .15; lo = Math.max(0, lo - pad); hi += pad;
+    const y = v => T + (H - T - B) * (1 - (Math.min(v, hi) - lo) / (hi - lo || 1));
+    const line = (arr, get) => arr.map((q, i) => `${i ? "L" : "M"}${x(pts.indexOf(q)).toFixed(1)} ${y(get(q)).toFixed(1)}`).join("");
+    const first = fin[0], last = fin[fin.length - 1], prev = fin[fin.length - 2];
+    const d = last && prev ? last.v - prev.v : 0;
+    const good = better && d ? Math.sign(d) === better : null;
+    const dTxt = !prev ? "" : Math.abs(d) < 1e-9 ? "без изменений" : (d > 0 ? "▲ " : "▼ ") + show(Math.abs(d)).replace("∞", "—");
+    return `<figure class="pchart"><figcaption><span class="pl">${label}${better < 0 ? ' <small>меньше — лучше</small>' : ""}</span>
+      <span class="pv"><b>${last ? show(last.v) : "—"}</b><small class="pd ${good === true ? "up" : good === false ? "down" : ""}">${dTxt}${prev ? " к прошлой игре" : ""}</small></span></figcaption>
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${label} по играм: ${pts.map(q => dateShort(q.g.date) + " — " + show(q.v)).join(", ")}">
+        ${[0, .5, 1].map(t => `<line class="grid" x1="${L}" x2="${W - R}" y1="${(T + (H - T - B) * t).toFixed(1)}" y2="${(T + (H - T - B) * t).toFixed(1)}"/>`).join("")}
+        <path class="avg" d="${line(pts, q => q.avg)}"/>
+        <path class="me" d="${line(fin, q => q.v)}"/>
+      </svg>
+      <div class="pdots">${pts.map((q, i) => `<span class="xl" style="left:${(x(i) / W * 100).toFixed(2)}%;transform:translateX(${i === 0 ? "0" : i === pts.length - 1 ? "-100%" : "-50%"})">${dateShort(q.g.date).slice(0, 5)}</span>`).join("")}${pts.map((q, i) => isFinite(q.v) ? `<span class="pdot" style="left:${(x(i) / W * 100).toFixed(2)}%;top:${(y(q.v) / H * 100).toFixed(2)}%" tabindex="0"
+        data-tip="${esc(`<b>${dateShort(q.g.date)}</b>${label}: ${show(q.v)}<br><span>среднее в игре: ${show(q.avg)}</span>`)}"></span>` : "").join("")}</div>
+    </figure>`;
+  }).join("")}</div>
+  <div class="plegend"><span><i class="me"></i>игрок</span><span><i class="avg"></i>среднее по всем игрокам этой игры</span></div>`;
+}
+let playerTab = "table";
+function progressInit() {
+  const tabs = document.querySelectorAll("[data-ptab]");
+  const pick = () => { tabs.forEach(b => b.setAttribute("aria-pressed", b.dataset.ptab === playerTab)); document.querySelectorAll("[data-pane]").forEach(el => el.hidden = el.dataset.pane !== playerTab); };
+  tabs.forEach(b => b.onclick = () => { playerTab = b.dataset.ptab; pick(); }); pick();
+  const box = document.querySelector(".prog"); if (!box) return;
+  let tip = document.getElementById("ptip");
+  if (!tip) { tip = document.createElement("div"); tip.id = "ptip"; tip.className = "ptip"; document.body.appendChild(tip); }
+  const show = el => { tip.innerHTML = el.dataset.tip; tip.hidden = false; const r = el.getBoundingClientRect();
+    tip.style.left = Math.min(innerWidth - tip.offsetWidth - 8, Math.max(8, r.left + r.width / 2 - tip.offsetWidth / 2)) + "px"; tip.style.top = (r.top + scrollY - tip.offsetHeight - 10) + "px"; };
+  const hide = () => tip.hidden = true; hide();
+  box.querySelectorAll(".pdot").forEach(el => { el.onpointerenter = el.onfocus = () => show(el); el.onpointerleave = el.onblur = hide; });
+}
+
 function viewPlayer(S, key) {
   const s = S.rows.find(r => r.key === key);
   if (!s) return viewSeason(S);
@@ -319,7 +373,9 @@ function viewPlayer(S, key) {
     <div class="fact"><span class="v">${fmt(s.dealt)}</span><span class="k">попаданий</span></div>
     <div class="fact"><span class="v">${r2(s.ratio)}</span><span class="k">попал / получил</span></div>
     <div class="fact"><span class="v">${pct(s.acc)}</span><span class="k">точность</span></div></div></section>
-  <section><h2>По играм</h2><div class="scroll"><table><thead><tr><th class="l">Игра</th><th class="l">Команда</th><th>Попал</th><th>Получил</th><th>Попал / получил</th><th>Смерти</th><th>Выстрелы</th><th>Точность</th></tr></thead>
+  <section><div class="head"><h2>По играм</h2><div class="seg" role="group" aria-label="Вид"><button data-ptab="table">Таблица</button><button data-ptab="prog">Прогресс</button></div></div>
+  <div data-pane="prog">${progressCharts(games)}<p class="note">Одна точка — одна игра. Пунктир — среднее по всем игрокам той же игры, чтобы было видно, лучше или хуже остальных. Наведите на точку, чтобы увидеть значения.</p></div>
+  <div data-pane="table" class="scroll"><table><thead><tr><th class="l">Игра</th><th class="l">Команда</th><th>Попал</th><th>Получил</th><th>Попал / получил</th><th>Смерти</th><th>Выстрелы</th><th>Точность</th></tr></thead>
   <tbody>${games.map(({ g, key, p }) => `<tr><th class="l"><a class="plink" href="#${key}">${dateShort(g.date)}</a> <span class="muted">${esc(g.title || "")}</span></th><td class="l"><span class="dots">${p.teams.map(dot).join("")}</span> <span class="muted">${esc(p.gun)}</span></td>
     <td class="num">${p.dealt}</td><td class="num">${p.recv}</td><td class="num">${r2(p.ratio)}</td><td class="num">${p.deaths}</td><td class="num">${fmt(p.shots)}</td><td class="num">${pct(p.acc)}</td></tr>`).join("")}</tbody></table></div></section>
   ${(() => { const names = [...new Set([...Object.keys(s.pairs), ...Object.keys(s.against)])];
@@ -538,7 +594,7 @@ function render() {
   let html, after = () => {};
   if (h === "games") html = viewGames(S);
   else if (h === "players") { html = viewPlayers(S); after = () => seasonTableInit(S); }
-  else if (/^p\d+$/.test(h)) html = viewPlayer(S, h);
+  else if (/^p\d+$/.test(h)) { html = viewPlayer(S, h); after = progressInit; }
   else if (h.startsWith("game-")) { html = viewGame(S, h); after = () => gameTableInit(S, h); }
   else if (h === "upload" && state.canEdit) { html = editorHtml(draft, "Добавить игру", true); after = () => editorInit(true); }
   else if (h.startsWith("edit-") && state.canEdit) { const x = allGames().find(z => z.key === h.slice(5)); html = x ? editorHtml(DATA.games[x.i], "Изменить игру", false) : viewSeason(S); after = () => x && editorInit(false, x.i); }
