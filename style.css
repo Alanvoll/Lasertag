@@ -348,3 +348,7 @@ thead tr.grp th.gsep { text-align: left }
 .drows[data-sortable] .drow.hd button[aria-pressed="true"][data-dir="asc"]::after { content: " ↑" }
 .drows[data-sortable] .drow.hd button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px }
 [data-npane] { display: flex; flex-direction: column; gap: 14px }
+/* MVP */
+.gmvp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 14px }
+.gmvp .tag { font: 600 10px var(--mono); letter-spacing: .16em; text-transform: uppercase; background: var(--gold); color: var(--on-acc, #0e0e10); padding: 3px 7px }
+.team .gmvp { border-top: 1px solid var(--line); padding-top: 12px; margin-top: auto }
