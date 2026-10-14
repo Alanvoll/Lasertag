@@ -168,7 +168,7 @@ function season() {
   models.forEach((m, gi) => {
     for (const p of m.P) {
       const s = S.get(p.name) || { name: p.name, games: 0, dealt: 0, recv: 0, deaths: 0, shots: 0, alive: 0, rounds: 0, teams: [], best: 0, pairs: {}, against: {} };
-      s.games++; if (isFinite(p.ratio)) (s.gameRatios = s.gameRatios || []).push(p.ratio); s.dealt += p.dealt; s.recv += p.recv; s.deaths += p.deaths; s.shots += p.shots;
+      s.games++; if (isFinite(p.ratio)) (s.gameRatios = s.gameRatios || []).push(p.ratio); if (p.shots) (s.gameAcc = s.gameAcc || []).push(p.acc); s.dealt += p.dealt; s.recv += p.recv; s.deaths += p.deaths; s.shots += p.shots;
       if (p.alive != null) { s.alive += p.alive; s.rounds += p.died.length; }
       s.teams.push(...p.teams); s.best = Math.max(s.best, p.dealt);
       for (const o of m.P) { if (o === p) continue; const x = m.val(p, o), y = m.val(o, p); if (x || y) { s.meet = s.meet || {}; s.meet[o.name] = (s.meet[o.name] || 0) + 1; } if (x) s.pairs[o.name] = (s.pairs[o.name] || 0) + x; if (y) s.against[o.name] = (s.against[o.name] || 0) + y; }
@@ -176,7 +176,7 @@ function season() {
     }
   });
   const rows = [...S.values()].sort((a, b) => a.name.localeCompare(b.name, "ru"));
-  rows.forEach((s, k) => { s.key = "p" + k; s.acc = div(s.dealt, s.shots); s.ratio = div(s.dealt, s.recv); s.lastTeam = s.teams[s.teams.length - 1] ?? 0; s.ratioPerGame = s.gameRatios && s.gameRatios.length ? sum(s.gameRatios, x => x) / s.gameRatios.length : 0; });
+  rows.forEach((s, k) => { s.key = "p" + k; s.acc = div(s.dealt, s.shots); s.ratio = div(s.dealt, s.recv); s.lastTeam = s.teams[s.teams.length - 1] ?? 0; s.ratioPerGame = s.gameRatios && s.gameRatios.length ? sum(s.gameRatios, x => x) / s.gameRatios.length : 0; s.accPerGame = s.gameAcc && s.gameAcc.length ? sum(s.gameAcc, x => x) / s.gameAcc.length : 0; });
   return { models, rows };
 }
 const playerLink = (name, rows, teams) => {
@@ -266,7 +266,7 @@ function viewSeason(S) {
     <div class="fact"><span class="v">${fmt(hits)}</span><span class="k">попаданий</span></div>
     <div class="fact"><span class="v">${fmt(shots)}</span><span class="k">выстрелов</span></div></div></section>
   <section><h2>Игры</h2>${gameCards(S)}</section>
-  ${S.rows.length ? `<section><h2>Игроки за сезон</h2><div class="scroll"><table id="seasonTable"></table></div><p class="note">Нажмите на имя, чтобы открыть страницу игрока. Заголовки столбцов сортируют таблицу.</p></section>
+  ${S.rows.length ? `<section><div class="head"><h2>Игроки за сезон</h2><div class="seg" role="group" aria-label="Режим таблицы"><button data-mode="avg">Среднее за игру</button><button data-mode="tot">Всего</button></div></div><div class="scroll"><table id="seasonTable"></table></div><p class="note">Нажмите на имя, чтобы открыть страницу игрока. Заголовки столбцов сортируют таблицу.</p></section>
   <section><h2>Номинации сезона</h2><div class="noms">${nomTiles(S.rows.filter(r => r.games >= Math.ceil(Math.max(...S.rows.map(z => z.games)) * 0.6)), who)}</div><p class="note">По сумме всех игр, среди тех, кто сыграл не меньше 60% игр сезона. «Без смерти» считается только по тагерам с журналом событий.</p></section>
   ${(() => { const pr = []; S.rows.forEach((a, i) => S.rows.slice(i + 1).forEach(b => { const x = a.pairs[b.name] || 0, y = b.pairs[a.name] || 0; if (x + y) pr.push({ a, b, x, y, n: x + y, g: (a.meet || {})[b.name] || 1 }); }));
     pr.sort((p, q) => q.n - p.n); const top = pr.slice(0, 10), mx = top.length ? top[0].n : 1;
@@ -276,25 +276,33 @@ function viewSeason(S) {
 ` : ""}
   ${footer()}`;
 }
+let seasonMode = "avg";
 function seasonTableInit(S) {
-  const cols = [["name", "Игрок", r => r.name], ["games", "Игр", r => r.games], ["dealt", "Попал", r => r.dealt], ["recv", "Получил", r => r.recv], ["ratio", "Попал / получил", r => r.ratio],
-    ["deaths", "Смерти", r => r.deaths], ["shots", "Выстрелы", r => r.shots], ["acc", "Точность", r => r.acc],
-    ["perGame", "Попал", r => r.dealt / r.games, "gsep"], ["ratioPerGame", "Попал / получил", r => r.ratioPerGame]];
-  const show = { games: r => r.games, dealt: r => fmt(r.dealt), recv: r => fmt(r.recv), ratio: r => r2(r.ratio), deaths: r => fmt(r.deaths), shots: r => fmt(r.shots),
-    acc: r => pct(r.acc), perGame: r => (r.dealt / r.games).toFixed(1).replace(".", ","), ratioPerGame: r => r2(r.ratioPerGame) };
-  const max = Object.fromEntries(cols.slice(1).map(([k, , f]) => [k, Math.max(1e-9, ...S.rows.map(f).filter(isFinite))]));
-  const group = `<tr class="grp"><th colspan="8"></th><th colspan="2" class="gsep">В среднем за игру</th></tr>`;
-  // полоса — в столбце, по которому отсортирована таблица
-  const td = (r, key, k, f, cls) => k === key && isFinite(f(r))
-    ? `<td class="num barcell ${cls || ""}"><span class="bar" style="--c:var(--gold);width:${Math.round(f(r) / max[k] * 70)}px;margin-right:8px"></span>${show[k](r)}</td>`
-    : `<td class="num ${cls || ""}">${show[k](r)}</td>`;
-  sortable("seasonTable", cols, S.rows, (r, key) => `<tr><th class="l">${playerLink(r.name, S.rows, [])}</th>${cols.slice(1).map(([k, , f, cls]) => td(r, key, k, f, cls)).join("")}</tr>`, "perGame", group);
+  const one = x => x.toFixed(1).replace(".", ",");
+  const COLS = {
+    avg: [["name", "Игрок", r => r.name], ["games", "Игр", r => r.games, String], ["perGame", "Попал", r => r.dealt / r.games, one], ["recvPG", "Получил", r => r.recv / r.games, one],
+      ["ratioPerGame", "Попал / получил", r => r.ratioPerGame, r2], ["deathsPG", "Смерти", r => r.deaths / r.games, one], ["shotsPG", "Выстрелы", r => r.shots / r.games, x => fmt(x)], ["accPerGame", "Точность", r => r.accPerGame, pct]],
+    tot: [["name", "Игрок", r => r.name], ["games", "Игр", r => r.games, String], ["dealt", "Попал", r => r.dealt, fmt], ["recv", "Получил", r => r.recv, fmt],
+      ["ratio", "Попал / получил", r => r.ratio, r2], ["deaths", "Смерти", r => r.deaths, fmt], ["shots", "Выстрелы", r => r.shots, fmt], ["acc", "Точность", r => r.acc, pct]],
+  };
+  const draw = () => {
+    const cols = COLS[seasonMode];
+    document.querySelectorAll("[data-mode]").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === seasonMode));
+    const max = Object.fromEntries(cols.slice(1).map(([k, , f]) => [k, Math.max(1e-9, ...S.rows.map(f).filter(isFinite))]));
+    // полоса — в столбце, по которому отсортирована таблица
+    const td = (r, key, [k, , f, show]) => k === key && isFinite(f(r))
+      ? `<td class="num barcell"><span class="bar" style="--c:var(--gold);width:${Math.round(f(r) / max[k] * 70)}px;margin-right:8px"></span>${show(f(r))}</td>`
+      : `<td class="num">${show(f(r))}</td>`;
+    sortable("seasonTable", cols, S.rows, (r, key) => `<tr><th class="l">${playerLink(r.name, S.rows, [])}</th>${cols.slice(1).map(c => td(r, key, c)).join("")}</tr>`, seasonMode === "avg" ? "perGame" : "dealt");
+  };
+  document.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => { seasonMode = b.dataset.mode; draw(); });
+  draw();
 }
 
 function viewGames(S) { return `${header("games")}<section><h1>Игры</h1>${gameCards(S)}</section>${footer()}`; }
 
 function viewPlayers(S) {
-  return `${header("players")}<section><h1>Игроки</h1><div class="scroll"><table id="seasonTable"></table></div><p class="note">Нажмите на имя, чтобы открыть страницу игрока.</p></section>${footer()}`;
+  return `${header("players")}<section><div class="head"><h1>Игроки</h1><div class="seg" role="group" aria-label="Режим таблицы"><button data-mode="avg">Среднее за игру</button><button data-mode="tot">Всего</button></div></div><div class="scroll"><table id="seasonTable"></table></div><p class="note">Нажмите на имя, чтобы открыть страницу игрока.</p></section>${footer()}`;
 }
 
 function viewPlayer(S, key) {
