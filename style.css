@@ -212,3 +212,101 @@ thead tr.grp th.gsep { text-align: left }
 .gbest { display: flex; flex-direction: column; gap: 2px; font-size: 13px; font-weight: 600; border-top: 1px solid var(--line); padding-top: 8px }
 .gbest > span { display: flex; justify-content: space-between; gap: 8px }
 .gbest .muted { font-weight: 400 }
+
+/* ===== Оформление «Турнир», чёрно-белое: баннер сезона с контурным словом, плашки команд, зерно и шкалы по краям. Цвет только у команд. ===== */
+:root .btn.main, :root .seg button[aria-pressed="true"] { color: var(--on-acc); box-shadow: none }
+:root .dot { box-shadow: 0 0 0 2px color-mix(in srgb, var(--c) 25%, transparent) }
+:root .gscore { flex-wrap: wrap }
+:root .gscore small, :root .score small { letter-spacing: 0; font-family: var(--body); font-weight: 400; font-size: 13px }
+:root #app { position: relative; z-index: 1 }
+.fx { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; display: none }
+:root .fx { display: block }
+.fx > * { position: absolute; display: none }
+.fx-grain { inset: -50%; opacity: .09; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1.2s steps(6) infinite }
+@keyframes grain { 0% { transform: translate(0,0) } 20% { transform: translate(-3%,2%) } 40% { transform: translate(2%,-3%) } 60% { transform: translate(-2%,-1%) } 80% { transform: translate(3%,3%) } 100% { transform: translate(0,0) } }
+:root .fx-grain { display: block }
+:root :is(.gcard, .duel, .nom, .fact, .frags, .team, .award) {
+  background-image: radial-gradient(260px circle at var(--mx, -999px) var(--my, -999px), var(--spot), transparent 70%) }
+@supports (animation-timeline: view()) {
+  :root #app > section:not(:first-of-type), :root :is(.gcard, .duel) {
+    animation: rise linear both; animation-timeline: view(); animation-range: entry 0% entry 35% }
+}
+@keyframes rise { from { opacity: .15; transform: translateY(28px) scale(.985) } to { opacity: 1; transform: none } }
+@media (prefers-reduced-motion: reduce) {
+  .fx *, h1 { animation: none !important }
+}
+.fx-rails { inset: 0 6px; background:
+  linear-gradient(rgba(196,92,255,.35), rgba(196,92,255,.35)) left 0 top 0 / 1px 100% no-repeat,
+  linear-gradient(rgba(196,92,255,.35), rgba(196,92,255,.35)) right 0 top 0 / 1px 100% no-repeat,
+  repeating-linear-gradient(rgba(225,75,255,.7) 0 2px, transparent 2px 46px) left 3px top 0 / 6px 100% no-repeat,
+  repeating-linear-gradient(rgba(225,75,255,.7) 0 2px, transparent 2px 46px) right 3px top 0 / 6px 100% no-repeat }
+@media (max-width: 700px) {
+  .fx-rails { display: none !important }
+}
+:root {
+  --bg: #0c0d13; --panel: #141621; --panel2: #1c1f2d; --line: #262a3b; --fg: #f4f4f8; --muted: #8e93a8; --gold: #ff7a1a; --on-acc: #fff; --spot: rgba(255,122,26,.12);
+  --acc-grad: linear-gradient(120deg, #b83a00, #ff7a1a 60%, #ff9a45);
+  --display: "Rubik", "Segoe UI", sans-serif; --body: "Rubik", "Segoe UI", system-ui, sans-serif; --mono: "Roboto Condensed", "Arial Narrow", sans-serif;
+}
+:root body { background: var(--bg); font-size: 14px }
+:root :is(h1, h2, h3, .logo) { font-family: var(--display); font-weight: 700; text-transform: uppercase; letter-spacing: -.01em }
+:root h1 { font-size: clamp(46px, 8.5vw, 104px); line-height: .92 }
+:root h2 { font-size: clamp(24px, 3vw, 34px); display: flex; align-items: center; gap: 12px }
+:root :is(section > h2, .head h2)::before { content: ""; width: 12px; height: 12px; background: var(--gold); transform: rotate(45deg) }
+:root .eyebrow, :root thead th, :root .fact .k, :root .nom .lab, :root .kv dt { font-family: var(--mono); font-weight: 600; letter-spacing: .16em; text-transform: uppercase }
+:root .top { border-bottom: 1px solid var(--line); padding-bottom: 14px }
+:root .logo { font-size: 20px; letter-spacing: .02em }
+:root .logo i { width: 26px; height: 18px; border-radius: 2px; background: var(--acc-grad); clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%); box-shadow: none }
+:root .tab { font: 600 13px var(--mono); letter-spacing: .16em; text-transform: uppercase; border-radius: 0; border: 0; border-bottom: 2px solid transparent; padding: 8px 12px }
+:root .tab[aria-current="page"] { background: none; color: #fff; border-bottom-color: var(--gold) }
+:root .hero { position: relative; overflow: hidden; isolation: isolate; border: 0; border-radius: 0; padding: clamp(26px, 5vw, 56px) clamp(22px, 4vw, 48px) 0; gap: 22px;
+  background: linear-gradient(110deg, rgba(10,10,18,.35), transparent 55%), var(--acc-grad) }
+:root .hero::before { content: "ЛАЗЕРТАГ ЛАЗЕРТАГ ЛАЗЕРТАГ ЛАЗЕРТАГ"; position: absolute; z-index: -1; inset: -10% -5%; font: 800 clamp(90px, 16vw, 220px)/.85 "Rubik", sans-serif; color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255,255,255,.18); word-spacing: .2em; overflow-wrap: anywhere; animation: drift 40s linear infinite }
+@keyframes drift { to { transform: translateX(-30%) } }
+:root .hero::after { content: ""; position: absolute; z-index: -1; right: 0; top: 0; bottom: 0; width: 38%; background: repeating-linear-gradient(-60deg, rgba(0,0,0,.18) 0 2px, transparent 2px 10px); -webkit-mask-image: linear-gradient(90deg, transparent, #000); mask-image: linear-gradient(90deg, transparent, #000) }
+:root .hero .eyebrow { align-self: flex-start; color: #fff; background: #0c0d13; padding: 6px 12px; font-size: 11px }
+:root .facts { margin-inline: calc(-1 * clamp(22px, 4vw, 48px)); padding: 20px clamp(22px, 4vw, 48px); background: #0f1019; border-bottom: 5px solid var(--gold); gap: 18px }
+:root .fact .v { font: 700 clamp(30px, 4.8vw, 52px)/1 var(--display); letter-spacing: -.02em }
+:root .fact .k { font-size: 11px; color: var(--gold) }
+:root :is(.scroll, .noms, .duel, .frags, .board, .seg) { border-radius: 0; border: 1px solid var(--line); background-color: var(--panel) }
+:root .gcard { border-radius: 0; border: 1px solid var(--line); padding: 0 18px 18px; background-color: var(--panel); transition: transform .2s, box-shadow .2s; overflow: hidden }
+:root .gcard .date { margin: 0 -18px 4px; padding: 26px 18px 14px; background: linear-gradient(110deg, rgba(10,10,18,.3), transparent), var(--acc-grad); color: #fff; font: 800 34px/1 var(--display); letter-spacing: -.01em; position: relative }
+:root .gcard .date::after { content: "ОТЧЁТ ОБ ИГРЕ"; position: absolute; left: 18px; top: 9px; font: 600 9px var(--mono); letter-spacing: .2em; opacity: .85 }
+:root .gcard:hover { transform: translateY(-5px); box-shadow: 0 0 0 1px var(--gold), 0 22px 40px -22px rgba(255,122,26,.7) }
+:root .gcard h3 { font-size: 17px }
+:root .gscore { font: 700 44px/1 var(--display) }
+:root thead { background: #10121b }
+:root thead th { font-size: 11px; color: var(--muted) }
+:root tbody tr:hover { background: rgba(255,122,26,.07) }
+:root .bar[style*="--gold"] { background: var(--acc-grad); height: 8px; border-radius: 0 }
+:root .seg button { font: 600 12px var(--mono); letter-spacing: .1em; text-transform: uppercase }
+:root .seg button[aria-pressed="true"] { background: var(--acc-grad) }
+:root .nom { background-color: transparent }
+:root :is(.nom .nt, .award .nt) { font: 700 17px/1.15 var(--display); text-transform: uppercase; color: #fff }
+:root .nom .lab { display: inline-block; align-self: flex-start; color: #fff; background: var(--gold); padding: 2px 6px; font-size: 9px }
+:root .nom .v { font: 700 28px var(--display) }
+:root .board { gap: 1px; background: var(--line) }
+:root .team { border-top: 0 }
+:root .team-name { margin: -18px -20px 0; padding: 14px 20px; background: linear-gradient(110deg, color-mix(in srgb, var(--c) 85%, #000), color-mix(in srgb, var(--c) 60%, #000)) }
+:root .team-name b { font: 800 26px var(--display); text-transform: uppercase; color: #fff }
+:root .team-name span { color: rgba(255,255,255,.8) }
+:root .score { font: 700 clamp(56px, 10vw, 96px)/.95 var(--display); letter-spacing: -.03em; margin-top: 10px }
+:root :is(.ratio, .pavg, .ptot) { font-family: var(--display); font-weight: 700; font-size: 24px }
+:root .strip i { border-radius: 0 }
+:root .foot { border-top: 5px solid var(--gold); padding-top: 18px; font-family: var(--mono); letter-spacing: .08em; text-transform: uppercase }
+:root .fx-rails { display: block; opacity: .35; filter: hue-rotate(115deg) saturate(1.4) }
+:root { --gold: #f4f4f5; --on-acc: #0e0e10; --spot: rgba(255,255,255,.08) }
+:root { --acc-grad: linear-gradient(120deg, #d9d9de, #ffffff 60%, #ececf0) }
+:root .hero { color: #0c0d13; --muted: #55586a }
+:root .hero::before { -webkit-text-stroke-color: rgba(12,13,19,.12) }
+:root .hero::after { background: repeating-linear-gradient(-60deg, rgba(0,0,0,.08) 0 2px, transparent 2px 10px) }
+:root .facts { color: #f4f4f8 }
+:root .gcard .date { color: #0c0d13 }
+:root .gcard:hover { box-shadow: 0 0 0 1px #fff, 0 22px 40px -22px rgba(255,255,255,.4) }
+:root tbody tr:hover { background: rgba(255,255,255,.05) }
+:root .nom .lab { color: #0c0d13 }
+:root .logo i { background: #fff }
+:root .fx-rails { filter: grayscale(1) brightness(1.6) }
