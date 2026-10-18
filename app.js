@@ -307,7 +307,7 @@ function viewSeason(S) {
     return `<div class="nom"><span class="nt">${title}</span><span class="lab">${label}</span><span class="ws">${playerLink(b.p.name, S.rows, b.p.teams)}</span><span class="v">${show(f(b))}</span><span class="sub">${dateRu(b.m.g.date)}</span></div>`;
   };
   return `${header("season")}
-  <section class="hero"><span class="eyebrow">Красные против синих</span><h1>Статистика сезона</h1>
+  <section class="hero"><span class="eyebrow">Сезон ${esc((DATA.games.map(g => (g.date || "").slice(0, 4)).filter(Boolean).sort().pop()) || "")}</span><h1>Статистика сезона</h1>
     <div class="facts"><div class="fact"><span class="v">${DATA.games.length}</span><span class="k">${plural(DATA.games.length, ["игра", "игры", "игр"]).split(" ")[1]} сыграно</span></div>
     <div class="fact"><span class="v">${fmt(rounds)}</span><span class="k">раундов</span></div>
     <div class="fact"><span class="v">${fmt(hits)}</span><span class="k">попаданий</span></div>
