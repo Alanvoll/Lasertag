@@ -307,7 +307,7 @@ function viewSeason(S) {
     return `<div class="nom"><span class="nt">${title}</span><span class="lab">${label}</span><span class="ws">${playerLink(b.p.name, S.rows, b.p.teams)}</span><span class="v">${show(f(b))}</span><span class="sub">${dateRu(b.m.g.date)}</span></div>`;
   };
   return `${header("season")}
-  <section class="hero"><span class="eyebrow">Красные против синих</span><h1>Статистика сезона</h1>
+  <section class="hero"><span class="eyebrow">Сезон ${esc((DATA.games.map(g => (g.date || "").slice(0, 4)).filter(Boolean).sort().pop()) || "")}</span><h1>Статистика сезона</h1>
     <div class="facts"><div class="fact"><span class="v">${DATA.games.length}</span><span class="k">${plural(DATA.games.length, ["игра", "игры", "игр"]).split(" ")[1]} сыграно</span></div>
     <div class="fact"><span class="v">${fmt(rounds)}</span><span class="k">раундов</span></div>
     <div class="fact"><span class="v">${fmt(hits)}</span><span class="k">попаданий</span></div>
@@ -321,10 +321,16 @@ function viewSeason(S) {
     <p class="note">Лучший результат за одну игру среди всех игроков сезона, рядом дата игры.</p></div></section>
   ${(() => { const pr = []; S.rows.forEach((a, i) => S.rows.slice(i + 1).forEach(b => { const x = a.pairs[b.name] || 0, y = b.pairs[a.name] || 0; if (x + y) pr.push(x >= y ? { a, b, x, y, n: x + y, g: (a.meet || {})[b.name] || 1 } : { a: b, b: a, x: y, y: x, n: x + y, g: (a.meet || {})[b.name] || 1 }); }));
     pr.sort((p, q) => q.n - p.n); const top = pr, mx = top.length ? top[0].n : 1;
-    return top.length ? `<section><h2>Главные противостояния</h2><div class="frags" data-psort><div class="prow hd"><span></span><span></span><span class="ptot"><button data-sk="n" aria-pressed="true">всего</button></span><span class="pavg"><button data-sk="avg">за игру</button></span><span class="pk"><button data-sk="k">коэф.</button></span></div>
+    const cards = S.rows.map(s => ({ s, rows: [...new Set([...Object.keys(s.pairs), ...Object.keys(s.against)])].map(n => ({ n, gave: s.pairs[n] || 0, took: s.against[n] || 0 })).sort((a, b) => (b.gave + b.took) - (a.gave + a.took)) })).filter(c => c.rows.length).sort((a, b) => b.s.ratio - a.s.ratio);
+    const cmx = Math.max(1, ...cards.flatMap(c => c.rows.map(r => Math.max(r.gave, r.took))));
+    const playersPane = `<div class="duels">${cards.map(({ s, rows }) => `<div class="duel"><div class="duel-head"><div>${playerLink(s.name, S.rows, [])}<span class="duel-sum">${plural(s.games, ["игра", "игры", "игр"])} · попал ${fmt(s.dealt)} · получил ${fmt(s.recv)}</span></div><div class="ratio">${r2(s.ratio)}<small>попал / получил</small></div></div>
+      <div class="drows" data-sortable><div class="drow hd"><span></span><span class="half lft"><button data-sk="gave">попал</button></span><span class="half rgt"><button data-sk="took">получил</button></span><span class="bal"><button data-sk="tot" aria-pressed="true">всего</button></span><span class="bal"><button data-sk="ratio">коэф.</button></span></div>
+      ${rows.map(r => `<div class="drow" data-gave="${r.gave}" data-took="${r.took}" data-tot="${r.gave + r.took}" data-ratio="${r.took ? r.gave / r.took : 1e9 + r.gave}" title="попал ${r.gave}, получил ${r.took}, всего ${r.gave + r.took}"><span class="nm">${esc(r.n)}</span><span class="half lft"><span class="num">${r.gave}</span><i style="--c:var(--gold);width:${(r.gave / cmx * 72).toFixed(1)}%"></i></span><span class="half rgt"><i style="--c:var(--muted);width:${(r.took / cmx * 72).toFixed(1)}%"></i><span class="num">${r.took}</span></span><span class="bal">${r.gave + r.took}</span><span class="bal">${r.took ? r2(r.gave / r.took) : "∞"}</span></div>`).join("")}</div></div>`).join("")}</div>
+      <p class="note">Карточка игрока за весь сезон: слева — сколько раз он попал в соперника, справа — сколько раз соперник попал в него. «Всего» — сумма в обе стороны. Карточки идут по коэффициенту «попал / получил», заголовки столбцов сортируют список внутри карточки.</p>`;
+    return top.length ? `<section><div class="head"><h2>Главные противостояния</h2><div class="seg" role="group" aria-label="Вид противостояний"><button data-dmode="pairs" aria-pressed="true">Пары</button><button data-dmode="players" aria-pressed="false">По игрокам</button></div></div><div data-dpane="pairs"><div class="frags" data-psort><div class="prow hd"><span></span><span></span><span class="ptot"><button data-sk="n" aria-pressed="true">всего</button></span><span class="pavg"><button data-sk="avg">за игру</button></span><span class="pk"><button data-sk="k">коэф.</button></span></div>
     ${top.map((z, i) => `<div class="prow" data-n="${z.n}" data-avg="${z.n / z.g}" data-k="${z.y ? z.x / z.y : 1e9}"${i >= 10 ? " hidden" : ""}><span class="pn">${playerLink(z.a.name, S.rows, [])}<span class="muted">и</span>${playerLink(z.b.name, S.rows, [])}</span>
       <span class="ptrack"><i style="--c:var(--gold);width:${(z.x / mx * 100).toFixed(1)}%"></i><i style="--c:var(--muted);width:${(z.y / mx * 100).toFixed(1)}%"></i></span>
-      <span class="ptot num">${z.n}<small>${z.x} : ${z.y}</small></span><span class="pavg num">${(z.n / z.g).toFixed(1).replace(".", ",")}<small>${plural(z.g, ["игра", "игры", "игр"])}</small></span><span class="pk num">${z.y ? r2(z.x / z.y) : "∞"}<small>коэф.</small></span></div>`).join("")}${top.length > 10 ? `<button class="pmore">Все пары (${top.length})</button>` : ""}</div><p class="note">Заголовки столбцов сортируют список, показаны первые 10 пар. Кто с кем чаще всего сходился в бою за сезон: сумма попаданий друг в друга во всех играх, под ней счёт в паре. Справа — в среднем за игру, сколько игр пара встречалась как соперники, и коэффициент «попал / получил» первого в паре.</p></section>` : ""; })()}
+      <span class="ptot num">${z.n}<small>${z.x} : ${z.y}</small></span><span class="pavg num">${(z.n / z.g).toFixed(1).replace(".", ",")}<small>${plural(z.g, ["игра", "игры", "игр"])}</small></span><span class="pk num">${z.y ? r2(z.x / z.y) : "∞"}<small>коэф.</small></span></div>`).join("")}${top.length > 10 ? `<button class="pmore">Все пары (${top.length})</button>` : ""}</div><p class="note">Заголовки столбцов сортируют список, показаны первые 10 пар. Кто с кем чаще всего сходился в бою за сезон: сумма попаданий друг в друга во всех играх, под ней счёт в паре. Справа — в среднем за игру, сколько игр пара встречалась как соперники, и коэффициент «попал / получил» первого в паре.</p></div><div data-dpane="players" hidden>${playersPane}</div></section>` : ""; })()}
 ` : ""}
   ${footer()}`;
 }
@@ -758,6 +764,14 @@ app.addEventListener("click", e => {
   b.dataset.dir = desc ? "desc" : "asc";
   const rows = [...box.querySelectorAll(".drow:not(.hd)")].sort((x, y) => (desc ? -1 : 1) * (x.dataset[k] - y.dataset[k]) || (y.dataset.tot - x.dataset.tot));
   box.append(...rows);
+});
+
+// «Главные противостояния»: переключатель «Пары / По игрокам»
+app.addEventListener("click", e => {
+  const b = e.target.closest("[data-dmode]"); if (!b) return;
+  const sec = b.closest("section");
+  sec.querySelectorAll("[data-dmode]").forEach(x => x.setAttribute("aria-pressed", x === b));
+  sec.querySelectorAll("[data-dpane]").forEach(el => el.hidden = el.dataset.dpane !== b.dataset.dmode);
 });
 
 // Сортировка «Главных противостояний»: по сумме, в среднем за игру или по коэффициенту; видны первые 10, «Все пары» раскрывает список
