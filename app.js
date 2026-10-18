@@ -127,6 +127,9 @@ const plural = (n, w) => `${fmt(n)} ${w[n % 10 === 1 && n % 100 !== 11 ? 0 : n %
 const HIT = ["попадание", "попадания", "попаданий"];
 const MONTHS = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
 const dateRu = d => { const [y, m, dd] = (d || "").split("-").map(Number); return y ? `${dd} ${MONTHS[m - 1]} ${y}` : "без даты"; };
+const WEEK = ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"];
+const weekday = d => { const [y, m, dd] = (d || "").split("-").map(Number); return y ? WEEK[new Date(y, m - 1, dd).getDay()] : ""; };
+const gameName = (g, i) => g.title || `Игра ${i + 1}${g.date ? " · " + weekday(g.date) : ""}`;
 const dateShort = d => { const [y, m, dd] = (d || "").split("-"); return y ? `${dd}.${m}.${y}` : "—"; };
 const dot = t => `<span class="dot" style="--c:${TEAMS[t].c}"></span>`;
 // Загрузка игр скрыта, пока разбор не автоматизирован; редактор открывается по адресу с ?admin
@@ -254,6 +257,32 @@ function nomTiles(rows, who, extra = [], noms = NOMS) {
   }).concat(extra).join("");
 }
 
+// иконки номинаций: простые контурные значки, цвет берут от текста
+const NOM_ICONS = {
+  "MVP": '<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
+  "Коллекционер MVP": '<path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 14v4M8 20h8"/>',
+  "Терминатор": '<circle cx="12" cy="12" r="7"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/>',
+  "Спонсор патронного завода": '<path d="M4 20V10q2-5 4 0v10zM10 20V8q2-5 4 0v12zM16 20V10q2-5 4 0v10z"/>',
+  "Бережливый": '<path d="M10 20V8q2-5 4 0v12zM8 20h8"/>',
+  "Белке в глаз": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',
+  "Штурмовик Империи": '<circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/><circle cx="3.5" cy="4" r="1" fill="currentColor"/><circle cx="20.5" cy="20" r="1" fill="currentColor"/><circle cx="21" cy="5" r="1" fill="currentColor"/>',
+  "Джон Уик": '<path d="M4 20l1.5-5.5L16 4l4 4L9.5 18.5zM14 6l4 4"/>',
+  "Живой щит": '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+  "Невидимка": '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/>',
+  "Кенни": '<path d="M12 3a8 8 0 0 0-8 8c0 3 1.5 4.5 3 5.5V20h10v-3.5c1.5-1 3-2.5 3-5.5a8 8 0 0 0-8-8z"/><circle cx="9" cy="11" r="1.6"/><circle cx="15" cy="11" r="1.6"/><path d="M10 20v-2M14 20v-2"/>',
+  "Горец": '<path d="M12 20s-8-4.5-8-10a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.5-8 10-8 10z"/>',
+  "Последний герой": '<path d="M5 21V4h12l-2 4 2 4H5"/>',
+  "Охота открыта": '<circle cx="10" cy="14" r="6"/><circle cx="10" cy="14" r="2"/><path d="M10 14L20 4M15 4h5v5"/>',
+  "Груша для битья": '<path d="M12 2v3"/><rect x="7" y="5" width="10" height="16" rx="5"/>',
+  "Личный кошмар": '<path d="M5 21V10a7 7 0 0 1 14 0v11l-2.5-2-2.3 2-2.2-2-2.2 2-2.3-2z"/><circle cx="9.5" cy="10" r="1"/><circle cx="14.5" cy="10" r="1"/>',
+  "Главный калибр": '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/>',
+  "Убойная": '<path d="M13 2L5 13h6l-1 9 8-11h-6z"/>',
+  "Снайперская": '<circle cx="12" cy="12" r="8"/><path d="M12 4v5M12 15v5M4 12h5M15 12h5"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',
+  "Переходящее знамя": '<path d="M5 21V4h12l-2 4 2 4H5M9 21h-4"/><circle cx="17" cy="17" r="2"/><circle cx="12" cy="18" r="2"/>',
+  "Лучшая игра": '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+};
+const nomIcon = t => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${NOM_ICONS[t] || '<path d="M12 4l8 8-8 8-8-8z"/>'}</svg>`;
+
 // ---------- шапка ----------
 function header(active) {
   return `<header class="top"><a class="logo" href="#season"><i aria-hidden="true"></i>Лазертаг</a>
@@ -272,7 +301,7 @@ function gameCards(S) {
   if (!list.length) return `<div class="empty">Игр пока нет.${state.canEdit ? ' <a href="#upload">Добавьте первую</a>.' : ""}</div>`;
   return `<div class="games">${list.map(({ g, i, key }) => {
     const m = S.models[i], sc = scoreOf(m), top = [...m.P].sort((a, b) => b.dealt - a.dealt)[0], topR = [...m.P].filter(p => isFinite(p.ratio)).sort((a, b) => b.ratio - a.ratio)[0];
-    return `<a class="gcard" href="#${key}"><span class="date">${dateShort(g.date)}</span><h3>${esc(g.title || "Игра " + dateShort(g.date))}</h3>
+    return `<a class="gcard" href="#${key}"><span class="date">${dateShort(g.date)}</span><h3>${esc(gameName(g, i))}</h3>
       <span class="gscore">${hitsOf(m).map(([t, n]) => `<span class="num" style="color:${TEAMS[t].c}">${n}</span>`).join('<span class="muted">:</span>')}<small>попадания</small></span>
       ${sc.kind === "раунды" ? `<span class="grounds"><span class="muted">Раунды</span> ${sc.parts.map(([t, n]) => `<b style="color:${TEAMS[t].c}">${n}</b>`).join('<span class="muted">:</span>')}</span>` : ""}
       <span class="gmeta">${plural(m.P.length, ["игрок", "игрока", "игроков"])}${m.winners.length ? " · " + plural(m.winners.length, ["раунд", "раунда", "раундов"]) : ""}</span>
@@ -287,13 +316,25 @@ function sortable(id, cols, rows, rowHtml, initial, group = "") {
     const c = cols.find(x => x[0] === key);
     const sorted = [...rows].sort((a, b) => key === "name" ? dir * a.name.localeCompare(b.name, "ru") : dir * ((c[2](a) ?? -1) - (c[2](b) ?? -1)));
     const el = document.getElementById(id); if (!el) return;
-    el.innerHTML = `<thead>${group}<tr>${cols.map(([k, label, , cls]) => `<th class="${k === "name" ? "l" : ""} ${cls || ""}" ${k === key ? `aria-sort="${dir < 0 ? "descending" : "ascending"}"` : ""}><button data-k="${k}">${label}</button></th>`).join("")}</tr></thead><tbody>${sorted.map(r => rowHtml(r, key)).join("")}</tbody>`;
+    el.innerHTML = `<thead>${group}<tr>${cols.map(([k, label, , cls]) => `<th class="${k === "name" ? "l" : ""} ${cls || ""}" ${k === key ? `aria-sort="${dir < 0 ? "descending" : "ascending"}"` : ""}><button data-k="${k}">${label}</button></th>`).join("")}</tr></thead><tbody>${sorted.map(r => rowHtml(r, key)).join("")}</tbody>`; scrollHints();
   };
   setTimeout(() => {
     const el = document.getElementById(id); if (!el) return;
     el.onclick = e => { const k = e.target.dataset && e.target.dataset.k; if (!k) return; if (k === key) dir = -dir; else { key = k; dir = k === "name" ? 1 : -1; } draw(); };
     draw();
   });
+}
+
+// ---------- подиум и место в сезоне: средний рейтинг MVP среди сыгравших не меньше 60% игр, как в номинациях ----------
+const qualified = S => { const mx = Math.max(0, ...S.rows.map(r => r.games)); return S.rows.filter(r => r.games >= Math.ceil(mx * 0.6)); };
+const seasonRank = S => qualified(S).sort((a, b) => b.mvp / b.games - a.mvp / a.games);
+function podium(S) {
+  const top = seasonRank(S).slice(0, 3);
+  if (top.length < 2) return "";
+  const card = (s, k) => `<a class="pod pod${k + 1}" href="#${s.key}"><span class="pod-place">${k + 1}</span><span class="pod-name">${esc(s.name)}</span>
+    <span class="pod-v">${fmt(s.mvp / s.games)}<small>рейтинг MVP за игру</small></span>
+    <span class="pod-meta"><span>${plural(s.games, ["игра", "игры", "игр"])}</span><span>${one(s.dealt / s.games)} попаданий за игру</span><span>попал / получил ${r2(s.ratio)}</span>${s.mvps ? `<span>MVP игры ${plural(s.mvps, ["раз", "раза", "раз"])}</span>` : ""}</span></a>`;
+  return `<section><h2>Топ сезона</h2><div class="podium">${top.map(card).join("")}</div><p class="note">Места по среднему рейтингу MVP за игру (100 — средний игрок игры). Учитываются те, кто сыграл не меньше 60% игр сезона.</p></section>`;
 }
 
 // ---------- страницы ----------
@@ -314,6 +355,7 @@ function viewSeason(S) {
     <div class="fact"><span class="v">${fmt(hits)}</span><span class="k">попаданий</span></div>
     <div class="fact"><span class="v">${fmt(shots)}</span><span class="k">выстрелов</span></div></div></section>
   <section><h2>Игры</h2>${gameCards(S)}</section>
+  ${podium(S)}
   ${S.rows.length ? `<section><div class="head"><h2>Игроки за сезон</h2><div class="row">${clsSeg()}<div class="seg" role="group" aria-label="Режим таблицы"><button data-mode="avg">Среднее за игру</button><button data-mode="rnd">За раунд</button><button data-mode="tot">Всего</button></div></div></div><div class="scroll"><table id="seasonTable"></table></div><p class="note">Нажмите на имя, чтобы открыть страницу игрока. Заголовки столбцов сортируют таблицу. «Автоматы» и «Пистолет» показывают только игры с этим оружием: у пистолета 5 жизней и одиночные выстрелы, поэтому его цифры отдельно.</p></section>
   <section><div class="head"><h2>Номинации сезона</h2><div class="seg" role="group" aria-label="Режим номинаций"><button data-nmode="avg">Среднее</button><button data-nmode="rec">Рекорд за игру</button></div></div>
     <div data-npane="avg"><div class="noms">${nomTiles(S.rows.filter(r => r.games >= Math.ceil(Math.max(...S.rows.map(z => z.games)) * 0.6)), who, (() => { const mx = Math.max(...S.rows.map(r => r.mvps)); return mx ? [`<div class="nom"><span class="nt">Коллекционер MVP</span><span class="lab">Чаще всех MVP игры</span><span class="ws">${S.rows.filter(r => r.mvps === mx).map(who).join("")}</span><span class="v">${plural(mx, ["раз", "раза", "раз"])}</span></div>`] : []; })(), SEASON_NOMS)}</div>
@@ -337,7 +379,7 @@ function viewSeason(S) {
 }
 let nomMode = "avg";
 function nomsInit() {
-  const pick = () => { document.querySelectorAll("[data-nmode]").forEach(b => b.setAttribute("aria-pressed", b.dataset.nmode === nomMode)); document.querySelectorAll("[data-npane]").forEach(el => el.hidden = el.dataset.npane !== nomMode); };
+  const pick = () => { document.querySelectorAll("[data-nmode]").forEach(b => b.setAttribute("aria-pressed", b.dataset.nmode === nomMode)); document.querySelectorAll("[data-npane]").forEach(el => el.hidden = el.dataset.npane !== nomMode); fillGrids(); };
   document.querySelectorAll("[data-nmode]").forEach(b => b.onclick = () => { nomMode = b.dataset.nmode; pick(); }); pick();
 }
 let seasonMode = "avg", seasonCls = "all";
@@ -489,8 +531,15 @@ function viewPlayer(S, key) {
   const games = allGames().map(x => ({ ...x, m: S.models[x.i] })).map(x => ({ ...x, p: x.m.P.find(p => p.name === s.name) })).filter(x => x.p);
   const top = (o) => Object.entries(o).sort((a, b) => b[1] - a[1])[0];
   const tg = top(s.pairs), nm = top(s.against);
+  const rank = seasonRank(S), place = rank.indexOf(s);
+  const won = place < 0 ? [] : SEASON_NOMS.filter(([, , f, dir, , ok]) => { const l = rank.filter(r => (ok ? ok(r) : true) && isFinite(f(r))); if (!l.length || !l.includes(s)) return false; const b = dir > 0 ? Math.max(...l.map(f)) : Math.min(...l.map(f)); return Math.abs(f(s) - b) < 1e-9; }).map(n => n[0]).filter(t => t !== "MVP");
+  const badges = [place >= 0 ? `<span class="badge"><b>${place + 1}</b> место в сезоне из ${rank.length}</span>` : "",
+    `<span class="badge">Рейтинг <b>${fmt(s.mvp / s.games)}</b> за игру</span>`,
+    s.mvps ? `<span class="badge">MVP игры <b>${plural(s.mvps, ["раз", "раза", "раз"])}</b></span>` : "",
+    `<span class="badge">Лучшая игра <b>${s.best}</b> попаданий</span>`,
+    ...won.slice(0, 3).map(t => `<span class="badge">${nomIcon(t)}${esc(t)}</span>`)].filter(Boolean).join("");
   return `${header("players")}
-  <section class="hero"><span class="eyebrow">Игрок</span><h1>${esc(s.name)}</h1>
+  <section class="hero" data-word="${esc(s.name.toUpperCase())}"><span class="eyebrow">Игрок</span><h1>${esc(s.name)}</h1><div class="badges">${badges}</div>
     <div class="facts"><div class="fact"><span class="v">${s.games}</span><span class="k">${plural(s.games, ["игра", "игры", "игр"]).split(" ")[1]}</span></div>
     <div class="fact"><span class="v">${fmt(s.dealt)}</span><span class="k">попаданий</span></div>
     <div class="fact"><span class="v">${r2(s.ratio)}</span><span class="k">попал / получил</span></div>
@@ -540,8 +589,21 @@ function viewGame(S, key) {
   let roundsHtml = "";
   if (m.winners.length) {
     const cnt = t => m.winners.filter(w => w === t).length;
-    roundsHtml = `<section><h2>Раунды</h2><div class="strip">${m.winners.map((w, i) => (m.swaps.includes(i) ? '<span class="sw" title="Смена составов"></span>' : "") +
-      (w === null ? `<i class="unk" title="Раунд ${i + 1}: не определить">${i + 1}</i>` : `<i style="--c:${TEAMS[w].c}" title="Раунд ${i + 1}: ${TEAMS[w].name}">${i + 1}</i>`)).join("")}</div>
+    // таймлайн как в трансляции: сверху линия перевеса по ходу игры, снизу полоса раундов
+    const n = m.winners.length, two = teamIds.length === 2;
+    let mom = "";
+    if (two) {
+      let d = 0; const pts = [0, ...m.winners.map(w => d += w === teamIds[0] ? 1 : w === teamIds[1] ? -1 : 0)];
+      const M = Math.max(1, ...pts.map(Math.abs)), y = v => (M - v).toFixed(2), xs = k => k.toFixed(2);
+      const line = pts.map((v, k) => `${xs(k)},${y(v)}`).join(" ");
+      mom = `<div class="tl-mom"><span class="tl-lab up" style="--c:${TEAMS[teamIds[0]].c}">${TEAMS[teamIds[0]].name} ведут</span><span class="tl-lab dn" style="--c:${TEAMS[teamIds[1]].c}">${TEAMS[teamIds[1]].name} ведут</span>
+        <svg viewBox="0 0 ${n} ${2 * M}" preserveAspectRatio="none" aria-hidden="true"><defs><clipPath id="tlUp"><rect x="0" y="0" width="${n}" height="${M}"/></clipPath><clipPath id="tlDn"><rect x="0" y="${M}" width="${n}" height="${M}"/></clipPath></defs>
+        <polygon points="0,${M} ${line} ${n},${M}" clip-path="url(#tlUp)" style="fill:${TEAMS[teamIds[0]].c}" class="tl-area"/><polygon points="0,${M} ${line} ${n},${M}" clip-path="url(#tlDn)" style="fill:${TEAMS[teamIds[1]].c}" class="tl-area"/>
+        <line x1="0" x2="${n}" y1="${M}" y2="${M}" class="tl-zero"/><polyline points="${line}" class="tl-line"/></svg></div>`;
+    }
+    roundsHtml = `<section><h2>Раунды</h2><div class="tl${n > 20 ? " dense" : ""}">${mom}<div class="tl-bar">${m.winners.map((w, i) =>
+      (w === null ? `<i class="unk${m.swaps.includes(i) ? " sw" : ""}" title="Раунд ${i + 1}: не определить">${i + 1}</i>` : `<i class="${m.swaps.includes(i) ? "sw" : ""}" style="--c:${TEAMS[w].c}" title="Раунд ${i + 1}: ${TEAMS[w].name}">${i + 1}</i>`)).join("")}</div>
+      <div class="tl-ends"><span>Раунд 1</span>${m.swaps.length ? `<span class="tl-swl">| смена составов</span>` : ""}<span>Раунд ${n}</span></div></div>
       <p class="note">${plural(m.winners.length, ["раунд", "раунда", "раундов"])}, счёт ${teamIds.map(t => `${TEAMS[t].name.toLowerCase()} ${cnt(t)}`).join(" : ")}. Раунды найдены по командам возрождения с пульта. Раунд проигрывает команда, все игроки которой погибли${g.rounds.exact ? "" : "; часть тагеров без журнала, поэтому победитель некоторых раундов определён по выжившим и может быть неточным"}.</p></section>`;
   }
   // номинации игры
@@ -596,7 +658,7 @@ function viewGame(S, key) {
   }).join("");
   const awards = (g.awards || []).filter(a => a && a[0]);
   return `${header("games")}
-  <section><span class="eyebrow">${dateRu(g.date)}</span><h1>${esc(g.title || "Игра " + dateShort(g.date))}</h1>
+  <section><span class="eyebrow">${dateRu(g.date)}${g.date ? " · " + weekday(g.date) : ""} · игра ${x.i + 1} сезона</span><h1>${esc(g.title || "Игра " + dateShort(g.date))}</h1>
     ${m.mvp ? `<p class="gmvp"><span class="tag">MVP игры</span>${who(m.mvp)}<span class="muted num">рейтинг ${fmt(m.mvp.mvp)}</span></p>` : ""}</section>
   <section><div class="board">${board}</div>${swapNote}</section>
   ${roundsHtml}
@@ -729,7 +791,53 @@ function render() {
   else if (h === "upload" && state.canEdit) { html = editorHtml(draft, "Добавить игру", true); after = () => editorInit(true); }
   else if (h.startsWith("edit-") && state.canEdit) { const x = allGames().find(z => z.key === h.slice(5)); html = x ? editorHtml(DATA.games[x.i], "Изменить игру", false) : viewSeason(S); after = () => x && editorInit(false, x.i); }
   else { html = viewSeason(S); after = () => { seasonTableInit(S); nomsInit(); }; }
-  app.innerHTML = html; after();
+  app.innerHTML = html; after(); decorate();
+}
+
+// ---------- оформление после отрисовки: иконки номинаций, сетка без дыр, навигация по игре, затухание у широких таблиц ----------
+function decorate() {
+  app.querySelectorAll(".nom").forEach(n => {
+    const t = n.querySelector(".nt"); if (!t || n.querySelector(".ic")) return;
+    n.insertAdjacentHTML("afterbegin", nomIcon(t.textContent.trim()));
+    if (t.textContent.trim() === "MVP") n.classList.add("feat");
+  });
+  fillGrids(); scrollHints(); gameNav();
+}
+// последняя клетка номинаций растягивается на пустое место в ряду
+function fillGrids() {
+  app.querySelectorAll(".noms").forEach(g => {
+    const items = [...g.children]; if (!items.length) return;
+    items.forEach(x => x.style.gridColumn = x.style.gridRow = "");
+    const cols = getComputedStyle(g).gridTemplateColumns.split(" ").filter(x => x && x !== "none").length;
+    if (cols < 2) return;
+    const feat = items.find(x => x.classList.contains("feat"));
+    if (feat) { feat.style.gridColumn = "span 2"; if (cols >= 4) feat.style.gridRow = "span 2"; }
+    const featCells = feat ? (cols >= 4 ? 4 : 2) : 0;
+    const cells = featCells + items.length - (feat ? 1 : 0), rest = (cols - cells % cols) % cols;
+    const last = items[items.length - 1];
+    if (rest && last !== feat) last.style.gridColumn = `span ${rest + 1}`;
+  });
+}
+function scrollHints() {
+  app.querySelectorAll(".scroll").forEach(el => el.classList.toggle("more", el.scrollLeft + el.clientWidth < el.scrollWidth - 4));
+}
+app.addEventListener("scroll", e => { if (e.target.classList && e.target.classList.contains("scroll")) scrollHints(); }, true);
+let fitT; addEventListener("resize", () => { clearTimeout(fitT); fitT = setTimeout(() => { fillGrids(); scrollHints(); }, 120); });
+// липкое меню по разделам длинной страницы игры; адрес страницы не меняет, только прокручивает
+let navObs;
+function gameNav() {
+  if (navObs) navObs.disconnect();
+  if (!(location.hash || "").startsWith("#game-")) return;
+  const secs = [...app.querySelectorAll("#app > section")].filter(s => s.querySelector(":scope > h2, :scope > .head h2"));
+  if (secs.length < 4) return;
+  secs.forEach((s, k) => s.id = "sec" + k);
+  const nav = document.createElement("nav"); nav.className = "subnav"; nav.setAttribute("aria-label", "Разделы игры");
+  nav.innerHTML = secs.map((s, k) => `<button data-to="sec${k}">${esc(s.querySelector("h2").textContent)}</button>`).join("");
+  secs[0].before(nav);
+  nav.onclick = e => { const b = e.target.closest("button"); if (!b) return; const t = document.getElementById(b.dataset.to); scrollTo({ top: t.getBoundingClientRect().top + scrollY - nav.offsetHeight - 12, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); };
+  const mark = id => nav.querySelectorAll("button").forEach(b => { const on = b.dataset.to === id; b.setAttribute("aria-current", on); if (on && nav.scrollWidth > nav.clientWidth) nav.scrollTo({ left: b.offsetLeft - 16 }); });
+  navObs = new IntersectionObserver(es => { const v = es.filter(e => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0]; if (v) mark(v.target.id); }, { rootMargin: "-80px 0px -60% 0px" });
+  secs.forEach(s => navObs.observe(s));
 }
 addEventListener("hashchange", () => { render(); scrollTo(0, 0); });
 app.innerHTML = `<div class="empty">Загружаю игры…</div>`;
