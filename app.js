@@ -148,7 +148,10 @@ function gameModel(g) {
   for (const p of P) {
     p.dealt = sum(P, v => val(p, v)); p.acc = div(p.dealt, p.shots); p.ratio = div(p.dealt, p.recv);
     p.foes = P.filter(o => o !== p && (val(p, o) || val(o, p)));
-    p.alive = p.died ? p.died.length - sum(p.died, x => x) : null;
+    // У старых тагеров нет журнала, но за раунд погибают не больше одного раза: без смерти = раунды − смерти
+    const nR = ((g.rounds && g.rounds.winners) || []).length;
+    p.nR = p.died ? p.died.length : nR && p.deaths <= nR ? nR : 0;
+    p.alive = p.died ? p.died.length - sum(p.died, x => x) : p.nR ? p.nR - p.deaths : null;
     p.fragEx = sum(P, v => (FA[`${p.i}:${v.i}`] || [0, 0])[0]); p.fragEs = sum(P, v => (FA[`${p.i}:${v.i}`] || [0, 0])[1]);
   }
   // рейтинг MVP (временная формула): 100 — средний игрок этой игры; половина — попадания, половина — коэффициент (не больше 3)
@@ -183,7 +186,7 @@ function season() {
     for (const p of m.P) {
       const s = S.get(p.name) || { name: p.name, games: 0, mvp: 0, mvps: 0, dealt: 0, recv: 0, deaths: 0, shots: 0, alive: 0, rounds: 0, teams: [], best: 0, pairs: {}, against: {} };
       s.games++; if (isFinite(p.ratio)) (s.gameRatios = s.gameRatios || []).push(p.ratio); if (p.shots) (s.gameAcc = s.gameAcc || []).push(p.acc); s.mvp += p.mvp; if (m.mvp === p) s.mvps++; s.dealt += p.dealt; s.recv += p.recv; s.deaths += p.deaths; s.shots += p.shots;
-      if (p.alive != null) { s.alive += p.alive; s.rounds += p.died.length; }
+      if (p.alive != null) { s.alive += p.alive; s.rounds += p.nR; }
       s.teams.push(...p.teams); s.best = Math.max(s.best, p.dealt);
       for (const o of m.P) { if (o === p) continue; const x = m.val(p, o), y = m.val(o, p); if (x || y) { s.meet = s.meet || {}; s.meet[o.name] = (s.meet[o.name] || 0) + 1; } if (x) s.pairs[o.name] = (s.pairs[o.name] || 0) + x; if (y) s.against[o.name] = (s.against[o.name] || 0) + y; }
       S.set(p.name, s);
@@ -314,7 +317,7 @@ function viewSeason(S) {
   <section><div class="head"><h2>Номинации сезона</h2><div class="seg" role="group" aria-label="Режим номинаций"><button data-nmode="avg">Среднее</button><button data-nmode="rec">Рекорд за игру</button></div></div>
     <div data-npane="avg"><div class="noms">${nomTiles(S.rows.filter(r => r.games >= Math.ceil(Math.max(...S.rows.map(z => z.games)) * 0.6)), who, (() => { const mx = Math.max(...S.rows.map(r => r.mvps)); return mx ? [`<div class="nom"><span class="nt">Коллекционер MVP</span><span class="lab">Чаще всех MVP игры</span><span class="ws">${S.rows.filter(r => r.mvps === mx).map(who).join("")}</span><span class="v">${plural(mx, ["раз", "раза", "раз"])}</span></div>`] : []; })(), SEASON_NOMS)}</div>
     <p class="note">В среднем за игру: каждая цифра — среднее по играм игрока. Рейтинг MVP: 100 — средний игрок игры, половина — попадания, половина — коэффициент. Учитываются те, кто сыграл не меньше 60% игр сезона. Доля раундов без смерти считается только по тагерам с журналом событий.</p></div>
-    <div data-npane="rec"><div class="noms">${nomTiles(per.map(({ p, m }) => ({ ...p, rounds: p.died ? p.died.length : 0, date: m.g.date })), r => `${playerLink(r.name, S.rows, [])}<span class="muted">${dateShort(r.date).slice(0, 5)}</span>`, [], REC_NOMS)}</div>
+    <div data-npane="rec"><div class="noms">${nomTiles(per.map(({ p, m }) => ({ ...p, rounds: p.nR, date: m.g.date })), r => `${playerLink(r.name, S.rows, [])}<span class="muted">${dateShort(r.date).slice(0, 5)}</span>`, [], REC_NOMS)}</div>
     <p class="note">Лучший результат за одну игру среди всех игроков сезона, рядом дата игры.</p></div></section>
   ${(() => { const pr = []; S.rows.forEach((a, i) => S.rows.slice(i + 1).forEach(b => { const x = a.pairs[b.name] || 0, y = b.pairs[a.name] || 0; if (x + y) pr.push(x >= y ? { a, b, x, y, n: x + y, g: (a.meet || {})[b.name] || 1 } : { a: b, b: a, x: y, y: x, n: x + y, g: (a.meet || {})[b.name] || 1 }); }));
     pr.sort((p, q) => q.n - p.n); const top = pr, mx = top.length ? top[0].n : 1;
@@ -535,7 +538,7 @@ function viewGame(S, key) {
   // номинации игры
   const pairs = P.flatMap(a => P.map(v => ({ a, v, n: val(a, v) })));
   const tp = pairs.reduce((a, y) => y.n > a.n ? y : a, { n: 0 });
-  const nomRows = P.map(p => ({ ...p, rounds: p.died ? p.died.length : 0 }));
+  const nomRows = P.map(p => ({ ...p, rounds: p.nR }));
   const extraNom = tp.n ? [`<div class="nom"><span class="nt">Охота открыта</span><span class="lab">Больше всех в одного соперника</span><span class="ws">${who(tp.a)}<span class="muted">→ ${esc(tp.v.name)}</span></span><span class="v">${tp.n}</span></div>`] : [];
   // дуэли
   const maxPair = Math.max(1, ...pairs.map(z => z.n));
