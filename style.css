@@ -403,3 +403,9 @@ h1 .tag, h2 .tag, .tab .tag { font: 600 10px var(--mono); letter-spacing: .16em;
 .pdlab b { font-size: 15px; color: var(--fg); letter-spacing: 0 }
 .pdlab small { margin-left: auto; text-transform: none; letter-spacing: 0 }
 .tab .tag { font-size: 9px; padding: 2px 5px; vertical-align: 2px; margin-left: 4px }
+.pdsegm { grid-template-columns: repeat(6, 1fr) }
+.pdsegm button { grid-column: span 2 }
+.pdsegm button:nth-child(n+4) { grid-column: span 3; border-top: 1px solid var(--line) }
+.pdavgrow { display: flex; justify-content: space-between; align-items: baseline; gap: 8px 16px; flex-wrap: wrap }
+.pdchk { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); cursor: pointer; min-height: 32px }
+.pdchk input { width: 18px; height: 18px; accent-color: var(--gold); margin: 0 }
