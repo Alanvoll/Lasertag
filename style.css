@@ -409,3 +409,11 @@ h1 .tag, h2 .tag, .tab .tag { font: 600 10px var(--mono); letter-spacing: .16em;
 .pdavgrow { display: flex; justify-content: space-between; align-items: baseline; gap: 8px 16px; flex-wrap: wrap }
 .pdchk { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); cursor: pointer; min-height: 32px }
 .pdchk input { width: 18px; height: 18px; accent-color: var(--gold); margin: 0 }
+
+/* широкие таблицы: первый столбец (имя) закреплён при горизонтальной прокрутке */
+.scroll tr > :first-child { position: sticky; left: 0; z-index: 1; background: var(--panel); box-shadow: inset -1px 0 0 var(--line) }
+@media (max-width: 640px) {
+  .scroll tbody tr > :first-child { max-width: 118px; overflow: hidden; text-overflow: ellipsis }
+  .scroll tbody tr > :first-child :is(small, .muted) { display: none }
+  .scroll tbody tr > :first-child .row { display: block; overflow: hidden; text-overflow: ellipsis }
+}
