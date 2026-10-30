@@ -664,7 +664,7 @@ function viewGame(S, key) {
   <section><div class="board">${board}</div>${swapNote}${(g.notes || []).map(n => `<p class="note">${esc(n)}</p>`).join("")}</section>
   ${roundsHtml}
   ${replayHtml}
-  <section><h2>Игроки</h2><div class="scroll"><table id="gameTable"></table></div><p class="note">Рейтинг MVP — пока простая формула: 100 — средний игрок этой игры. Половина рейтинга — попадания относительно среднего в игре, половина — коэффициент попал / получил относительно среднего (коэффициент выше 3 считается за 3). Например, рейтинг 150 — заметно лучше среднего.</p></section>
+  <section><div class="head"><h2>Игроки</h2><div class="seg" role="group" aria-label="Режим таблицы"><button data-gmode="tot">Всего</button><button data-gmode="rnd">За раунд</button></div></div><div class="scroll"><table id="gameTable"></table></div><p class="note">Рейтинг MVP — пока простая формула: 100 — средний игрок этой игры. Половина рейтинга — попадания относительно среднего в игре, половина — коэффициент попал / получил относительно среднего (коэффициент выше 3 считается за 3). Например, рейтинг 150 — заметно лучше среднего.</p></section>
   <section><h2>Номинации</h2><div class="noms">${nomTiles(nomRows, who, extraNom)}</div></section>
   ${awards.length ? `<section><h2>Ачивки</h2><div class="awards">${awards.map(([t, names, stat, txt]) => `<div class="award"><span class="nt">${esc(t)}</span><span class="row">${String(names || "").split(",").map(n => n.trim()).filter(Boolean).map(n => { const p = P.find(z => z.name === n); return p ? who(p) : esc(n); }).join(" ")}</span><span class="stat">${esc(stat)}</span><span class="txt">${esc(txt)}</span></div>`).join("")}</div></section>` : ""}
   <section><h2>Дуэли</h2><div class="duels">${duels}</div><p class="note">Заголовки столбцов в карточке сортируют её список. Слева — сколько раз игрок попал в соперника, справа — сколько раз соперник попал в него. «Всего» — сумма, то есть как часто эти двое сходились в бою. У сменивших команду отдельный блок за каждую команду.</p></section>
@@ -674,18 +674,26 @@ function viewGame(S, key) {
   ${state.canEdit ? `<section class="admin"><h3>Управление игрой</h3><div class="row"><a class="btn" href="#edit-${x.key}">Изменить имена, дату и ачивки</a><a class="btn danger" href="https://github.com/${REPO}/delete/${BRANCH}/games/${encodeURIComponent(g.file)}" target="_blank" rel="noopener">Удалить на GitHub</a></div><p class="note">Файл игры: <a href="https://github.com/${REPO}/blob/${BRANCH}/games/${encodeURIComponent(g.file)}" target="_blank" rel="noopener">games/${esc(g.file)}</a>. Править и удалять может только владелец репозитория.</p></section>` : ""}
   ${footer()}`;
 }
+let gameMode = "tot";
 function gameTableInit(S, key) {
   const x = allGames().find(z => z.key === key); if (!x) return;
-  const m = S.models[x.i], max = Math.max(1, ...m.P.map(p => p.dealt));
-  const cols = [["name", "Игрок", p => p.name], ["dealt", "Попал", p => p.dealt], ["recv", "Получил", p => p.recv], ["ratio", "Попал / получил", p => p.ratio],
-    ["deaths", "Смерти", p => p.deaths], ["dpd", "Попал на смерть", p => div(p.dealt, p.deaths)], ["rpd", "Получил на смерть", p => div(p.recv, p.deaths)],
-    ["shots", "Выстрелы", p => p.shots], ["acc", "Точность", p => p.acc]];
-  const pd = x => isFinite(x) ? one(x) : "∞";
-  if (m.winners.length) cols.push(["alive", "Раундов без смерти", p => p.alive]);
-  cols.push(["mvp", "Рейтинг", p => p.mvp]);
-  sortable("gameTable", cols, m.P, p => `<tr><th class="l"><span class="row" style="gap:6px">${playerLink(p.name, S.rows, p.teams)}<small class="muted num">${esc(p.gun !== p.name ? p.gun : "")}${p.swap ? " · смена команды" : ""}</small></span></th>
-    <td class="num barcell">${p.segs.map(s => { const n = sum(m.P, v => m.valT(p, v, s.team)); return `<span class="bar" style="--c:${TEAMS[s.team].c};width:${Math.round(n / max * 80)}px;margin-right:${p.swap ? 1 : 0}px"></span>`; }).join("")}<span style="margin-left:8px">${approx(p.e.dealt)}${p.dealt}</span></td>
-    <td class="num">${approx(p.e.recv)}${p.recv}</td><td class="num">${approx(p.e.ratio)}${r2(p.ratio)}</td><td class="num">${approx(p.e.deaths)}${p.deaths}</td><td class="num">${approx(p.e.dealt || p.e.deaths)}${pd(div(p.dealt, p.deaths))}</td><td class="num">${approx(p.e.recv || p.e.deaths)}${pd(div(p.recv, p.deaths))}</td><td class="num">${approx(p.e.shots)}${fmt(p.shots)}</td><td class="num">${approx(p.e.acc)}${pct(p.acc)}</td>${m.winners.length ? `<td class="num">${p.alive == null ? "—" : approx(p.e.alive) + p.alive}</td>` : ""}<td class="num">${approx(p.e.mvp)}${fmt(p.mvp)}${m.mvp === p ? " ★" : ""}</td></tr>`, "mvp");
+  const m = S.models[x.i];
+  const draw = () => {
+    // «За раунд»: попал, получил, смерти и выстрелы делим на число раундов игры, остальное не меняется
+    const R = gameMode === "rnd", pr = (p, v) => R ? div(v, p.gr) : v, nf = (v, f) => R ? r2(v) : f(v), max = Math.max(1e-9, ...m.P.map(p => pr(p, p.dealt)));
+    document.querySelectorAll("[data-gmode]").forEach(b => b.setAttribute("aria-pressed", b.dataset.gmode === gameMode));
+    const cols = [["name", "Игрок", p => p.name], ["dealt", "Попал", p => pr(p, p.dealt)], ["recv", "Получил", p => pr(p, p.recv)], ["ratio", "Попал / получил", p => p.ratio],
+      ["deaths", "Смерти", p => pr(p, p.deaths)], ["dpd", "Попал на смерть", p => div(p.dealt, p.deaths)], ["rpd", "Получил на смерть", p => div(p.recv, p.deaths)],
+      ["shots", "Выстрелы", p => pr(p, p.shots)], ["acc", "Точность", p => p.acc]];
+    const pd = x => isFinite(x) ? one(x) : "∞";
+    if (m.winners.length) cols.push(["alive", "Раундов без смерти", p => p.alive]);
+    cols.push(["mvp", "Рейтинг", p => p.mvp]);
+    sortable("gameTable", cols, m.P, p => `<tr><th class="l"><span class="row" style="gap:6px">${playerLink(p.name, S.rows, p.teams)}<small class="muted num">${esc(p.gun !== p.name ? p.gun : "")}${p.swap ? " · смена команды" : ""}</small></span></th>
+      <td class="num barcell">${p.segs.map(s => { const n = sum(m.P, v => m.valT(p, v, s.team)); return `<span class="bar" style="--c:${TEAMS[s.team].c};width:${Math.round(pr(p, n) / max * 80)}px;margin-right:${p.swap ? 1 : 0}px"></span>`; }).join("")}<span style="margin-left:8px">${approx(p.e.dealt)}${nf(pr(p, p.dealt), fmt)}</span></td>
+      <td class="num">${approx(p.e.recv)}${nf(pr(p, p.recv), fmt)}</td><td class="num">${approx(p.e.ratio)}${r2(p.ratio)}</td><td class="num">${approx(p.e.deaths)}${nf(pr(p, p.deaths), fmt)}</td><td class="num">${approx(p.e.dealt || p.e.deaths)}${pd(div(p.dealt, p.deaths))}</td><td class="num">${approx(p.e.recv || p.e.deaths)}${pd(div(p.recv, p.deaths))}</td><td class="num">${approx(p.e.shots)}${R ? one(pr(p, p.shots)) : fmt(p.shots)}</td><td class="num">${approx(p.e.acc)}${pct(p.acc)}</td>${m.winners.length ? `<td class="num">${p.alive == null ? "—" : approx(p.e.alive) + p.alive}</td>` : ""}<td class="num">${approx(p.e.mvp)}${fmt(p.mvp)}${m.mvp === p ? " ★" : ""}</td></tr>`, "mvp");
+  };
+  document.querySelectorAll("[data-gmode]").forEach(b => b.onclick = () => { gameMode = b.dataset.gmode; draw(); });
+  draw();
 }
 
 // ---------- загрузка и правка ----------
