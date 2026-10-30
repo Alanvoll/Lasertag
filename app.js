@@ -113,7 +113,7 @@ function analyzeExport(raw) {
 // Сайт статистики лазертага на GitHub Pages. Каждая игра лежит отдельным файлом в папке games/ репозитория.
 // Список файлов берётся из games/index.json (его собирает GitHub Actions при деплое), а если его нет, из GitHub API.
 const REPO = "Alanvoll/Lasertag", BRANCH = "main";
-const DATA = { games: [] };
+const DATA = { games: [], replays: [] };
 const TEAMS = { 0: { name: "Красные", c: "var(--red)" }, 1: { name: "Синие", c: "var(--blue)" }, 2: { name: "Жёлтые", c: "var(--yellow)" }, 3: { name: "Зелёные", c: "var(--green)" } };
 const app = document.getElementById("app");
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -560,6 +560,10 @@ function viewGame(S, key) {
       (w === null ? `<i class="unk" title="Раунд ${i + 1}: не определить">${i + 1}</i>` : `<i style="--c:${TEAMS[w].c}" title="Раунд ${i + 1}: ${TEAMS[w].name}">${i + 1}</i>`)).join("")}</div>
       <p class="note">${plural(m.winners.length, ["раунд", "раунда", "раундов"])}, счёт ${teamIds.map(t => `${TEAMS[t].name.toLowerCase()} ${cnt(t)}`).join(" : ")}. Раунды найдены по командам возрождения с пульта. Раунд проигрывает команда, все игроки которой погибли${g.rounds.exact ? "" : "; часть тагеров без журнала, поэтому победитель некоторых раундов определён по выжившим и может быть неточным"}.</p></section>`;
   }
+  // повтор боя (бета): есть только для игр с журналами девяток
+  const replayHtml = DATA.replays.includes(g.date) ? `<section><h2>Повтор боя <span class="tag">бета</span></h2><div class="replay">
+    <p>Бой раунд за раундом в реальном времени: кто в кого попадал, кто кого выбил, первая кровь, лучший игрок раунда и шанс команд на победу по ходу боя.</p>
+    <a class="btn main" href="replay.html#${esc(g.date)}">Смотреть повтор</a></div></section>` : "";
   // номинации игры
   const pairs = P.flatMap(a => P.map(v => ({ a, v, n: estH(a, v) ? 0 : val(a, v) })));
   const tp = pairs.reduce((a, y) => y.n > a.n ? y : a, { n: 0 });
@@ -617,6 +621,7 @@ function viewGame(S, key) {
     ${m.mvp ? `<p class="gmvp"><span class="tag">MVP игры</span>${who(m.mvp)}<span class="muted num">рейтинг ${fmt(m.mvp.mvp)}</span></p>` : ""}</section>
   <section><div class="board">${board}</div>${swapNote}${(g.notes || []).map(n => `<p class="note">${esc(n)}</p>`).join("")}</section>
   ${roundsHtml}
+  ${replayHtml}
   <section><h2>Игроки</h2><div class="scroll"><table id="gameTable"></table></div><p class="note">Рейтинг MVP — пока простая формула: 100 — средний игрок этой игры. Половина рейтинга — попадания относительно среднего в игре, половина — коэффициент попал / получил относительно среднего (коэффициент выше 3 считается за 3). Например, рейтинг 150 — заметно лучше среднего.</p></section>
   <section><h2>Номинации</h2><div class="noms">${nomTiles(nomRows, who, extraNom)}</div></section>
   ${awards.length ? `<section><h2>Ачивки</h2><div class="awards">${awards.map(([t, names, stat, txt]) => `<div class="award"><span class="nt">${esc(t)}</span><span class="row">${String(names || "").split(",").map(n => n.trim()).filter(Boolean).map(n => { const p = P.find(z => z.name === n); return p ? who(p) : esc(n); }).join(" ")}</span><span class="stat">${esc(stat)}</span><span class="txt">${esc(txt)}</span></div>`).join("")}</div></section>` : ""}
@@ -729,6 +734,7 @@ async function loadGames() {
     try { const r = await fetch(x.url); if (!r.ok) return null; const g = await r.json(); return g && Array.isArray(g.players) && Array.isArray(g.hits) ? { ...g, file: x.file } : null; }
     catch (e) { return null; }
   }));
+  try { const r = await fetch("replays/index.json" + bust, { cache: "no-store" }); if (r.ok) DATA.replays = await r.json(); } catch (e) {}
   DATA.games = games.filter(Boolean).sort((a, b) => (a.date || "").localeCompare(b.date || "") || a.file.localeCompare(b.file));
 }
 

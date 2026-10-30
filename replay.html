@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Повтор боя · Лазертаг</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='13' width='14' height='6' rx='3' fill='%23f4f4f8'/%3E%3Crect x='16' y='13' width='14' height='6' rx='3' fill='%23f4f4f8'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=Roboto+Condensed:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: эфирная «арена» в стиле сайта «Турнир»: шапка-баннер со счётом, две колонны игроков лицом к лицу с лучами попаданий, под ними шкала боя по раундам, лента выбываний и дуэли. Цвет только у команд, общий акцент оранжевый. */
+:root {
+  --bg: #0c0d13; --panel: #141621; --panel2: #1c1f2d; --line: #262a3b; --fg: #f4f4f8; --muted: #8e93a8; --dim: #555a70;
+  --acc: #ff7a1a; --acc-grad: linear-gradient(120deg, #b83a00, #ff7a1a 60%, #ff9a45);
+  --red: #ff4d4f; --green: #2fc27a;
+  --display: "Rubik", "Segoe UI", sans-serif; --body: "Rubik", "Segoe UI", system-ui, sans-serif; --mono: "Roboto Condensed", "Arial Narrow", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box }
+html, body { background: var(--bg) }
+body { color: var(--fg); font: 14px/1.5 var(--body); margin: 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); overflow-x: hidden }
+button { font: inherit; color: inherit }
+:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px }
+.fx { position: fixed; inset: -50%; z-index: 0; pointer-events: none; opacity: .08; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1.2s steps(6) infinite }
+@keyframes grain { 0% { transform: translate(0,0) } 25% { transform: translate(-3%,2%) } 50% { transform: translate(2%,-3%) } 75% { transform: translate(-2%,-1%) } 100% { transform: translate(0,0) } }
+#app { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; padding-block: 20px 56px }
+.eyebrow { font: 600 11px var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted) }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums }
+h1, h2 { font-family: var(--display); font-weight: 700; text-transform: uppercase; margin: 0; text-wrap: balance; letter-spacing: -.01em }
+h2 { font-size: clamp(20px, 2.6vw, 26px); display: flex; align-items: center; gap: 12px }
+h2::before { content: ""; width: 11px; height: 11px; background: var(--acc); transform: rotate(45deg); flex: none }
+
+/* баннер */
+.hero { position: relative; overflow: hidden; isolation: isolate; padding: clamp(20px, 4vw, 40px) clamp(18px, 4vw, 40px) 0; background: linear-gradient(110deg, rgba(10,10,18,.4), transparent 55%), var(--acc-grad); display: flex; flex-direction: column; gap: 16px }
+.hero::before { content: "ПОВТОР ПОВТОР ПОВТОР ПОВТОР ПОВТОР"; position: absolute; z-index: -1; inset: -10% -5%; font: 800 clamp(80px, 14vw, 190px)/.85 var(--display); color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,.17); word-spacing: .2em; overflow-wrap: anywhere; animation: drift 50s linear infinite }
+@keyframes drift { to { transform: translateX(-30%) } }
+.hero .eyebrow { align-self: flex-start; color: #fff; background: var(--bg); padding: 5px 11px }
+.hero h1 { font-size: clamp(40px, 8vw, 88px); line-height: .92; color: #fff }
+.hero p { margin: 0; color: rgba(255,255,255,.88); max-width: 62ch }
+.scorebar { margin-inline: calc(-1 * clamp(18px, 4vw, 40px)); background: #0f1019; border-bottom: 5px solid var(--acc); display: grid; grid-template-columns: 1fr auto 1fr; align-items: stretch }
+.tm { display: flex; align-items: center; gap: 12px; padding: 14px clamp(14px, 3vw, 28px); min-width: 0 }
+.tm b { font: 800 clamp(16px, 2.6vw, 24px) var(--display); text-transform: uppercase; color: #fff }
+.tm small { display: block; font: 500 11px var(--mono); letter-spacing: .12em; color: rgba(255,255,255,.75); text-transform: uppercase }
+.tm.r { background: linear-gradient(110deg, color-mix(in srgb, var(--red) 80%, #000), color-mix(in srgb, var(--red) 35%, #000)) }
+.tm.g { background: linear-gradient(250deg, color-mix(in srgb, var(--green) 80%, #000), color-mix(in srgb, var(--green) 35%, #000)); justify-content: flex-end; text-align: right }
+.sc { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px clamp(12px, 3vw, 30px); gap: 2px }
+.sc .big { font: 800 clamp(34px, 6vw, 58px)/1 var(--display); letter-spacing: -.02em; white-space: nowrap }
+.sc .big i { font-style: normal; color: var(--dim); padding-inline: 6px }
+.sc .eyebrow { font-size: 10px; white-space: nowrap }
+.pop { animation: pop .6s ease-out }
+@keyframes pop { 0% { transform: scale(1.5); color: var(--acc) } 100% { transform: none } }
+
+/* арена */
+.arena { position: relative; background: var(--panel); border: 1px solid var(--line); padding: 14px; display: grid; grid-template-columns: minmax(0,1fr) 92px minmax(0,1fr); gap: 10px; overflow: hidden;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 100% 44px, 44px 100%; background-position: 0 -1px, -1px 0 }
+.arena::after { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 80% at 50% 50%, transparent, var(--panel) 85%); pointer-events: none; z-index: 0 }
+.col { display: flex; flex-direction: column; gap: 8px; position: relative; z-index: 2 }
+.mid { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center }
+.mid .vs { font: 800 30px var(--display); color: var(--dim) }
+.mid .clock { font: 700 22px var(--mono); font-variant-numeric: tabular-nums }
+.mid .eyebrow { font-size: 10px; letter-spacing: .12em }
+svg.beams { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; overflow: visible }
+.beam { fill: none; stroke-width: 3; stroke-linecap: round; animation: beam .9s ease-out forwards }
+.beam.k { stroke-width: 5 }
+@keyframes beam { 0% { stroke-dashoffset: var(--len); opacity: 1 } 25% { stroke-dashoffset: 0; opacity: 1 } 100% { stroke-dashoffset: 0; opacity: 0 } }
+.spark { animation: spark .7s ease-out forwards }
+@keyframes spark { from { r: 3; opacity: 1 } to { r: 22; opacity: 0 } }
+
+.pc { --c: var(--red); position: relative; background: var(--panel2); border: 1px solid var(--line); padding: 9px 11px 9px 14px; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 2px 8px; align-items: center; transition: opacity .3s, filter .3s, background-color .25s; min-height: 64px }
+.pc::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--c) }
+.pc.t3 { --c: var(--green) }
+.g .pc { padding: 9px 14px 9px 11px }
+.g .pc::before { left: auto; right: 0 }
+.pc .nm { font: 700 16px/1.15 var(--display); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0 }
+.pc .gun { font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0 }
+.pc .st { grid-row: 1 / span 2; grid-column: 2; display: flex; flex-direction: column; align-items: flex-end; gap: 5px }
+.pips { display: flex; gap: 3px }
+.pips i { width: 12px; height: 7px; background: var(--c); transform: skewX(-20deg); transition: background-color .2s, opacity .2s }
+.pips i.off { background: var(--line) }
+.pc .ct { font: 500 11px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap }
+.pc .ct b { color: var(--fg); font-weight: 700 }
+.pc .ct b + .lw, .pc .ct { word-spacing: .05em }
+.pc.dead { opacity: .42; filter: grayscale(1) }
+.pc.dead .nm { text-decoration: line-through; text-decoration-thickness: 2px }
+.pc .tag { position: absolute; top: -7px; font: 700 9px var(--mono); letter-spacing: .14em; padding: 1px 6px; background: var(--fg); color: var(--bg); display: none }
+.r .pc .tag { right: 8px } .g .pc .tag { left: 8px }
+.pc.dead .tag { display: block }
+.pc.old { background: transparent; border-style: dashed; min-height: 50px }
+.pc.old .st { display: none }
+.pc.fire { background-color: color-mix(in srgb, var(--c) 18%, var(--panel2)) }
+.pc.hit { animation: shake .35s }
+@keyframes shake { 20% { transform: translateX(-5px) } 40% { transform: translateX(4px) } 60% { transform: translateX(-3px) } 80% { transform: translateX(2px) } }
+.pc.ko { animation: ko .7s }
+@keyframes ko { 0% { box-shadow: 0 0 0 0 #fff } 30% { box-shadow: 0 0 0 4px #fff, 0 0 30px 6px var(--c) } 100% { box-shadow: 0 0 0 0 transparent } }
+.flash { position: absolute; inset: 0; z-index: 4; display: grid; place-items: center; pointer-events: none; opacity: 0 }
+.flash.on { animation: fl 2.4s ease-out }
+@keyframes fl { 0% { opacity: 0; transform: scale(1.1) } 12% { opacity: 1; transform: none } 75% { opacity: 1 } 100% { opacity: 0 } }
+.flash div { background: var(--c, var(--acc)); color: #fff; padding: 12px 22px; font: 800 clamp(18px, 3vw, 28px) var(--display); text-transform: uppercase; clip-path: polygon(4% 0, 100% 0, 96% 100%, 0 100%); text-align: center }
+.flash small { display: block; font: 600 11px var(--mono); letter-spacing: .16em; opacity: .85 }
+
+/* пульт */
+.deck { background: #0f1019; border: 1px solid var(--line); padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 12px }
+.ctrl { display: flex; gap: 8px 10px; align-items: center; flex-wrap: wrap }
+.b { all: unset; box-sizing: border-box; cursor: pointer; height: 38px; min-width: 38px; padding: 0 12px; display: inline-grid; place-items: center; border: 1px solid var(--line); background: var(--panel2); font: 600 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--fg) }
+.b:hover { border-color: var(--muted) }
+.b:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px }
+.b.play { background: var(--acc-grad); border: 0; height: 46px; padding: 0 22px 0 18px; font: 800 15px var(--display); letter-spacing: .04em; display: inline-flex; gap: 9px; align-items: center; clip-path: polygon(0 0, 100% 0, 100% 70%, 88% 100%, 0 100%) }
+.b.play svg { width: 16px; height: 16px; fill: #fff }
+.seg { display: inline-flex; border: 1px solid var(--line) }
+.seg button { all: unset; cursor: pointer; padding: 0 10px; height: 36px; display: grid; place-items: center; font: 600 12px var(--mono); letter-spacing: .06em; color: var(--muted) }
+.seg button[aria-pressed="true"] { background: var(--acc-grad); color: #fff }
+.seg button:focus-visible { outline: 2px solid var(--acc); outline-offset: -2px }
+.spacer { flex: 1 }
+.rlabel { font: 700 15px var(--display); text-transform: uppercase; white-space: nowrap }
+.tl { position: relative; height: 62px; cursor: pointer; touch-action: none; user-select: none }
+.tl canvas { position: absolute; inset: 0; width: 100%; height: 100% }
+.tl .head { position: absolute; top: -4px; bottom: -4px; width: 2px; background: #fff; box-shadow: 0 0 10px var(--acc); pointer-events: none; transform: translateX(-1px) }
+.tl .head::before { content: ""; position: absolute; top: -5px; left: -5px; width: 12px; height: 12px; background: var(--acc); transform: rotate(45deg) }
+.tl-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font: 500 11px var(--mono); color: var(--muted); letter-spacing: .04em }
+.tl-legend span { display: inline-flex; align-items: center; gap: 6px }
+.tl-legend i { width: 10px; height: 10px; display: inline-block }
+
+/* нижний ряд */
+.low { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 18px; align-items: start }
+.panel { background: var(--panel); border: 1px solid var(--line); padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+.panel .hd { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap }
+.feed { display: flex; flex-direction: column; gap: 4px; min-height: 252px }
+@media (max-width: 820px) { .feed { min-height: 0 } }
+.kf { display: grid; grid-template-columns: 44px minmax(0,1fr) auto minmax(0,1fr); gap: 8px; align-items: center; padding: 6px 10px; background: var(--panel2); font-weight: 600 }
+.kf.new { animation: kin .35s ease-out }
+@keyframes kin { from { transform: translateX(20px); opacity: 0 } }
+.kf .t { font: 500 11px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums }
+.kf .a { text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.kf .v { white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.kf .x { font: 600 10px var(--mono); color: var(--muted); letter-spacing: .1em; text-transform: uppercase; padding: 1px 6px; border: 1px solid var(--line) }
+.kf.round { grid-template-columns: 44px 1fr; background: transparent; border-top: 1px solid var(--line); font: 600 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted) }
+.c0 { color: var(--red) } .c3 { color: var(--green) }
+.empty { color: var(--muted); font-size: 13px; padding: 8px 2px }
+.duels { display: flex; flex-direction: column; gap: 2px }
+.du { display: grid; grid-template-columns: minmax(0,1fr) 112px minmax(0,1fr); gap: 10px; align-items: center; padding: 6px 8px; transition: background-color .4s }
+.du.live { background: color-mix(in srgb, var(--acc) 16%, transparent) }
+.du .n { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.du .n.rt { text-align: right }
+.du .bar { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 6px; font: 700 14px var(--mono); font-variant-numeric: tabular-nums }
+.du .split { height: 6px; display: flex; background: var(--line) }
+.du .split i { display: block; height: 100%; transition: width .3s }
+.du .split i:first-child { background: var(--red) } .du .split i:last-child { background: var(--green) }
+.note { color: var(--muted); font-size: 12.5px; max-width: 92ch; margin: 0 }
+.kbd { font: 600 11px var(--mono); border: 1px solid var(--line); padding: 0 5px }
+@media (max-width: 820px) { .low { grid-template-columns: minmax(0,1fr) } }
+
+/* ассисты */
+.as { display: flex; flex-direction: column; gap: 14px }
+.as .lead { margin: 0; color: var(--muted); max-width: 78ch }
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line) }
+.rules.one { grid-template-columns: minmax(0,1fr) }
+.rules div { background: var(--panel); padding: 12px 14px; display: flex; flex-direction: column; gap: 4px }
+.rules b { font: 700 15px var(--display); text-transform: uppercase }
+.rules span { color: var(--muted); font-size: 13px }
+.scroll { overflow-x: auto; border: 1px solid var(--line); background: var(--panel) }
+table.at { border-collapse: collapse; width: 100%; min-width: 640px; font-variant-numeric: tabular-nums }
+.at th, .at td { padding: 9px 12px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line) }
+.at th { font: 600 10.5px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); background: #10121b; vertical-align: bottom }
+.at th:first-child, .at td:first-child { text-align: left; position: sticky; left: 0; background: var(--panel); z-index: 1 }
+.at th:first-child { background: #10121b }
+.at td { font: 600 15px var(--mono) }
+.at td:first-child { font: 700 15px var(--display) }
+.at td.hi { color: #fff; font-size: 17px }
+.at td.hi b { display: inline-block; min-width: 26px }
+.at .mbar2 { display: inline-block; height: 6px; background: var(--acc-grad); vertical-align: middle; margin-left: 8px }
+.at tr.old td:first-child::after { content: " · без журнала"; font: 500 10px var(--mono); color: var(--muted); letter-spacing: .08em }
+.as2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: end }
+.hist { display: flex; flex-direction: column; gap: 8px }
+.hist svg { width: 100%; height: auto; display: block }
+.pairs { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 6px }
+.pr { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 8px 10px; background: var(--panel2) }
+.pr span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600 }
+.pr span i { font-style: normal; color: var(--muted); font-weight: 400 }
+.pr b { font: 700 18px var(--display) }
+.kf .v small { color: var(--muted); font: 500 11px var(--mono); margin-left: 6px }
+@media (max-width: 820px) { .as2 { grid-template-columns: minmax(0,1fr) } }
+@media (max-width: 560px) { .rules, .pairs { grid-template-columns: minmax(0,1fr) } .at th, .at td { padding: 8px 9px } .at td { font-size: 14px } .rules div { padding: 10px 12px } }
+.blg { grid-column: 1 / -1; position: relative; z-index: 2; display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 18px; font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding-top: 4px }
+.blg span { display: inline-flex; align-items: center; gap: 7px }
+.blg i { display: inline-block; width: 26px; height: 2px; border-radius: 2px; background: var(--muted) }
+.blg i.b0 { background: linear-gradient(90deg, var(--red) 50%, var(--green) 50%); opacity: .7 }
+.blg i.b1 { height: 3px; background: var(--acc); box-shadow: 0 0 6px var(--acc) }
+.blg i.b2 { height: 4px; background: #fff; box-shadow: 0 0 8px #fff }
+.mbar { display: none }
+.ff { font: 600 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--acc); visibility: hidden }
+.ff.on { visibility: visible; animation: blink 1s steps(2) infinite }
+@keyframes blink { 50% { opacity: .35 } }
+@media (max-width: 560px) {
+  #app { gap: 14px; padding-block: 12px 96px }
+  .hero { padding: 18px 16px 0; gap: 10px }
+  .hero h1 { font-size: clamp(26px, 8vw, 34px); white-space: nowrap }
+  .hero .eyebrow { font-size: 10px; padding: 4px 9px }
+  .hero p { display: none }
+  .hero::before { font-size: 90px }
+  .scorebar { margin-inline: -16px }
+  .tm { padding: 10px 12px } .tm small { display: none } .tm b { font-size: 14px }
+  .sc { padding: 6px 10px } .sc .big { font-size: 40px } .sc .eyebrow { font-size: 9px; letter-spacing: .08em }
+
+  .arena { grid-template-columns: minmax(0,1fr) 22px minmax(0,1fr); padding: 0 8px 10px; gap: 6px; margin-inline: -8px; background-size: 100% 36px, 36px 100% }
+  .mbar { display: flex; grid-column: 1 / -1; justify-content: space-between; align-items: baseline; margin: 0 -8px 4px; padding: 8px 12px; background: #0f1019; border-bottom: 1px solid var(--line); position: relative; z-index: 2 }
+  .mbar b { font: 700 15px var(--display); text-transform: uppercase }
+  .mbar .num { font: 700 18px var(--mono) }
+  .mid > * { display: none }
+  .mid::before { content: ""; position: absolute; top: 4px; bottom: 4px; left: 50%; width: 1px; background: linear-gradient(transparent, var(--line), transparent) }
+  .col { gap: 6px }
+  .pc, .g .pc { grid-template-columns: minmax(0,1fr) auto; grid-template-rows: auto auto; padding: 7px 8px 7px 11px; min-height: 0; gap: 4px 6px }
+  .g .pc { padding: 7px 11px 7px 8px }
+  .pc .nm { font-size: 14px; grid-column: 1 / -1 }
+  .pc .gun { display: none }
+  .pc .st { display: contents }
+  .pc .pips { grid-row: 2; grid-column: 1 / -1 }
+  .pc .ct { grid-row: 3; grid-column: 1 / -1; font-size: 10.5px }
+  .g .pc { text-align: right }
+  .g .pc .pips { justify-content: flex-end }
+  .pips { gap: 2px } .pips i { width: 9px; height: 6px }
+  .pc.old { min-height: 0; padding-block: 6px }
+  .pc.old .nm { font-size: 13px; color: var(--muted) }
+  .pc.old .gun { display: block; grid-column: 1 / -1; font-size: 9px }
+  .pc .tag { font-size: 8px; padding: 0 4px; top: -6px }
+
+  .deck { padding: 10px 10px 12px; gap: 8px; margin-inline: -8px }
+  .ctrl { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; gap: 6px; flex-wrap: nowrap; justify-content: space-between;
+    padding: 10px max(12px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px));
+    background: color-mix(in srgb, #0f1019 92%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 2px solid var(--acc) }
+  .ctrl .spacer, .ctrl > .eyebrow, #playTxt, .rlabel .lw { display: none }
+  .b.play { height: 44px; width: 52px; padding: 0; justify-content: center }
+  .b.play svg { width: 18px; height: 18px }
+  .b { height: 40px; min-width: 36px; padding: 0 8px }
+  .rlabel { font-size: 14px; min-width: 52px; text-align: center }
+  .seg button { padding: 0 7px; height: 38px; font-size: 11px }
+  .tl { height: 70px }
+  .tl-legend { font-size: 10px; gap: 2px 12px }
+  .tl-legend span:nth-child(n+3) { display: none }
+
+  .panel { padding: 12px 10px; margin-inline: -8px }
+  h2 { font-size: 19px }
+  .kf { grid-template-columns: 34px minmax(0,1fr) auto minmax(0,1fr); padding: 6px 8px; gap: 6px; font-size: 13px }
+  .du { grid-template-columns: minmax(0,1fr) 92px minmax(0,1fr); gap: 6px; padding: 6px 2px; font-size: 13px }
+  .du .bar { font-size: 13px; gap: 4px }
+  .kbd, .keys { display: none }
+}
+.wp { display: grid; gap: 6px }
+.wp .lab { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font: 600 12px var(--mono); letter-spacing: .04em; color: var(--muted) }
+.wp .lab b { font: 800 18px var(--display); color: var(--ink, #fff) }
+.wp .lab b.c0 { color: var(--red) } .wp .lab b.c3 { color: var(--green) }
+.wp .bar { height: 12px; display: flex; background: var(--line); overflow: hidden; clip-path: polygon(0 0, 100% 0, 99% 100%, 1% 100%) }
+.wp .bar i { display: block; height: 100%; transition: width .35s ease }
+.wp .bar i:first-child { background: var(--red) } .wp .bar i:last-child { background: var(--green) }
+.rinfo { display: flex; flex-wrap: wrap; gap: 6px 18px; font: 500 13px var(--mono); color: var(--muted) }
+.rinfo b { color: #fff; font-weight: 700 }
+.rinfo .tag { display: inline-block; font: 700 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: #fff; background: var(--acc-grad); padding: 2px 6px; margin-right: 6px; vertical-align: 1px }
+.kf .fb { display: inline-block; font: 700 9px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #fff; background: var(--acc-grad); padding: 1px 5px; margin-left: 6px; vertical-align: 2px }
+.flash em { display: block; font: 700 13px var(--mono); font-style: normal; letter-spacing: .1em; margin-top: 4px; opacity: .95 }
+@media (prefers-reduced-motion: reduce) { .wp .bar i { transition: none } }
+@media (prefers-reduced-motion: reduce) { .fx, .hero::before { animation: none } .pc.hit { animation: none } }
+
+/* ч/б как на сайте («Турнир ч/б») */
+:root { --acc: #f4f4f5; --acc-grad: linear-gradient(120deg, #d9d9de, #ffffff 60%, #ececf0) }
+.hero, .hero h1, .hero p { color: #0c0d13 }
+.hero::before { -webkit-text-stroke-color: rgba(12,13,19,.12) }
+.hero .scorebar { color: #f4f4f8 }
+.b.play, .seg button[aria-pressed="true"], .rinfo .tag, .kf .fb { color: #0c0d13 }
+.b.play svg { fill: #0c0d13 }
+.mvp .rt b { color: #0c0d13 } .mvp .lab i { background: #0c0d13 }
+.grid div.top { box-shadow: inset 3px 0 0 #fff }
+.rw i.m::after { box-shadow: 0 0 0 1.5px #0c0d13 }
+.blg i.b1 { background: repeating-linear-gradient(90deg, #a9adbb 0 5px, transparent 5px 8px); box-shadow: none }
+.top { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; justify-content: space-between }
+.top a { color: var(--fg); text-decoration: none; font: 600 13px var(--mono); letter-spacing: .08em; text-transform: uppercase }
+.top a:hover { text-decoration: underline }
+.top .logo { display: inline-flex; align-items: center; gap: 10px; font: 800 18px var(--display); letter-spacing: 0; text-transform: none }
+.top .logo i { width: 26px; height: 18px; background: #fff; clip-path: polygon(0 0, 100% 0, 100% 70%, 70% 100%, 0 100%) }
+.top select { background: var(--panel); color: var(--fg); border: 1px solid var(--line); font: 600 13px var(--mono); padding: 8px 10px; min-height: 40px }
+.beta { display: inline-block; font: 700 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; background: #0c0d13; color: #fff; padding: 3px 7px; margin-left: 8px; vertical-align: 3px }
+.loading { padding: 60px 0; text-align: center; color: var(--muted) }
+.tm.r { background: linear-gradient(110deg, color-mix(in srgb, var(--red) 80%, #000), color-mix(in srgb, var(--red) 35%, #000)) }
+</style>
+</head>
+<body>
+<div class="fx" aria-hidden="true"></div>
+<div id="app">
+  <nav class="top" aria-label="Навигация"><a class="logo" href="./#season"><i aria-hidden="true"></i>Лазертаг</a>
+    <span style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><a id="back" href="./#games">← К игре</a><label><span class="eyebrow" style="margin-right:8px">Игра</span><select id="gsel" aria-label="Выбрать игру"></select></label></span></nav>
+  <div id="main" hidden>
+  <header class="hero">
+    <span class="eyebrow">Повтор боя<span class="beta">бета</span></span>
+    <h1 id="ttl">Игра</h1>
+    <p>Все попадания, выстрелы и выбывания с журналов тагеров нового поколения, сведённые на общие часы. Жми «Смотреть» и следи, как шёл бой, раунд за раундом.</p>
+    <div class="scorebar">
+      <div class="tm r"><div><b id="tnA">Красные</b><small>раунды</small></div></div>
+      <div class="sc"><div class="big num"><span id="sR">0</span><i>:</i><span id="sG">0</span></div><span class="eyebrow" id="sLab">из 29 раундов</span></div>
+      <div class="tm g"><div><b id="tnB">Зелёные</b><small>раунды</small></div></div>
+    </div>
+  </header>
+
+  <section class="arena" id="arena" aria-label="Арена">
+    <div class="mbar"><b id="mbR">Раунд 1</b><span class="num"><span class="ff" id="mbF">затишье ⏩</span> <span id="mbC">0:00</span></span></div>
+    <div class="col r" id="colR"></div>
+    <div class="mid"><span class="eyebrow" id="mRound">Раунд 1</span><span class="vs">VS</span><span class="ff" id="mF">затишье ⏩</span><span class="clock" id="mClock">0:00</span><span class="eyebrow">в раунде</span></div>
+    <div class="col g" id="colG"></div>
+    <svg class="beams" id="beams" aria-hidden="true"></svg>
+    <div class="blg" aria-label="Виды попаданий"><span><i class="b0"></i>обычное</span><span><i class="b1"></i>ассист</span><span><i class="b2"></i>летальное</span></div>
+    <div class="flash" id="flash"><div><small id="flS">Раунд 1</small><span id="flT"></span><em id="flM"></em></div></div>
+  </section>
+
+  <section class="deck" aria-label="Управление">
+    <div class="ctrl">
+      <button class="b play" id="play" type="button" aria-label="Смотреть"><svg viewBox="0 0 16 16" id="playIco"><path d="M3 1.5v13l11-6.5z"/></svg><span id="playTxt">Смотреть</span></button>
+      <button class="b" id="prev" type="button" aria-label="Предыдущий раунд" title="Предыдущий раунд">‹ Р</button>
+      <span class="rlabel" id="rLab">Раунд 1 / 29</span>
+      <button class="b" id="next" type="button" aria-label="Следующий раунд" title="Следующий раунд">Р ›</button>
+      <span class="spacer"></span>
+      <span class="eyebrow">Скорость</span>
+      <div class="seg" id="speed" role="group" aria-label="Скорость"></div>
+    </div>
+    <div class="wp" aria-live="off">
+      <div class="lab"><b class="c0" id="wpR">50%</b><span>шанс победы в раунде по модели</span><b class="c3" id="wpG">50%</b></div>
+      <div class="bar"><i id="wpRb" style="width:50%"></i><i id="wpGb" style="width:50%"></i></div>
+    </div>
+    <div class="rinfo"><span><span class="tag">первая кровь</span><span id="riFB">ещё нет</span></span><span><span class="tag">MVP раунда</span><span id="riM">в конце раунда</span></span></div>
+    <div class="tl" id="tl" role="slider" tabindex="0" aria-label="Шкала боя" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <canvas id="tlc"></canvas><div class="head" id="head"></div>
+    </div>
+    <div class="tl-legend">
+      <span><i style="background:var(--red)"></i><span id="lgA">раунд красных</span></span>
+      <span><i style="background:var(--green)"></i><span id="lgB">раунд зелёных</span></span>
+      <span id="lgS">штрихи сверху и снизу: выбывания</span>
+      <span><i style="background:var(--acc)"></i>первая кровь раунда (среди выбываний девяток)</span>
+      <span>паузы между раундами вырезаны, затишья дольше 20 с сжаты</span>
+    </div>
+  </section>
+
+  <div class="low">
+    <section class="panel" aria-label="Выбывания">
+      <div class="hd"><h2>Выбывания</h2><span class="eyebrow" id="kCount">0 в раунде</span></div>
+      <div class="feed" id="feed"></div>
+    </section>
+    <section class="panel" aria-label="Дуэли девяток">
+      <div class="hd"><h2>Дуэли девяток</h2>
+        <div class="seg" id="dmode" role="group" aria-label="Период дуэлей"><button type="button" aria-pressed="true" data-m="game">С начала игры</button><button type="button" aria-pressed="false" data-m="round">Этот раунд</button></div>
+      </div>
+      <div class="duels" id="duels"></div>
+      <p class="note">Попадания друг в друга до текущего момента повтора. Подсвечена пара, которая только что перестреливалась.</p>
+    </section>
+  </div>
+
+
+
+
+  <p class="note">Бета. Повтор собран из журналов тагеров нового поколения («девяток»): у них записано время каждого выстрела, попадания и смерти. Часы тагеров сведены по совпадению попадания с выстрелом стрелка. Старые тагеры журнала не пишут: их попадания по девяткам видно, а попадания по ним и их выбывания нет. Шанс победы и лучший в раунде считаются по модели, обученной на играх с журналами.</p>
+  </div>
+  <div class="loading" id="loading">Загружаю повтор…</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+function main(J) {
+const D = J.data, AS = { feed: J.feed }, RD = J.rd; // RD: [{fb:[кто, кого, t], mvp, mvpv, curve:[[t, шанс левой команды]]}]
+const TA = J.teams[0], TB = J.teams[1];
+document.documentElement.style.setProperty('--red', TA.c); document.documentElement.style.setProperty('--green', TB.c);
+$('tnA').textContent = TA.name; $('tnB').textContent = TB.name; $('lgA').textContent = 'раунд ' + TA.gen; $('lgB').textContent = 'раунд ' + TB.gen;
+$('lgS').textContent = 'штрихи сверху: выбили ' + TA.name.toLowerCase() + ', снизу: ' + TB.name.toLowerCase();
+const [yy, mm, dd] = J.date.split('-'); $('ttl').textContent = 'Игра ' + dd + '.' + mm + '.' + yy; document.title = 'Повтор боя ' + dd + '.' + mm + ' · Лазертаг';
+$('back').href = './#game-' + J.date;
+const P = {}; D.players.forEach(p => P[p.g] = p);
+const TEAMN = { 0: TA.gen, 3: TB.gen };
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const R = D.rounds; // [start, end, winner]
+const NR = R.length;
+// сжатая шкала: только раунды
+// сжатая шкала: паузы между раундами вырезаны, затишья внутри раунда длиннее 20 с сжаты до 4 с
+const QUIET = 20000, QUIET_C = 4000;
+const KG = [], KC = [], KQ = []; let cc = 0;
+const act = [...D.hits.map(h => h[0]), ...D.deaths.map(d => d[0])].sort((a, b) => a - b);
+const cum = [];
+R.forEach((r, i) => {
+  cum.push(cc);
+  const pts = [r[0], ...act.filter(t => t > r[0] && t < r[1]), r[1]];
+  KG.push(r[0]); KC.push(cc); KQ.push(false);
+  for (let j = 1; j < pts.length; j++) {
+    const g = pts[j] - pts[j - 1]; if (g <= 0) continue;
+    const q = g > QUIET; KQ[KQ.length - 1] = q;
+    cc += q ? QUIET_C : g; KG.push(pts[j]); KC.push(cc); KQ.push(false);
+  }
+});
+const TOTAL = cc; cum.push(TOTAL);
+function seg(arr, x) { let lo = 0, hi = arr.length - 1; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (arr[m] <= x) lo = m; else hi = m - 1; } return lo; }
+const toC = t => {
+  if (t <= KG[0]) return 0; if (t >= KG[KG.length - 1]) return TOTAL;
+  const k = seg(KG, t); if (k + 1 >= KG.length) return TOTAL;
+  const g0 = KG[k], g1 = KG[k + 1];
+  if (KC[k + 1] === KC[k] || g1 - g0 <= 0) return KC[k]; // пауза между раундами
+  return KC[k] + (t - g0) / (g1 - g0) * (KC[k + 1] - KC[k]);
+};
+const fromC = c => {
+  if (c <= 0) return KG[0]; if (c >= TOTAL) return KG[KG.length - 1];
+  let k = seg(KC, c); while (k + 1 < KC.length && KC[k + 1] === KC[k]) k++;
+  if (k + 1 >= KG.length) return KG[KG.length - 1];
+  return KG[k] + (c - KC[k]) / (KC[k + 1] - KC[k]) * (KG[k + 1] - KG[k]);
+};
+const quietAt = t => { if (t < KG[0] || t >= KG[KG.length - 1]) return false; return KQ[seg(KG, t)]; };
+const roundAt = t => { let k = 0; for (let i = 0; i < NR; i++) if (t >= R[i][0]) k = i; return k; };
+// единая лента событий
+const EV = [];
+D.revives.forEach(([t, g]) => EV.push({ t, k: 'rv', g }));
+D.shots.forEach(([t, g]) => EV.push({ t, k: 'sh', g }));
+D.hits.forEach(([t, v, a, c]) => EV.push({ t, k: 'hit', g: v, a, c }));
+D.deaths.forEach(([t, v, a]) => EV.push({ t, k: 'die', g: v, a }));
+R.forEach((r, i) => { EV.push({ t: r[0] - 1, k: 'rs', i }); EV.push({ t: r[1], k: 're', i }); });
+const ORD = { rs: 0, rv: 1, sh: 2, hit: 3, die: 4, re: 5 };
+EV.sort((x, y) => x.t - y.t || ORD[x.k] - ORD[y.k]);
+
+const gen8 = D.players.filter(p => p.gen === 8);
+const pairs = [];
+gen8.filter(p => p.team === 0).forEach(a => gen8.filter(p => p.team === 3).forEach(b => pairs.push([a.g, b.g])));
+
+// карточки
+const cards = {};
+function card(p) {
+  const el = document.createElement('div');
+  el.className = 'pc t' + p.team + (p.gen === 8 ? '' : ' old');
+  el.innerHTML = `<span class="tag">ВЫБИТ</span><span class="nm">${p.name}</span><span class="gun">${(p.gen === 8 ? cap(p.gun) : cap(p.gun) + ' · без журнала') + (p.note ? ' · ' + p.note : '')}</span>` +
+    (p.gen === 8 ? `<div class="st"><span class="pips">${'<i></i>'.repeat(p.lives)}</span><span class="ct"><b data-k="h">0</b> попал<span class="lw"> · </span><b data-k="s">0</b> выстр.</span></div>` : '');
+  cards[p.g] = el; return el;
+}
+const order = (a, b) => (b.gen - a.gen);
+D.players.filter(p => p.team === 0).sort(order).forEach(p => $('colR').appendChild(card(p)));
+D.players.filter(p => p.team === 3).sort(order).forEach(p => $('colG').appendChild(card(p)));
+
+// состояние
+let S, ptr, tg, playing = false, speed = 8, dmode = 'game';
+function reset() {
+  S = { alive: {}, hp: {}, rh: {}, rs: {}, score: { 0: 0, 3: 0 }, round: 0, duelG: {}, duelR: {}, kills: [], live: {} };
+  gen8.forEach(p => { S.alive[p.g] = true; S.hp[p.g] = p.lives; S.rh[p.g] = 0; S.rs[p.g] = 0; });
+  ptr = 0;
+}
+const fx = { on: false };
+const key = (a, b) => a + '-' + b;
+function apply(e) {
+  if (e.k === 'rs') { S.round = e.i; gen8.forEach(p => { S.rh[p.g] = 0; S.rs[p.g] = 0; }); S.duelR = {}; S.kills = []; }
+  else if (e.k === 'rv') { S.alive[e.g] = true; S.hp[e.g] = P[e.g].lives; }
+  else if (e.k === 'sh') { S.rs[e.g]++; if (fx.on) fire(e.g); }
+  else if (e.k === 'hit') {
+    S.hp[e.g] = Math.max(0, S.hp[e.g] - 1);
+    if (S.rh[e.a] !== undefined) S.rh[e.a]++;
+    if (P[e.a].gen === 8) {
+      const red = P[e.a].team === 0 ? e.a : e.g, grn = red === e.a ? e.g : e.a, side = red === e.a ? 0 : 1;
+      for (const m of [S.duelG, S.duelR]) { const k = key(red, grn); (m[k] = m[k] || [0, 0])[side]++; }
+      S.live[key(red, grn)] = e.t;
+    }
+    if (fx.on) beam(e.a, e.g, e.c || 0);
+  }
+  else if (e.k === 'die') {
+    S.alive[e.g] = false; S.hp[e.g] = 0; S.kills.push(e);
+    if (fx.on) ko(e.g);
+  }
+  else if (e.k === 're') { if (R[e.i][2] != null) S.score[R[e.i][2]]++; if (fx.on) roundFlash(e.i); }
+}
+function advance(t) {
+  if (t < tg) { reset(); fx.on = false; while (ptr < EV.length && EV[ptr].t <= t) apply(EV[ptr++]); }
+  else { while (ptr < EV.length && EV[ptr].t <= t) apply(EV[ptr++]); }
+  tg = t;
+}
+
+// эффекты
+const svgNS = 'http://www.w3.org/2000/svg';
+const lastFire = {};
+function fire(g) {
+  const el = cards[g]; if (!el) return;
+  const now = performance.now(); if (now - (lastFire[g] || 0) < 90) return; lastFire[g] = now;
+  el.classList.add('fire'); clearTimeout(el._f); el._f = setTimeout(() => el.classList.remove('fire'), 90);
+}
+function anchor(g) {
+  const a = $('arena').getBoundingClientRect(), r = cards[g].getBoundingClientRect();
+  const left = P[g].team === 0;
+  return { x: (left ? r.right : r.left) - a.left, y: r.top + r.height / 2 - a.top };
+}
+function beam(a, v, kind) { // 0 обычное, 1 ассист, 2 летальное
+  const kill = kind === 2;
+  if (!cards[a] || !cards[v]) { if (cards[v]) shake(v); return; }
+  const A = anchor(a), B = anchor(v), svg = $('beams');
+  const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2 - 24 + Math.random() * 48;
+  const team = P[a].team === 0 ? 'var(--red)' : 'var(--green)';
+  const col = kind === 2 ? '#fff' : kind === 1 ? '#a9adbb' : team;
+  const sm = innerWidth < 560 ? .5 : 1; // на телефоне стрелки тоньше
+  const g = document.createElementNS(svgNS, 'g');
+  g.style.filter = kind === 0 ? 'none' : `drop-shadow(0 0 ${(sm < 1 ? 2 : 5) * (kill ? 1.6 : 1)}px ${kill ? team : col})`;
+  if (kind === 0) g.style.opacity = .7;
+  const path = document.createElementNS(svgNS, 'path');
+  path.setAttribute('d', `M${A.x},${A.y} Q${mx},${my} ${B.x},${B.y}`);
+  path.setAttribute('fill', 'none'); path.setAttribute('stroke-linecap', 'round'); if (kind === 1) path.setAttribute('stroke-dasharray', '6 4');
+  path.style.stroke = col; path.style.strokeWidth = (kill ? 5 : kind ? 3.5 : 2) * sm;
+  // наконечник стрелки у цели
+  const ang = Math.atan2(B.y - my, B.x - mx), L = (kill ? 15 : 12) * (sm < 1 ? .6 : 1), W = (kill ? 8 : 6) * (sm < 1 ? .55 : 1);
+  const tip = document.createElementNS(svgNS, 'path');
+  const bx = B.x - Math.cos(ang) * L, by = B.y - Math.sin(ang) * L, nx = -Math.sin(ang) * W, ny = Math.cos(ang) * W;
+  tip.setAttribute('d', `M${B.x},${B.y} L${bx + nx},${by + ny} L${bx - nx},${by - ny} Z`);
+  tip.style.fill = col;
+  const dot = document.createElementNS(svgNS, 'circle');
+  dot.setAttribute('cx', A.x); dot.setAttribute('cy', A.y); dot.setAttribute('r', 4 * (sm < 1 ? .6 : 1)); dot.style.fill = team;
+  g.append(path, tip, dot); svg.appendChild(g);
+  const len = path.getTotalLength(), life = speed >= 120 ? 900 : kill ? 2200 : kind ? 1800 : 1300;
+  path.style.strokeDasharray = len;
+  path.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }], { duration: Math.min(250, life / 4), easing: 'ease-out', fill: 'forwards' });
+  tip.animate([{ opacity: 0 }, { opacity: 0, offset: .12 }, { opacity: 1, offset: .16 }, { opacity: 1 }], { duration: life, fill: 'forwards' });
+  g.animate([{ opacity: kind ? 1 : .7 }, { opacity: kind ? 1 : .7, offset: .6 }, { opacity: 0 }], { duration: life, fill: 'forwards' });
+  setTimeout(() => g.remove(), life + 50);
+  shake(v);
+}
+function shake(g) { const el = cards[g]; if (!el || el.classList.contains('old')) return; el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); }
+function ko(g) { const el = cards[g]; el.classList.remove('ko'); void el.offsetWidth; el.classList.add('ko'); }
+function roundFlash(i) {
+  const w = R[i][2], f = $('flash');
+  f.style.setProperty('--c', w === 0 ? 'var(--red)' : w === 3 ? 'var(--green)' : 'var(--dim)');
+  $('flS').textContent = 'Раунд ' + (i + 1) + ' из ' + NR; $('flT').textContent = w == null ? 'Победитель не определён' : 'Победа ' + TEAMN[w];
+  const m = RD[i].mvp; $('flM').textContent = m != null ? 'MVP · ' + P[m].name : '';
+  f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
+  if (w == null) return;
+  const s = $(w === 0 ? 'sR' : 'sG'); s.classList.remove('pop'); void s.offsetWidth; s.classList.add('pop');
+}
+
+// отрисовка
+const fmt = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+function render() {
+  gen8.forEach(p => {
+    const el = cards[p.g];
+    el.classList.toggle('dead', !S.alive[p.g]);
+    el.querySelectorAll('.pips i').forEach((i, k) => i.classList.toggle('off', k >= S.hp[p.g]));
+    el.querySelector('[data-k=h]').textContent = S.rh[p.g];
+    el.querySelector('[data-k=s]').textContent = S.rs[p.g];
+  });
+  const ri = roundAt(tg);
+  $('sR').textContent = S.score[0]; $('sG').textContent = S.score[3];
+  $('sLab').textContent = (S.score[0] + S.score[3]) + ' из ' + NR + ' раундов сыграно';
+  $('rLab').innerHTML = '<span class="lw">Раунд </span>' + (ri + 1) + ' / ' + NR; $('mbR').textContent = 'Раунд ' + (ri + 1) + ' из ' + NR; $('mbC').textContent = fmt(tg - R[ri][0]); $('mRound').textContent = 'Раунд ' + (ri + 1);
+  $('mClock').textContent = fmt(tg - R[ri][0]);
+  const q = quietAt(tg) && tg > R[ri][0]; $('mF').classList.toggle('on', q); $('mbF').classList.toggle('on', q);
+  const c = toC(tg); $('head').style.left = (c / TOTAL * 100) + '%'; $('tl').setAttribute('aria-valuenow', Math.round(c / TOTAL * 100));
+  // шанс победы, первая кровь, MVP
+  const cv = RD[ri].curve; let pr = cv.length ? cv[0][1] : .5;
+  for (const [t, p] of cv) { if (t <= tg) pr = p; else break; }
+  if (tg >= R[ri][1] && R[ri][2] != null) pr = R[ri][2] === 0 ? 1 : 0;
+  const pp = Math.round(pr * 100);
+  $('wpR').textContent = pp + '%'; $('wpG').textContent = (100 - pp) + '%'; $('wpRb').style.width = pp + '%'; $('wpGb').style.width = (100 - pp) + '%';
+  const fb = RD[ri].fb;
+  $('riFB').innerHTML = fb && tg >= fb[2] ? `<b class="c${P[fb[0]].team}">${P[fb[0]].name}</b> → <b class="c${P[fb[1]].team}">${P[fb[1]].name}</b> · ${fmt(fb[2] - R[ri][0])}` : 'ещё нет';
+  const mv = RD[ri].mvp;
+  $('riM').innerHTML = tg >= R[ri][1] && mv != null ? `<b class="c${P[mv].team}">${P[mv].name}</b> · +${Math.round(RD[ri].mvpv * 100)}% к шансу` : 'в конце раунда';
+  // лента
+  const feed = $('feed'); const ks = S.kills.slice(-7).reverse();
+  const sig = ri + ':' + S.kills.length;
+  if (feed._sig !== sig) {
+    feed._sig = sig;
+    const grew = feed._n !== undefined && S.kills.length === feed._n + 1; feed._n = S.kills.length;
+    feed.innerHTML = ks.length ? ks.map((e, j) => {
+      const a = P[e.a], v = P[e.g];
+      return `<div class="kf${j === 0 && grew ? ' new' : ''}"><span class="t">${fmt(e.t - R[ri][0])}</span><span class="a c${a ? a.team : ''}">${a ? a.name : '?'}</span><span class="x">выбил</span><span class="v c${v.team}">${v.name}${RD[ri].fb && RD[ri].fb[2] === e.t && RD[ri].fb[1] === e.g ? '<span class="fb">1-я кровь</span>' : ''}${(ASK[e.t + '-' + e.g] || []).length ? '<small>+ ' + ASK[e.t + '-' + e.g].map(x => P[x].name).join(', ') + '</small>' : ''}</span></div>`;
+    }).join('') : `<div class="empty">В этом раунде пока никто не выбыл.</div>`;
+    $('kCount').textContent = S.kills.length + ' в раунде';
+  }
+  // дуэли
+  const m = dmode === 'game' ? S.duelG : S.duelR;
+  const rows = pairs.map(([a, b]) => { const v = m[key(a, b)] || [0, 0]; return { a, b, x: v[0], y: v[1], live: tg - (S.live[key(a, b)] || -1e9) < 2500 }; })
+    .sort((p, q) => (q.x + q.y) - (p.x + p.y) || p.a - q.a);
+  $('duels').innerHTML = rows.map(r => {
+    const s = r.x + r.y, w = s ? r.x / s * 100 : 50;
+    return `<div class="du${r.live ? ' live' : ''}"><span class="n rt c0">${P[r.a].name}</span><div class="bar"><span>${r.x}</span><div class="split"><i style="width:${s ? w : 0}%"></i><i style="width:${s ? 100 - w : 0}%"></i></div><span>${r.y}</span></div><span class="n c3">${P[r.b].name}</span></div>`;
+  }).join('');
+}
+
+// шкала
+function drawTL() {
+  const cv = $('tlc'), dpr = devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
+  cv.width = W * dpr; cv.height = H * dpr; const x = cv.getContext('2d'); x.scale(dpr, dpr);
+  const css = getComputedStyle(document.documentElement), col = { 0: css.getPropertyValue('--red').trim(), 3: css.getPropertyValue('--green').trim(), null: css.getPropertyValue('--dim').trim() };
+  const line = css.getPropertyValue('--line').trim(), muted = css.getPropertyValue('--muted').trim();
+  const mid = H / 2, bh = 14;
+  R.forEach((r, i) => {
+    const x0 = cum[i] / TOTAL * W, x1 = cum[i + 1] / TOTAL * W;
+    x.fillStyle = col[r[2]]; x.globalAlpha = .28; x.fillRect(x0, mid - bh / 2, x1 - x0 - 1, bh);
+    x.globalAlpha = 1; x.fillRect(x0, mid + bh / 2 - 3, x1 - x0 - 1, 3);
+    if ((x1 - x0) > 16) { x.fillStyle = muted; x.font = '600 10px "Roboto Condensed", sans-serif'; x.textAlign = 'center'; x.fillText(i + 1, (x0 + x1) / 2, mid + 1.5); }
+  });
+  D.deaths.forEach(([t, v, a]) => {
+    const px = toC(t) / TOTAL * W, k = P[a] ? P[a].team : (P[v].team === 0 ? 3 : 0);
+    x.fillStyle = col[k];
+    if (k === 0) x.fillRect(px - 1, 2, 2, mid - bh / 2 - 5); else x.fillRect(px - 1, mid + bh / 2 + 3, 2, mid - bh / 2 - 5);
+  });
+  const acc = css.getPropertyValue('--acc').trim();
+  RD.forEach(r => { if (!r.fb) return; const px = toC(r.fb[2]) / TOTAL * W; x.fillStyle = acc; x.beginPath(); const y = mid - bh / 2; x.moveTo(px, y - 5); x.lineTo(px + 4, y); x.lineTo(px, y + 5); x.lineTo(px - 4, y); x.fill(); });
+  x.strokeStyle = line; x.beginPath(); x.moveTo(0, mid - bh / 2 - .5); x.lineTo(W, mid - bh / 2 - .5); x.stroke();
+}
+
+// управление
+const SPEEDS = [2, 8, 30, 120];
+$('speed').innerHTML = SPEEDS.map(s => `<button type="button" data-s="${s}" aria-pressed="${s === speed}">×${s}</button>`).join('');
+$('speed').onclick = e => { const b = e.target.closest('button'); if (!b) return; speed = +b.dataset.s; [...$('speed').children].forEach(x => x.setAttribute('aria-pressed', x === b)); };
+$('dmode').onclick = e => { const b = e.target.closest('button'); if (!b) return; dmode = b.dataset.m; [...$('dmode').children].forEach(x => x.setAttribute('aria-pressed', x === b)); render(); };
+function seek(t) { fx.on = false; advance(t); fx.on = playing; render(); }
+function setPlay(v) {
+  playing = v; fx.on = v;
+  $('playTxt').textContent = v ? 'Пауза' : (tg >= R[NR - 1][1] ? 'Заново' : 'Смотреть');
+  $('playIco').innerHTML = v ? '<path d="M3 1.5h3.5v13H3zM9.5 1.5H13v13H9.5z"/>' : '<path d="M3 1.5v13l11-6.5z"/>';
+  last = performance.now();
+}
+$('play').onclick = () => { if (!playing && tg >= R[NR - 1][1]) seek(R[0][0]); setPlay(!playing); };
+$('prev').onclick = () => { const ri = roundAt(tg); seek(R[(tg - R[ri][0] < 3000 && ri > 0) ? ri - 1 : ri][0]); };
+$('next').onclick = () => { const ri = roundAt(tg); if (ri < NR - 1) seek(R[ri + 1][0]); };
+const tl = $('tl');
+function tlSeek(ev) { const r = tl.getBoundingClientRect(); const f = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width)); seek(fromC(f * TOTAL)); }
+tl.addEventListener('pointerdown', e => { tl.setPointerCapture(e.pointerId); tlSeek(e); tl._drag = true; });
+tl.addEventListener('pointermove', e => { if (tl._drag) tlSeek(e); });
+tl.addEventListener('pointerup', () => tl._drag = false);
+document.addEventListener('keydown', e => {
+  if (e.target.closest && e.target.closest('button') && e.key === ' ') return;
+  if (e.key === ' ') { e.preventDefault(); $('play').click(); }
+  else if (e.key === 'ArrowRight') seek(fromC(Math.min(TOTAL, toC(tg) + 10000)));
+  else if (e.key === 'ArrowLeft') seek(fromC(Math.max(0, toC(tg) - 10000)));
+  else if (e.key === ']') $('next').click(); else if (e.key === '[') $('prev').click();
+});
+let last = performance.now(), hold = 0;
+function loop(now) {
+  const dt = Math.min(100, now - last); last = now;
+  if (playing) {
+    const ri = roundAt(tg);
+    if (tg >= R[ri][1]) {
+      hold += dt;
+      if (hold > 2400) { hold = 0; if (ri < NR - 1) advance(R[ri + 1][0]); else setPlay(false); }
+    } else { hold = 0; advance(Math.min(Math.max(tg + 1, fromC(toC(tg) + dt * speed)), R[ri][1])); }
+    render();
+  }
+  requestAnimationFrame(loop);
+}
+
+// ассисты
+const ASK = {}; AS.feed.forEach(([t, v, a, l, b]) => ASK[t + '-' + v] = [...l, ...b.filter(x => !l.includes(x))]);
+reset(); tg = -1; advance(R[0][0]); render(); drawTL();
+addEventListener('resize', () => drawTL());
+document.fonts && document.fonts.ready.then(drawTL);
+requestAnimationFrame(loop);
+}
+// загрузка: игра из адреса (#2026-10-22), иначе последняя
+fetch('replays/index.json?t=' + Date.now()).then(r => r.json()).then(list => {
+  const want = location.hash.slice(1), date = list.includes(want) ? want : list[list.length - 1];
+  const sel = $('gsel');
+  sel.innerHTML = [...list].reverse().map(d => `<option value="${d}"${d === date ? ' selected' : ''}>${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(0, 4)}</option>`).join('');
+  sel.onchange = () => { location.hash = sel.value; location.reload(); };
+  return fetch('replays/' + date + '.json').then(r => r.json());
+}).then(J => { $('loading').remove(); $('main').hidden = false; main(J); })
+  .catch(e => { $('loading').textContent = 'Не получилось загрузить повтор: ' + e.message; });
+addEventListener('hashchange', () => location.reload());
+</script>
+</body>
+</html>
