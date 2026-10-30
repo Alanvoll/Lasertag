@@ -359,13 +359,14 @@ let seasonMode = "avg", seasonCls = "all";
 const clsSeg = () => `<div class="seg" role="group" aria-label="Оружие">${Object.entries(CLS).map(([k, v]) => `<button data-cls="${k}">${v}</button>`).join("")}</div>`;
 function seasonTableInit(S) {
   const one = x => x.toFixed(1).replace(".", ",");
+  const pdf = x => isFinite(x) ? one(x) : "∞"; // попадания на смерть: из сумм за сезон
   const COLS = {
     avg: [["name", "Игрок", r => r.name], ["games", "Игр", r => r.games, String], ["perGame", "Попал", r => r.dealt / r.games, one], ["recvPG", "Получил", r => r.recv / r.games, one],
-      ["ratioPerGame", "Попал / получил", r => r.ratioPerGame, r2], ["deathsPG", "Смерти", r => r.deaths / r.games, one], ["shotsPG", "Выстрелы", r => r.shots / r.games, x => fmt(x)], ["accPerGame", "Точность", r => r.accPerGame, pct]],
+      ["ratioPerGame", "Попал / получил", r => r.ratioPerGame, r2], ["deathsPG", "Смерти", r => r.deaths / r.games, one], ["dpd", "Попал на смерть", r => div(r.dealt, r.deaths), pdf], ["rpd", "Получил на смерть", r => div(r.recv, r.deaths), pdf], ["shotsPG", "Выстрелы", r => r.shots / r.games, x => fmt(x)], ["accPerGame", "Точность", r => r.accPerGame, pct]],
     rnd: [["name", "Игрок", r => r.name], ["gr", "Раундов", r => r.gr, String], ["dealtPR", "Попал", r => div(r.dealt, r.gr), r2], ["recvPR", "Получил", r => div(r.recv, r.gr), r2],
-      ["ratio", "Попал / получил", r => r.ratio, r2], ["deathsPR", "Смерти", r => div(r.deaths, r.gr), r2], ["shotsPR", "Выстрелы", r => div(r.shots, r.gr), one], ["acc", "Точность", r => r.acc, pct]],
+      ["ratio", "Попал / получил", r => r.ratio, r2], ["deathsPR", "Смерти", r => div(r.deaths, r.gr), r2], ["dpd", "Попал на смерть", r => div(r.dealt, r.deaths), pdf], ["rpd", "Получил на смерть", r => div(r.recv, r.deaths), pdf], ["shotsPR", "Выстрелы", r => div(r.shots, r.gr), one], ["acc", "Точность", r => r.acc, pct]],
     tot: [["name", "Игрок", r => r.name], ["games", "Игр", r => r.games, String], ["dealt", "Попал", r => r.dealt, fmt], ["recv", "Получил", r => r.recv, fmt],
-      ["ratio", "Попал / получил", r => r.ratio, r2], ["deaths", "Смерти", r => r.deaths, fmt], ["shots", "Выстрелы", r => r.shots, fmt], ["acc", "Точность", r => r.acc, pct]],
+      ["ratio", "Попал / получил", r => r.ratio, r2], ["deaths", "Смерти", r => r.deaths, fmt], ["dpd", "Попал на смерть", r => div(r.dealt, r.deaths), pdf], ["rpd", "Получил на смерть", r => div(r.recv, r.deaths), pdf], ["shots", "Выстрелы", r => r.shots, fmt], ["acc", "Точность", r => r.acc, pct]],
   };
   const draw = () => {
     const cols = COLS[seasonMode];
