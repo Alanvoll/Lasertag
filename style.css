@@ -142,6 +142,7 @@ thead th[aria-sort="ascending"] button::after { content: " ↑"; color: var(--go
 .mx tbody th small { display: block; font-weight: 400; color: var(--muted); font-size: 11px }
 .mx td.cell { height: 38px; font: 600 14px var(--mono); background: color-mix(in srgb, var(--c) var(--a), var(--panel)); border-radius: 4px }
 .mx td.cell.hi { color: #fff }
+.mx td.cell.est { font-weight: 400; font-style: italic }
 .mx .tot { font: 400 13px var(--mono); color: var(--muted); padding: 0 8px }
 
 /* фраги */
