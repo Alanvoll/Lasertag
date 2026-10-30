@@ -380,3 +380,25 @@ h2 .tag { font: 600 10px var(--mono); letter-spacing: .16em; text-transform: upp
 .replay { background: var(--panel); border: 1px solid var(--line); padding: 16px 18px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px }
 .replay p { margin: 0; color: var(--muted); max-width: 62ch }
 .replay .btn { flex: none }
+
+/* попадания на смерть: лента карточек под телефон, без цветов команд (игроки меняют команды) */
+.pd { max-width: 560px; width: 100%; margin-inline: auto }
+.pdseg { display: grid; grid-template-columns: 1fr 1fr }
+.pdseg button { text-align: center; padding: 10px 6px }
+.pdavg { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; font-size: 14px; color: var(--muted) }
+.pdavg b { font-size: 20px; color: var(--fg); font-weight: 600 }
+.pdlist { display: flex; flex-direction: column; gap: 8px }
+.pdcard { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; align-items: center }
+.pdnm { font-weight: 600; font-size: 16px; min-width: 0 }
+.pdnm small { font: 400 12px var(--body); color: var(--muted); margin-left: 6px }
+.pdbig { font-size: 24px; line-height: 1; text-align: right; font-weight: 600 }
+.pdbig small { display: block; font: 400 11px var(--body); color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-top: 3px }
+.pdtrack { grid-column: 1/-1; height: 6px; border-radius: 3px; background: var(--panel2); position: relative }
+.pdtrack i { position: absolute; top: 0; bottom: 0; border-radius: 3px; background: var(--fg); opacity: .85 }
+.pdtrack u { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--gold) }
+.pdmm { grid-column: 1/-1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; color: var(--muted) }
+.pdmm b { color: var(--fg); font-weight: 600 }
+.pdmm span:last-child { text-align: right }
+.pdlab { grid-column: 1/-1; display: flex; align-items: baseline; gap: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 8px; margin-top: 2px }
+.pdlab b { font-size: 15px; color: var(--fg); letter-spacing: 0 }
+.pdlab small { margin-left: auto; text-transform: none; letter-spacing: 0 }
