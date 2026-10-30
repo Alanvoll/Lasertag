@@ -159,7 +159,7 @@ function gameModel(g) {
     p.fragEx = sum(P, v => (FA[`${p.i}:${v.i}`] || [0, 0])[0]); p.fragEs = sum(P, v => (FA[`${p.i}:${v.i}`] || [0, 0])[1]);
   }
   for (const p of P) {
-    p.e = { dealt: P.some(v => estH(p, v)), recv: p.est.has("recv") || P.some(a => estH(a, p)), shots: p.est.has("shots"), deaths: p.est.has("deaths") };
+    p.e = { dealt: P.some(v => estH(p, v)), recv: p.est.has("recv"), shots: p.est.has("shots"), deaths: p.est.has("deaths") };
     Object.assign(p.e, { acc: p.e.dealt || p.e.shots, ratio: p.e.dealt || p.e.recv, alive: p.e.deaths && !p.died });
     p.e.mvp = p.e.dealt || p.e.ratio;
   }
@@ -544,7 +544,7 @@ function viewGame(S, key) {
     const mem = inTeam(t), dealt = sum(P, a => sum(P, v => valT(a, v, t)));
     const recv = sum(mem, p => sum(segOf(p, t), s => s.recv)), shots = sum(mem, p => sum(segOf(p, t), s => s.shots)), deaths = sum(mem, p => sum(segOf(p, t), s => s.deaths));
     const won = m.winners.filter(w => w === t).length, tm = [...mem].sort((a, b) => b.mvp - a.mvp)[0];
-    const eD = P.some(a => a.teams.includes(t) && a.e.dealt), eR = mem.some(p => p.e.recv), eK = mem.some(p => p.e.deaths), eS = mem.some(p => p.e.shots);
+    const eD = P.some(v => !v.teams.includes(t) && v.est.has("recv") && P.some(a => estH(a, v))), eR = mem.some(p => p.e.recv), eK = mem.some(p => p.e.deaths), eS = mem.some(p => p.e.shots);
     return `<div class="team" style="--c:${TEAMS[t].c}"><div class="team-name"><b>${TEAMS[t].name}</b><span>${mem.map(p => esc(p.name) + (p.swap ? ` (${when(p, t)})` : "")).join(", ")}</span></div>
       <div class="score">${A(eD)}${fmt(dealt)}<small>попаданий</small></div>
       <dl class="kv"><div><dt>Получил</dt><dd>${A(eR)}${fmt(recv)}</dd></div><div><dt>Попал / получил</dt><dd>${A(eD || eR)}${r2(div(dealt, recv))}</dd></div>
