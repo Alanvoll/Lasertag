@@ -276,7 +276,7 @@ function header(active) {
     <a class="tab" href="#games" ${active === "games" ? 'aria-current="page"' : ""}>Игры</a>
     <a class="tab" href="#players" ${active === "players" ? 'aria-current="page"' : ""}>Игроки</a>
     <a class="tab" href="#guns" ${active === "guns" ? 'aria-current="page"' : ""}>Пушки</a>
-    <a class="tab" href="#perdeath" ${active === "perdeath" ? 'aria-current="page"' : ""}>На смерть <span class="tag">бета</span></a>
+    <a class="tab" href="#spread" ${active === "spread" ? 'aria-current="page"' : ""}>Разброс по играм <span class="tag">бета</span></a>
     ${state.canEdit ? `<a class="tab" href="#upload" ${active === "upload" ? 'aria-current="page"' : ""}>+ Добавить игру</a>` : ""}
   </nav></header>`;
 }
@@ -384,44 +384,61 @@ function seasonTableInit(S) {
   draw();
 }
 
-// ---------- попадания на смерть ----------
-// Одна запись на игру игрока: r — получил, k — попал, x — смертей; игры без смертей не считаем.
-let pdMode = "r";
-try { const v = localStorage.getItem("hpd-mode"); if (v === "r" || v === "k") pdMode = v; } catch (_) {}
-const PD = {
-  r: { lead: "Сколько попаданий игрок в среднем получал на одну свою смерть. Минимум 4: столько нужно, чтобы выбить автомат (пистолет 5). Чем больше, тем чаще он доживал раунд с ранениями.", lo: "меньше", hi: "больше" },
-  k: { lead: "Сколько попаданий игрок делал в среднем на одну свою смерть. Это его размен: чем больше, тем дороже он отдавал жизнь.", lo: "худшая", hi: "лучшая" } };
-function viewPerDeath(S) {
-  return `${header("perdeath")}<section class="pd"><div><span class="eyebrow">Сезон · ${plural(DATA.games.length, ["игра", "игры", "игр"])}</span><h1>Попадания на смерть <span class="tag">бета</span></h1></div>
-  <p class="muted" id="pdLead"></p>
-  <div class="seg pdseg" role="group" aria-label="Что считать"><button data-m="r">Получил на смерть</button><button data-m="k">Попал на смерть</button></div>
-  <div class="pdavg" id="pdAvg"></div><div class="pdlist" id="pdList"></div>
-  <p class="note">Крупная цифра — среднее по всем играм игрока. Если он играл и с автоматом, и с пистолетом, ниже отдельные полосы для каждого: у пистолета 5 жизней вместо 4, поэтому его цифры выше. Полоска: светлая часть от худшей до лучшей игры, черта — среднее. «≈» — в игре часть данных оценена.</p></section>${footer()}`;
+// ---------- разброс по играм ----------
+// Одна запись на игру игрока: k — попал, r — получил, x — смертей, g — раундов в игре; e* — есть оценки.
+let spMode = "q", spNorm = "rd", spHide1 = true;
+try { const v = JSON.parse(localStorage.getItem("spread") || "{}"); if (["k", "r", "q", "kx", "rx"].includes(v.m)) spMode = v.m; if (v.n === "g" || v.n === "rd") spNorm = v.n; if (typeof v.h === "boolean") spHide1 = v.h; } catch (_) {}
+const SP = {
+  k: { lead: "Сколько попаданий игрок делал в игре: среднее, худшая и лучшая игра. Широкая полоска значит, что игры у него сильно разные.", lo: "худшая", hi: "лучшая" },
+  r: { lead: "Сколько попаданий игрок получал в игре. Меньше — лучше, поэтому сверху те, кто получал меньше всех.", lo: "больше", hi: "меньше", asc: true },
+  q: { lead: "Коэффициент попал / получил по играм. Это самый устойчивый показатель уровня игры: у одного и того же игрока он повторяется от игры к игре лучше остальных.", lo: "худшая", hi: "лучшая" },
+  kx: { lead: "Сколько попаданий игрок делал на одну свою смерть, по играм. Это его размен: чем больше, тем дороже он отдавал жизнь.", lo: "худшая", hi: "лучшая" },
+  rx: { lead: "Сколько попаданий игрок получал на одну свою смерть, по играм. Минимум 4 (пистолет 5). Больше — чаще доживал раунд с ранениями. От игры к игре почти не повторяется, так что это скорее стиль и везение, чем уровень.", lo: "меньше", hi: "больше" } };
+function viewSpread(S) {
+  return `${header("spread")}<section class="pd"><div><span class="eyebrow">Сезон · ${plural(DATA.games.length, ["игра", "игры", "игр"])}</span><h1>Разброс по играм <span class="tag">бета</span></h1></div>
+  <p class="muted" id="spLead"></p>
+  <div class="seg pdseg pdsegm" role="group" aria-label="Что считать"><button data-m="k">Попал</button><button data-m="r">Получил</button><button data-m="q">Попал / получил</button><button data-m="kx">Попал на смерть</button><button data-m="rx">Получил на смерть</button></div>
+  <div class="seg pdseg" role="group" aria-label="Нормировка" id="spNorm"><button data-n="g">За игру</button><button data-n="rd">За раунд</button></div>
+  <div class="pdavgrow"><div class="pdavg" id="spAvg"></div><label class="pdchk"><input type="checkbox" id="spOne"> Скрыть с одной игрой</label></div>
+  <div class="pdlist" id="spList"></div>
+  <p class="note">Крупная цифра — среднее по играм игрока. Полоска: светлая часть от худшей до лучшей игры, черта — среднее. Если человек играл и с автоматом, и с пистолетом, ниже отдельные полосы: у пистолета 5 жизней и одиночные выстрелы. Игры идут 17–32 раунда, поэтому «за раунд» честнее сравнивает попадания между играми. Коэффициент и попадания на смерть от числа раундов не зависят, игры без смертей в них не считаются. «≈» — в игре часть данных оценена.</p></section>${footer()}`;
 }
-function perDeathInit(S) {
+function spreadInit(S) {
   const by = new Map();
-  S.models.forEach(m => m.P.forEach(p => { if (!p.deaths) return;
-    const l = by.get(p.name) || []; by.set(p.name, l);
-    l.push({ d: dateShort(m.g.date).slice(0, 5), r: p.recv / p.deaths, k: p.dealt / p.deaths, pist: clsOf(p) === "pistol", er: !!(p.e.recv || p.e.deaths), ek: !!(p.e.dealt || p.e.deaths) }); }));
+  S.models.forEach(m => m.P.forEach(p => { const l = by.get(p.name) || []; by.set(p.name, l);
+    l.push({ d: dateShort(m.g.date).slice(0, 5), k: p.dealt, r: p.recv, x: p.deaths, g: p.gr, pist: clsOf(p) === "pistol", ek: !!p.e.dealt, er: !!p.e.recv, ex: !!p.e.deaths }); }));
+  const save = () => { try { localStorage.setItem("spread", JSON.stringify({ m: spMode, n: spNorm, h: spHide1 })); } catch (_) {} };
   const draw = () => {
-    const md = pdMode, ek = "e" + md;
-    document.querySelectorAll(".pdseg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === md));
-    document.getElementById("pdLead").textContent = PD[md].lead;
-    const st = v => ({ avg: sum(v, x => x[md]) / v.length, lo: v.reduce((a, x) => x[md] < a[md] ? x : a), hi: v.reduce((a, x) => x[md] > a[md] ? x : a), n: v.length, e: v.some(x => x[ek]) });
-    const rows = [...by].map(([n, g]) => { const a = g.filter(x => !x.pist), p = g.filter(x => x.pist);
-      return { n, all: st(g), parts: [a.length && ["Автомат", st(a)], p.length && ["Пистолет", st(p)]].filter(Boolean) }; }).sort((a, b) => b.all.avg - a.all.avg);
-    const vals = [...by.values()].flat().map(x => x[md]), mx = Math.max(...vals) * 1.04, mn = md === "r" ? 3.5 : 0;
-    const pos = x => ((x - mn) / (mx - mn) * 100).toFixed(1) + "%", A = on => on ? "≈" : "", f = r2, gw = n => plural(n, ["игра", "игры", "игр"]);
-    document.getElementById("pdAvg").innerHTML = `Среднее по всем игрокам <b class="num">${f(sum(vals, x => x) / vals.length)}</b>`;
+    const md = spMode, T = SP[md], per = md === "k" || md === "r";
+    const val = x => md === "kx" ? (x.x ? x.k / x.x : null) : md === "rx" ? (x.x ? x.r / x.x : null) : md === "q" ? (x.r ? x.k / x.r : null) : (md === "k" ? x.k : x.r) / (spNorm === "rd" ? x.g : 1);
+    const est = x => md === "k" ? x.ek : md === "r" ? x.er : md === "q" ? x.ek || x.er : md === "kx" ? x.ek || x.ex : x.er || x.ex;
+    const f = v => per && spNorm === "g" ? one(v) : r2(v), A = on => on ? "≈" : "", gw = n => plural(n, ["игра", "игры", "игр"]);
+    document.querySelectorAll(".pdsegm button").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === md));
+    document.querySelectorAll("#spNorm button").forEach(b => b.setAttribute("aria-pressed", b.dataset.n === spNorm));
+    document.getElementById("spNorm").style.display = per ? "" : "none";
+    document.getElementById("spLead").textContent = T.lead;
+    const st = v => ({ avg: sum(v, x => x.v) / v.length, lo: v.reduce((a, x) => x.v < a.v ? x : a), hi: v.reduce((a, x) => x.v > a.v ? x : a), n: v.length, e: v.some(x => x.e) });
+    const rows = [...by].map(([n, g]) => { const v = g.map(x => ({ ...x, v: val(x), e: est(x) })).filter(x => x.v != null); if (!v.length) return null;
+      const a = v.filter(x => !x.pist), p = v.filter(x => x.pist);
+      return { n, all: st(v), parts: [a.length && ["Автомат", st(a)], p.length && ["Пистолет", st(p)]].filter(Boolean) }; })
+      .filter(r => r && (!spHide1 || r.all.n > 1)).sort((a, b) => T.asc ? a.all.avg - b.all.avg : b.all.avg - a.all.avg);
+    // шкала полосок общая для всех игр, чтобы не прыгала от галочки
+    const vals = [...by.values()].flat().map(val).filter(x => x != null), mx = Math.max(...vals) * 1.04, mn = md === "rx" ? 3.5 : 0;
+    const pos = x => ((x - mn) / (mx - mn) * 100).toFixed(1) + "%";
+    // для «получил» лучшая игра — с меньшим числом, поэтому слева «больше», справа «меньше»
+    const L = t => T.asc ? t.hi : t.lo, R = t => T.asc ? t.lo : t.hi;
+    document.getElementById("spAvg").innerHTML = `Среднее по игрокам <b class="num">${rows.length ? f(sum(rows, r => r.all.avg) / rows.length) : "—"}</b>`;
     const part = (lab, t, showLab) => `${showLab ? `<span class="pdlab">${lab}<b class="num">${A(t.e)}${f(t.avg)}</b><small>${t.n > 1 ? gw(t.n) : "игра " + t.hi.d}</small></span>` : ""}
-      ${t.n > 1 ? `<span class="pdtrack"><i style="left:${pos(t.lo[md])};width:calc(${pos(t.hi[md])} - ${pos(t.lo[md])} + 2px)"></i><u style="left:${pos(t.avg)}"></u></span>
-      <span class="pdmm"><span>${PD[md].lo} <b class="num">${A(t.lo[ek])}${f(t.lo[md])}</b> · ${t.lo.d}</span><span>${PD[md].hi} <b class="num">${A(t.hi[ek])}${f(t.hi[md])}</b> · ${t.hi.d}</span></span>` : ""}`;
-    document.getElementById("pdList").innerHTML = rows.map(r => { const two = r.parts.length > 1; return `<div class="pdcard">
+      ${t.n > 1 ? `<span class="pdtrack"><i style="left:${pos(t.lo.v)};width:calc(${pos(t.hi.v)} - ${pos(t.lo.v)} + 2px)"></i><u style="left:${pos(t.avg)}"></u></span>
+      <span class="pdmm"><span>${T.lo} <b class="num">${A(L(t).e)}${f(L(t).v)}</b> · ${L(t).d}</span><span>${T.hi} <b class="num">${A(R(t).e)}${f(R(t).v)}</b> · ${R(t).d}</span></span>` : ""}`;
+    document.getElementById("spList").innerHTML = rows.map(r => { const two = r.parts.length > 1; return `<div class="pdcard">
       <span class="pdnm">${playerLink(r.n, S.rows, [])}<small>${r.all.n > 1 ? gw(r.all.n) : ""}${!two && r.parts[0][0] === "Пистолет" ? " · пистолет" : ""}</small></span>
       <span class="pdbig num">${A(r.all.e)}${f(r.all.avg)}<small>${r.all.n > 1 ? "в среднем" : "игра " + r.all.hi.d}</small></span>
       ${r.parts.map(([l, t]) => part(l, t, two)).join("")}</div>`; }).join("");
   };
-  document.querySelector(".pdseg").onclick = ev => { const v = ev.target.dataset && ev.target.dataset.m; if (v) { pdMode = v; try { localStorage.setItem("hpd-mode", v); } catch (_) {} draw(); } };
+  document.querySelector(".pdsegm").onclick = ev => { const v = ev.target.dataset && ev.target.dataset.m; if (v) { spMode = v; save(); draw(); } };
+  document.getElementById("spNorm").onclick = ev => { const v = ev.target.dataset && ev.target.dataset.n; if (v) { spNorm = v; save(); draw(); } };
+  const one1 = document.getElementById("spOne"); one1.checked = spHide1; one1.onchange = () => { spHide1 = one1.checked; save(); draw(); };
   draw();
 }
 
@@ -798,7 +815,7 @@ function render() {
   else if (h === "players") { html = viewPlayers(S); after = () => seasonTableInit(S); }
   else if (/^p\d+$/.test(h)) { const s = S.rows.find(r => r.key === h); html = viewPlayer(S, h); after = () => { progressInit(); if (s && s.byCls && s.byCls.auto && s.byCls.pistol) statTable("pClsTable", statCols(["name", "Оружие", r => CLS[r.cls]], true), [s.byCls.auto, s.byCls.pistol], r => CLS[r.cls], "games");
       if (s) statTable("pGunTable", statCols(["name", "Пушка", r => r.gun.name]), s.gunList, r => gunLink(r.gun), "games"); }; }
-  else if (h === "perdeath") { html = viewPerDeath(S); after = () => perDeathInit(S); }
+  else if (h === "spread" || h === "perdeath") { html = viewSpread(S); after = () => spreadInit(S); }
   else if (h === "guns") { html = viewGuns(S); after = () => gunsInit(S); }
   else if (/^gun\d+$/.test(h)) { const g = S.guns.find(z => z.key === h); html = viewGun(S, h); after = () => g && statTable("gunPlayers", statCols(["name", "Игрок", r => r.name]), g.players, r => playerLink(r.name, S.rows, []), "ratio"); }
   else if (h.startsWith("game-")) { html = viewGame(S, h); after = () => gameTableInit(S, h); }
