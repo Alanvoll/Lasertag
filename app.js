@@ -276,7 +276,7 @@ function header(active) {
     <a class="tab" href="#games" ${active === "games" ? 'aria-current="page"' : ""}>Игры</a>
     <a class="tab" href="#players" ${active === "players" ? 'aria-current="page"' : ""}>Игроки</a>
     <a class="tab" href="#guns" ${active === "guns" ? 'aria-current="page"' : ""}>Пушки</a>
-    <a class="tab" href="#perdeath" ${active === "perdeath" ? 'aria-current="page"' : ""}>На смерть</a>
+    <a class="tab" href="#perdeath" ${active === "perdeath" ? 'aria-current="page"' : ""}>На смерть <span class="tag">бета</span></a>
     ${state.canEdit ? `<a class="tab" href="#upload" ${active === "upload" ? 'aria-current="page"' : ""}>+ Добавить игру</a>` : ""}
   </nav></header>`;
 }
@@ -392,7 +392,7 @@ const PD = {
   r: { lead: "Сколько попаданий игрок в среднем получал на одну свою смерть. Минимум 4: столько нужно, чтобы выбить автомат (пистолет 5). Чем больше, тем чаще он доживал раунд с ранениями.", lo: "меньше", hi: "больше" },
   k: { lead: "Сколько попаданий игрок делал в среднем на одну свою смерть. Это его размен: чем больше, тем дороже он отдавал жизнь.", lo: "худшая", hi: "лучшая" } };
 function viewPerDeath(S) {
-  return `${header("perdeath")}<section class="pd"><div><span class="eyebrow">Сезон · ${plural(DATA.games.length, ["игра", "игры", "игр"])}</span><h1>Попадания на смерть</h1></div>
+  return `${header("perdeath")}<section class="pd"><div><span class="eyebrow">Сезон · ${plural(DATA.games.length, ["игра", "игры", "игр"])}</span><h1>Попадания на смерть <span class="tag">бета</span></h1></div>
   <p class="muted" id="pdLead"></p>
   <div class="seg pdseg" role="group" aria-label="Что считать"><button data-m="r">Получил на смерть</button><button data-m="k">Попал на смерть</button></div>
   <div class="pdavg" id="pdAvg"></div><div class="pdlist" id="pdList"></div>
