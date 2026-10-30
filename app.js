@@ -636,12 +636,14 @@ function gameTableInit(S, key) {
   const x = allGames().find(z => z.key === key); if (!x) return;
   const m = S.models[x.i], max = Math.max(1, ...m.P.map(p => p.dealt));
   const cols = [["name", "Игрок", p => p.name], ["dealt", "Попал", p => p.dealt], ["recv", "Получил", p => p.recv], ["ratio", "Попал / получил", p => p.ratio],
-    ["deaths", "Смерти", p => p.deaths], ["shots", "Выстрелы", p => p.shots], ["acc", "Точность", p => p.acc]];
+    ["deaths", "Смерти", p => p.deaths], ["dpd", "Попал на смерть", p => div(p.dealt, p.deaths)], ["rpd", "Получил на смерть", p => div(p.recv, p.deaths)],
+    ["shots", "Выстрелы", p => p.shots], ["acc", "Точность", p => p.acc]];
+  const pd = x => isFinite(x) ? one(x) : "∞";
   if (m.winners.length) cols.push(["alive", "Раундов без смерти", p => p.alive]);
   cols.push(["mvp", "Рейтинг", p => p.mvp]);
   sortable("gameTable", cols, m.P, p => `<tr><th class="l"><span class="row" style="gap:6px">${playerLink(p.name, S.rows, p.teams)}<small class="muted num">${esc(p.gun !== p.name ? p.gun : "")}${p.swap ? " · смена команды" : ""}</small></span></th>
     <td class="num barcell">${p.segs.map(s => { const n = sum(m.P, v => m.valT(p, v, s.team)); return `<span class="bar" style="--c:${TEAMS[s.team].c};width:${Math.round(n / max * 80)}px;margin-right:${p.swap ? 1 : 0}px"></span>`; }).join("")}<span style="margin-left:8px">${approx(p.e.dealt)}${p.dealt}</span></td>
-    <td class="num">${approx(p.e.recv)}${p.recv}</td><td class="num">${approx(p.e.ratio)}${r2(p.ratio)}</td><td class="num">${approx(p.e.deaths)}${p.deaths}</td><td class="num">${approx(p.e.shots)}${fmt(p.shots)}</td><td class="num">${approx(p.e.acc)}${pct(p.acc)}</td>${m.winners.length ? `<td class="num">${p.alive == null ? "—" : approx(p.e.alive) + p.alive}</td>` : ""}<td class="num">${approx(p.e.mvp)}${fmt(p.mvp)}${m.mvp === p ? " ★" : ""}</td></tr>`, "mvp");
+    <td class="num">${approx(p.e.recv)}${p.recv}</td><td class="num">${approx(p.e.ratio)}${r2(p.ratio)}</td><td class="num">${approx(p.e.deaths)}${p.deaths}</td><td class="num">${approx(p.e.dealt || p.e.deaths)}${pd(div(p.dealt, p.deaths))}</td><td class="num">${approx(p.e.recv || p.e.deaths)}${pd(div(p.recv, p.deaths))}</td><td class="num">${approx(p.e.shots)}${fmt(p.shots)}</td><td class="num">${approx(p.e.acc)}${pct(p.acc)}</td>${m.winners.length ? `<td class="num">${p.alive == null ? "—" : approx(p.e.alive) + p.alive}</td>` : ""}<td class="num">${approx(p.e.mvp)}${fmt(p.mvp)}${m.mvp === p ? " ★" : ""}</td></tr>`, "mvp");
 }
 
 // ---------- загрузка и правка ----------
