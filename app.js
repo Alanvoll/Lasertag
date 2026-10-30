@@ -276,6 +276,7 @@ function header(active) {
     <a class="tab" href="#games" ${active === "games" ? 'aria-current="page"' : ""}>Игры</a>
     <a class="tab" href="#players" ${active === "players" ? 'aria-current="page"' : ""}>Игроки</a>
     <a class="tab" href="#guns" ${active === "guns" ? 'aria-current="page"' : ""}>Пушки</a>
+    <a class="tab" href="#perdeath" ${active === "perdeath" ? 'aria-current="page"' : ""}>На смерть</a>
     ${state.canEdit ? `<a class="tab" href="#upload" ${active === "upload" ? 'aria-current="page"' : ""}>+ Добавить игру</a>` : ""}
   </nav></header>`;
 }
@@ -380,6 +381,47 @@ function seasonTableInit(S) {
   };
   document.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => { seasonMode = b.dataset.mode; draw(); });
   document.querySelectorAll("[data-cls]").forEach(b => b.onclick = () => { seasonCls = b.dataset.cls; draw(); });
+  draw();
+}
+
+// ---------- попадания на смерть ----------
+// Одна запись на игру игрока: r — получил, k — попал, x — смертей; игры без смертей не считаем.
+let pdMode = "r";
+try { const v = localStorage.getItem("hpd-mode"); if (v === "r" || v === "k") pdMode = v; } catch (_) {}
+const PD = {
+  r: { lead: "Сколько попаданий игрок в среднем получал на одну свою смерть. Минимум 4: столько нужно, чтобы выбить автомат (пистолет 5). Чем больше, тем чаще он доживал раунд с ранениями.", lo: "меньше", hi: "больше" },
+  k: { lead: "Сколько попаданий игрок делал в среднем на одну свою смерть. Это его размен: чем больше, тем дороже он отдавал жизнь.", lo: "худшая", hi: "лучшая" } };
+function viewPerDeath(S) {
+  return `${header("perdeath")}<section class="pd"><div><span class="eyebrow">Сезон · ${plural(DATA.games.length, ["игра", "игры", "игр"])}</span><h1>Попадания на смерть</h1></div>
+  <p class="muted" id="pdLead"></p>
+  <div class="seg pdseg" role="group" aria-label="Что считать"><button data-m="r">Получил на смерть</button><button data-m="k">Попал на смерть</button></div>
+  <div class="pdavg" id="pdAvg"></div><div class="pdlist" id="pdList"></div>
+  <p class="note">Крупная цифра — среднее по всем играм игрока. Если он играл и с автоматом, и с пистолетом, ниже отдельные полосы для каждого: у пистолета 5 жизней вместо 4, поэтому его цифры выше. Полоска: светлая часть от худшей до лучшей игры, черта — среднее. «≈» — в игре часть данных оценена.</p></section>${footer()}`;
+}
+function perDeathInit(S) {
+  const by = new Map();
+  S.models.forEach(m => m.P.forEach(p => { if (!p.deaths) return;
+    const l = by.get(p.name) || []; by.set(p.name, l);
+    l.push({ d: dateShort(m.g.date).slice(0, 5), r: p.recv / p.deaths, k: p.dealt / p.deaths, pist: clsOf(p) === "pistol", er: !!(p.e.recv || p.e.deaths), ek: !!(p.e.dealt || p.e.deaths) }); }));
+  const draw = () => {
+    const md = pdMode, ek = "e" + md;
+    document.querySelectorAll(".pdseg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === md));
+    document.getElementById("pdLead").textContent = PD[md].lead;
+    const st = v => ({ avg: sum(v, x => x[md]) / v.length, lo: v.reduce((a, x) => x[md] < a[md] ? x : a), hi: v.reduce((a, x) => x[md] > a[md] ? x : a), n: v.length, e: v.some(x => x[ek]) });
+    const rows = [...by].map(([n, g]) => { const a = g.filter(x => !x.pist), p = g.filter(x => x.pist);
+      return { n, all: st(g), parts: [a.length && ["Автомат", st(a)], p.length && ["Пистолет", st(p)]].filter(Boolean) }; }).sort((a, b) => b.all.avg - a.all.avg);
+    const vals = [...by.values()].flat().map(x => x[md]), mx = Math.max(...vals) * 1.04, mn = md === "r" ? 3.5 : 0;
+    const pos = x => ((x - mn) / (mx - mn) * 100).toFixed(1) + "%", A = on => on ? "≈" : "", f = r2, gw = n => plural(n, ["игра", "игры", "игр"]);
+    document.getElementById("pdAvg").innerHTML = `Среднее по всем игрокам <b class="num">${f(sum(vals, x => x) / vals.length)}</b>`;
+    const part = (lab, t, showLab) => `${showLab ? `<span class="pdlab">${lab}<b class="num">${A(t.e)}${f(t.avg)}</b><small>${t.n > 1 ? gw(t.n) : "игра " + t.hi.d}</small></span>` : ""}
+      ${t.n > 1 ? `<span class="pdtrack"><i style="left:${pos(t.lo[md])};width:calc(${pos(t.hi[md])} - ${pos(t.lo[md])} + 2px)"></i><u style="left:${pos(t.avg)}"></u></span>
+      <span class="pdmm"><span>${PD[md].lo} <b class="num">${A(t.lo[ek])}${f(t.lo[md])}</b> · ${t.lo.d}</span><span>${PD[md].hi} <b class="num">${A(t.hi[ek])}${f(t.hi[md])}</b> · ${t.hi.d}</span></span>` : ""}`;
+    document.getElementById("pdList").innerHTML = rows.map(r => { const two = r.parts.length > 1; return `<div class="pdcard">
+      <span class="pdnm">${playerLink(r.n, S.rows, [])}<small>${r.all.n > 1 ? gw(r.all.n) : ""}${!two && r.parts[0][0] === "Пистолет" ? " · пистолет" : ""}</small></span>
+      <span class="pdbig num">${A(r.all.e)}${f(r.all.avg)}<small>${r.all.n > 1 ? "в среднем" : "игра " + r.all.hi.d}</small></span>
+      ${r.parts.map(([l, t]) => part(l, t, two)).join("")}</div>`; }).join("");
+  };
+  document.querySelector(".pdseg").onclick = ev => { const v = ev.target.dataset && ev.target.dataset.m; if (v) { pdMode = v; try { localStorage.setItem("hpd-mode", v); } catch (_) {} draw(); } };
   draw();
 }
 
@@ -748,6 +790,7 @@ function render() {
   else if (h === "players") { html = viewPlayers(S); after = () => seasonTableInit(S); }
   else if (/^p\d+$/.test(h)) { const s = S.rows.find(r => r.key === h); html = viewPlayer(S, h); after = () => { progressInit(); if (s && s.byCls && s.byCls.auto && s.byCls.pistol) statTable("pClsTable", statCols(["name", "Оружие", r => CLS[r.cls]], true), [s.byCls.auto, s.byCls.pistol], r => CLS[r.cls], "games");
       if (s) statTable("pGunTable", statCols(["name", "Пушка", r => r.gun.name]), s.gunList, r => gunLink(r.gun), "games"); }; }
+  else if (h === "perdeath") { html = viewPerDeath(S); after = () => perDeathInit(S); }
   else if (h === "guns") { html = viewGuns(S); after = () => gunsInit(S); }
   else if (/^gun\d+$/.test(h)) { const g = S.guns.find(z => z.key === h); html = viewGun(S, h); after = () => g && statTable("gunPlayers", statCols(["name", "Игрок", r => r.name]), g.players, r => playerLink(r.name, S.rows, []), "ratio"); }
   else if (h.startsWith("game-")) { html = viewGame(S, h); after = () => gameTableInit(S, h); }
