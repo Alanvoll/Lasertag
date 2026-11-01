@@ -153,9 +153,11 @@ function gameModel(g) {
     p.foes = P.filter(o => o !== p && (val(p, o) || val(o, p)));
     // У старых тагеров нет журнала, но за раунд погибают не больше одного раза: без смерти = раунды − смерти
     const nR = ((g.rounds && g.rounds.winners) || []).length;
-    p.gr = nR; // раундов в игре: для средних «за раунд»
-    p.nR = p.died ? p.died.length : nR && p.deaths <= nR ? nR : 0;
-    p.alive = p.died ? p.died.length - sum(p.died, x => x) : p.nR ? p.nR - p.deaths : null;
+    // died: 1 — погиб в раунде, 0 — дожил, null — не играл этот раунд (сидел)
+    const played = p.died ? p.died.filter(x => x != null).length : null;
+    p.gr = played ?? nR; // раундов сыграно: для средних «за раунд»
+    p.nR = p.died ? played : nR && p.deaths <= nR ? nR : 0;
+    p.alive = p.died ? p.died.filter(x => x === 0).length : p.nR ? p.nR - p.deaths : null;
     p.fragEx = sum(P, v => (FA[`${p.i}:${v.i}`] || [0, 0])[0]); p.fragEs = sum(P, v => (FA[`${p.i}:${v.i}`] || [0, 0])[1]);
   }
   for (const p of P) {
