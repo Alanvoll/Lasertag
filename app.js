@@ -168,10 +168,18 @@ function gameModel(g) {
   // рейтинг MVP (временная формула): 100 — средний игрок этой игры; половина — попадания, половина — коэффициент (не больше 3)
   const rc = p => Math.min(isFinite(p.ratio) ? p.ratio : 3, 3), avgD = sum(P, p => p.dealt) / P.length || 1, avgR = sum(P, rc) / P.length || 1;
   for (const p of P) p.mvp = 50 * p.dealt / avgD + 50 * rc(p) / avgR;
+  // рейтинг игрока за одну команду: та же формула, но только по тому, что он сделал за неё
+  const valT0 = (a, v, t) => HT[`${a.i}:${v.i}:${t}`] || 0;
+  const mvpT = (p, t) => { if (!p.swap) return p.mvp; const d = sum(P, v => valT0(p, v, t)), r = sum(p.segs.filter(s => s.team === t), s => s.recv), x = div(d, r);
+    return 50 * d / avgD + 50 * Math.min(isFinite(x) ? x : 3, 3) / avgR; };
+  // доля игры за команду: по раундам, если они известны, иначе по выстрелам
+  const shareT = (p, t) => { if (!p.swap) return 1;
+    if (p.segRounds) { const n = q => sum(q, ([a, b]) => b - a + 1), all = n(p.segRounds); return div(n(p.segRounds.filter((_, k) => p.segs[k].team === t)), all); }
+    return div(sum(p.segs.filter(s => s.team === t), s => s.shots), p.shots); };
   const teamIds = [...new Set(P.flatMap(p => p.teams))].sort();
   const winners = (g.rounds && g.rounds.winners) || [];
   const mvp = [...P].sort((a, b) => b.mvp - a.mvp)[0];
-  return { g, P, teamIds, val, valT, estH, FT, FA, winners, mvp, swaps: (g.rounds && g.rounds.swaps) || [] };
+  return { g, P, teamIds, val, valT, estH, FT, FA, winners, mvp, mvpT, shareT, swaps: (g.rounds && g.rounds.swaps) || [] };
 }
 const gameKey = g => "game-" + String(g.file || g.date || "x").replace(/\.json$/i, "");
 const allGames = () => DATA.games.map((g, i) => ({ g, i, key: gameKey(g) })).sort((a, b) => (b.g.date || "").localeCompare(a.g.date || "") || b.i - a.i);
@@ -613,13 +621,13 @@ function viewGame(S, key) {
   const board = teamIds.map(t => {
     const mem = inTeam(t), dealt = sum(P, a => sum(P, v => valT(a, v, t)));
     const recv = sum(mem, p => sum(segOf(p, t), s => s.recv)), shots = sum(mem, p => sum(segOf(p, t), s => s.shots)), deaths = sum(mem, p => sum(segOf(p, t), s => s.deaths));
-    const won = m.winners.filter(w => w === t).length, tm = [...mem].sort((a, b) => b.mvp - a.mvp)[0];
+    const won = m.winners.filter(w => w === t).length, tm = mem.filter(p => m.shareT(p, t) > .5).sort((a, b) => m.mvpT(b, t) - m.mvpT(a, t))[0]; // MVP команды — среди тех, кто играл за неё большую часть игры, по сделанному за неё
     const eD = P.some(v => !v.teams.includes(t) && v.est.has("recv") && P.some(a => estH(a, v))), eR = mem.some(p => p.e.recv), eK = mem.some(p => p.e.deaths), eS = mem.some(p => p.e.shots);
     return `<div class="team" style="--c:${TEAMS[t].c}"><div class="team-name"><b>${TEAMS[t].name}</b><span>${mem.map(p => esc(p.name) + (p.swap ? ` (${when(p, t)})` : "")).join(", ")}</span></div>
       <div class="score">${A(eD)}${fmt(dealt)}<small>попаданий</small></div>
       <dl class="kv"><div><dt>Получил</dt><dd>${A(eR)}${fmt(recv)}</dd></div><div><dt>Попал / получил</dt><dd>${A(eD || eR)}${r2(div(dealt, recv))}</dd></div>
       ${m.winners.length ? `<div><dt>Раундов</dt><dd>${won}</dd></div>` : ""}<div><dt>Смертей</dt><dd>${A(eK)}${deaths}</dd></div><div><dt>Выстрелов</dt><dd>${A(eS)}${fmt(shots)}</dd></div><div><dt>Точность</dt><dd>${A(eD || eS)}${pct(div(dealt, shots))}</dd></div></dl>
-      ${tm ? `<p class="gmvp"><span class="tag">MVP команды</span>${who(tm)}<span class="muted num">${A(tm.e.mvp)}${fmt(tm.mvp)}</span></p>` : ""}</div>`;
+      ${tm ? `<p class="gmvp"><span class="tag">MVP команды</span>${who(tm)}<span class="muted num">${A(tm.e.mvp)}${fmt(m.mvpT(tm, t))}</span></p>` : ""}</div>`;
   }).join("");
   const swapNote = swappers.length ? `<p class="note">По ходу игры ${(n => n.length > 1 ? n.slice(0, -1).join(", ") + " и " + n[n.length - 1] : n[0])(swappers.map(p => esc(p.name)))} ${swappers.length > 1 ? "сменили" : "сменил(а)"} команду${m.swaps.length ? ` после ${m.swaps.map(r => r + "-го").join(" и ")} раунда` : ""}. Попадания, смерти и выстрелы засчитаны той команде, за которую игрок был в тот момент. Цветные точки у имени показывают команды по порядку.</p>` : "";
   // раунды
