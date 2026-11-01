@@ -139,7 +139,7 @@ function gameModel(g) {
     const segs = p.segs.map(s => ({ ...s, shots: Math.round(s.shots * k) }));
     return { i, name: p.name || cap(p.gun), gun: cap(p.gun), gkey: p.key || p.gun, gen: p.gen, segs, teams: [...new Set(segs.map(s => s.team))],
       swap: new Set(segs.map(s => s.team)).size > 1, shots: sum(segs, s => s.shots), deaths: sum(segs, s => s.deaths), recv: sum(segs, s => s.recv), died: p.died,
-      est: new Set(p.est || []) };
+      est: new Set(p.est || []), parts: p.parts || null, segRounds: p.segRounds || null };
   });
   // Оценки: тагер не считан, часть цифр восстановлена приблизительно (показываем со знаком «≈»)
   const HT = {}, HA = {}, HE = new Set();
@@ -199,15 +199,18 @@ function season() {
       s.teams.push(...p.teams); s.best = Math.max(s.best, p.dealt);
       for (const o of m.P) { if (o === p) continue; const x = m.val(p, o), y = m.val(o, p); if (x || y) { s.meet = s.meet || {}; s.meet[o.name] = (s.meet[o.name] || 0) + 1; } if (x) s.pairs[o.name] = (s.pairs[o.name] || 0) + x; if (y) s.against[o.name] = (s.against[o.name] || 0) + y; }
       S.set(p.name, s);
-      // пушки: тагер узнаём по MAC, поэтому переименования не разбивают статистику
-      const gn = G.get(p.gkey) || { gkey: p.gkey, aliases: {}, gen: p.gen, by: {} };
-      gn.aliases[p.gun.toLowerCase()] = (gn.aliases[p.gun.toLowerCase()] || 0) + 1;
-      addStat(gn, p); addStat(gn.by[p.name] = gn.by[p.name] || { name: p.name }, p);
-      addStat((s.guns = s.guns || {})[p.gkey] = s.guns[p.gkey] || { gkey: p.gkey }, p);
-      const c = clsOf(p); gn.cls = c;
-      const sc = addStat((s.byCls = s.byCls || {})[c] = s.byCls[c] || { cls: c, name: p.name, gameRatios: [], gameAcc: [] }, p);
-      if (isFinite(p.ratio)) sc.gameRatios.push(p.ratio); if (p.shots) sc.gameAcc.push(p.acc);
-      G.set(p.gkey, gn);
+      // пушки: тагер узнаём по MAC, поэтому переименования не разбивают статистику.
+      // Если игрок за игру сменил тагер, у него есть parts: статистика пушек и классов считается по каждому тагеру отдельно
+      for (const u of gunUnits(p)) {
+        const gn = G.get(u.gkey) || { gkey: u.gkey, aliases: {}, gen: u.gen, by: {} };
+        gn.aliases[u.gun.toLowerCase()] = (gn.aliases[u.gun.toLowerCase()] || 0) + 1;
+        addStat(gn, u); addStat(gn.by[p.name] = gn.by[p.name] || { name: p.name }, u);
+        addStat((s.guns = s.guns || {})[u.gkey] = s.guns[u.gkey] || { gkey: u.gkey }, u);
+        const c = clsOf(u); gn.cls = c;
+        const sc = addStat((s.byCls = s.byCls || {})[c] = s.byCls[c] || { cls: c, name: p.name, gameRatios: [], gameAcc: [] }, u);
+        if (isFinite(u.ratio)) sc.gameRatios.push(u.ratio); if (u.shots) sc.gameAcc.push(u.acc);
+        G.set(u.gkey, gn);
+      }
     }
   });
   const rows = [...S.values()].sort((a, b) => a.name.localeCompare(b.name, "ru"));
@@ -220,6 +223,9 @@ function season() {
   rows.forEach(s => s.gunList = Object.values(s.guns || {}).map(x => finStat({ ...x, gun: guns.find(g => g.gkey === x.gkey) })));
   return { models, rows, guns };
 }
+// часть игры на одном тагере: у сменившего тагер по части на каждый, у остальных — весь игрок
+const gunUnits = p => p.parts ? p.parts.map(x => finStat({ name: p.name, gkey: x.key, gun: cap(x.gun), gen: x.gen, dealt: x.dealt, recv: x.recv, deaths: x.deaths, shots: x.shots, gr: x.gr, teams: x.teams || p.teams,
+  e: { dealt: false, recv: false, ratio: false, deaths: false, shots: false, acc: false }, est: new Set() })) : [p];
 const addStat = (a, p) => { a.games = (a.games || 0) + 1; for (const k of ["dealt", "recv", "deaths", "shots", "gr"]) a[k] = (a[k] || 0) + p[k]; return a; };
 const finStat = a => { a.acc = div(a.dealt, a.shots); a.ratio = div(a.dealt, a.recv); return a; };
 const gunLink = g => g ? `<a class="plink" href="#${g.key}">${esc(g.name)}</a>` : "";
@@ -488,7 +494,7 @@ function gunsInit(S) {
 }
 function viewGun(S, key) {
   const g = S.guns.find(z => z.key === key); if (!g) return viewGuns(S);
-  const games = allGames().map(x => ({ ...x, m: S.models[x.i] })).map(x => ({ ...x, p: x.m.P.find(p => p.gkey === g.gkey) })).filter(x => x.p);
+  const games = allGames().map(x => ({ ...x, m: S.models[x.i] })).map(x => ({ ...x, p: x.m.P.flatMap(gunUnits).find(p => p.gkey === g.gkey) })).filter(x => x.p);
   const best = [...g.players].filter(r => isFinite(r.ratio)).sort((a, b) => b.ratio - a.ratio)[0];
   const alias = Object.keys(g.aliases).map(cap).filter(n => n !== g.name);
   return `${header("guns")}<section class="hero"><span class="eyebrow">Пушка · ${genLabel(g)}</span><h1>${esc(g.name)}</h1>
@@ -595,7 +601,9 @@ function viewGame(S, key) {
   const m = S.models[x.i], { g, P, teamIds, val, valT, estH } = m;
   const A = approx;
   const who = p => playerLink(p.name, S.rows, p.teams);
-  const when = (p, t) => !p.swap ? "" : p.teams[0] === t ? "до смены" : "после смены";
+  const rng = ([a, b]) => a === b ? `${a}` : `${a}–${b}`;
+  const when = (p, t) => !p.swap ? "" : p.segRounds ? (q => (q.length > 1 || q[0][0] !== q[0][1] ? "раунды " : "раунд ") + q.map(rng).join(", "))(p.segRounds.filter((_, k) => p.segs[k].team === t))
+    : p.teams[0] === t ? "до смены" : "после смены";
   const inTeam = t => P.filter(p => p.teams.includes(t)).sort((a, b) => a.swap - b.swap);
   const segOf = (p, t) => p.segs.filter(s => s.team === t);
   const swappers = P.filter(p => p.swap);
@@ -611,7 +619,7 @@ function viewGame(S, key) {
       ${m.winners.length ? `<div><dt>Раундов</dt><dd>${won}</dd></div>` : ""}<div><dt>Смертей</dt><dd>${A(eK)}${deaths}</dd></div><div><dt>Выстрелов</dt><dd>${A(eS)}${fmt(shots)}</dd></div><div><dt>Точность</dt><dd>${A(eD || eS)}${pct(div(dealt, shots))}</dd></div></dl>
       ${tm ? `<p class="gmvp"><span class="tag">MVP команды</span>${who(tm)}<span class="muted num">${A(tm.e.mvp)}${fmt(tm.mvp)}</span></p>` : ""}</div>`;
   }).join("");
-  const swapNote = swappers.length ? `<p class="note">По ходу игры ${swappers.map(p => esc(p.name)).join(" и ")} ${swappers.length > 1 ? "сменили" : "сменил(а)"} команду${m.swaps.length ? ` после ${m.swaps[0]}-го раунда` : ""}. Попадания, смерти и выстрелы засчитаны той команде, за которую игрок был в тот момент. Цветные точки у имени показывают команды по порядку.</p>` : "";
+  const swapNote = swappers.length ? `<p class="note">По ходу игры ${(n => n.length > 1 ? n.slice(0, -1).join(", ") + " и " + n[n.length - 1] : n[0])(swappers.map(p => esc(p.name)))} ${swappers.length > 1 ? "сменили" : "сменил(а)"} команду${m.swaps.length ? ` после ${m.swaps.map(r => r + "-го").join(" и ")} раунда` : ""}. Попадания, смерти и выстрелы засчитаны той команде, за которую игрок был в тот момент. Цветные точки у имени показывают команды по порядку.</p>` : "";
   // раунды
   let roundsHtml = "";
   if (m.winners.length) {
@@ -707,7 +715,7 @@ function gameTableInit(S, key) {
     if (m.winners.length) cols.push(["alive", "Раундов без смерти", p => p.alive]);
     cols.push(["mvp", "Рейтинг", p => p.mvp]);
     sortable("gameTable", cols, m.P, p => `<tr><th class="l"><span class="row" style="gap:6px">${playerLink(p.name, S.rows, p.teams)}<small class="muted num">${esc(p.gun !== p.name ? p.gun : "")}${p.swap ? " · смена команды" : ""}</small></span></th>
-      <td class="num barcell">${p.segs.map(s => { const n = sum(m.P, v => m.valT(p, v, s.team)); return `<span class="bar" style="--c:${TEAMS[s.team].c};width:${Math.round(pr(p, n) / max * 80)}px;margin-right:${p.swap ? 1 : 0}px"></span>`; }).join("")}<span style="margin-left:8px">${approx(p.e.dealt)}${nf(pr(p, p.dealt), fmt)}</span></td>
+      <td class="num barcell">${p.teams.map(t => { const n = sum(m.P, v => m.valT(p, v, t)); return `<span class="bar" style="--c:${TEAMS[t].c};width:${Math.round(pr(p, n) / max * 80)}px;margin-right:${p.swap ? 1 : 0}px"></span>`; }).join("")}<span style="margin-left:8px">${approx(p.e.dealt)}${nf(pr(p, p.dealt), fmt)}</span></td>
       <td class="num">${approx(p.e.recv)}${nf(pr(p, p.recv), fmt)}</td><td class="num">${approx(p.e.ratio)}${r2(p.ratio)}</td><td class="num">${approx(p.e.deaths)}${nf(pr(p, p.deaths), fmt)}</td><td class="num">${approx(p.e.dealt || p.e.deaths)}${pd(div(p.dealt, p.deaths))}</td><td class="num">${approx(p.e.recv || p.e.deaths)}${pd(div(p.recv, p.deaths))}</td><td class="num">${approx(p.e.shots)}${R ? one(pr(p, p.shots)) : fmt(p.shots)}</td><td class="num">${approx(p.e.acc)}${pct(p.acc)}</td>${m.winners.length ? `<td class="num">${p.alive == null ? "—" : approx(p.e.alive) + p.alive}</td>` : ""}<td class="num">${approx(p.e.mvp)}${fmt(p.mvp)}${m.mvp === p ? " ★" : ""}</td></tr>`, "mvp");
   };
   document.querySelectorAll("[data-gmode]").forEach(b => b.onclick = () => { gameMode = b.dataset.gmode; draw(); });
