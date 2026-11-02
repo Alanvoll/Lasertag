@@ -347,7 +347,7 @@ function viewSeason(S) {
     <div class="fact"><span class="v">${fmt(hits)}</span><span class="k">попаданий</span></div>
     <div class="fact"><span class="v">${fmt(shots)}</span><span class="k">выстрелов</span></div></div></section>
   <section><h2>Игры</h2>${gameCards(S)}</section>
-  ${S.rows.length ? `<section><div class="head"><h2>Игроки за сезон</h2><div class="row">${clsSeg()}<div class="seg" role="group" aria-label="Режим таблицы"><button data-mode="avg">Среднее за игру</button><button data-mode="rnd">За раунд</button><button data-mode="tot">Всего</button><button data-mode="dth">На 1 смерть</button></div>${locSeg()}</div></div><div class="scroll"><table id="seasonTable"></table></div><p class="note">Нажмите на имя, чтобы открыть страницу игрока. Заголовки столбцов сортируют таблицу. «Автоматы» и «Пистолет» показывают только игры с этим оружием: у пистолета 5 жизней и одиночные выстрелы, поэтому его цифры отдельно. «На 1 смерть» — попадания и выстрелы делим на число смертей игрока; кто не умирал ни разу, тот внизу. Локации: на каждой считаются только игры, сыгранные там.</p></section>
+  ${S.rows.length ? `<section><div class="head"><h2>Игроки за сезон</h2><div class="row">${clsSeg()}<div class="seg" role="group" aria-label="Режим таблицы"><button data-mode="avg">Среднее за игру</button><button data-mode="rnd">За раунд</button><button data-mode="tot">Всего</button><button data-mode="dth">На 1 смерть</button></div>${locSeg()}</div></div><div class="scroll"><table id="seasonTable"></table></div><p class="note">Нажмите на имя, чтобы открыть страницу игрока. Заголовки столбцов сортируют таблицу. «Автоматы» и «Пистолет» показывают только игры с этим оружием: у пистолета 5 жизней и одиночные выстрелы, поэтому его цифры отдельно. «На 1 смерть» — попадания и выстрелы делим на число смертей игрока; кто не умирал ни разу, тот внизу. Локации: на каждой считаются только игры, сыгранные там. «От N игр» скрывает тех, кто сыграл меньше (с учётом выбранной локации и оружия).</p></section>
   <section><div class="head"><h2>Номинации сезона</h2><div class="seg" role="group" aria-label="Режим номинаций"><button data-nmode="avg">Среднее</button><button data-nmode="rec">Рекорд за игру</button></div></div>
     <div data-npane="avg"><div class="noms">${nomTiles(S.rows.filter(r => r.games >= Math.ceil(Math.max(...S.rows.map(z => z.games)) * 0.6)), who, (() => { const mx = Math.max(...S.rows.map(r => r.mvps)); return mx ? [`<div class="nom"><span class="nt">Коллекционер MVP</span><span class="lab">Чаще всех MVP игры</span><span class="ws">${S.rows.filter(r => r.mvps === mx).map(who).join("")}</span><span class="v">${plural(mx, ["раз", "раза", "раз"])}</span></div>`] : []; })(), SEASON_NOMS)}</div>
     <p class="note">В среднем за игру: каждая цифра — среднее по играм игрока. Рейтинг MVP: 100 — средний игрок игры, половина — попадания, половина — коэффициент. Учитываются те, кто сыграл не меньше 60% игр сезона. Доля раундов без смерти считается только по тагерам с журналом событий.</p></div>
@@ -373,11 +373,12 @@ function nomsInit() {
   const pick = () => { document.querySelectorAll("[data-nmode]").forEach(b => b.setAttribute("aria-pressed", b.dataset.nmode === nomMode)); document.querySelectorAll("[data-npane]").forEach(el => el.hidden = el.dataset.npane !== nomMode); };
   document.querySelectorAll("[data-nmode]").forEach(b => b.onclick = () => { nomMode = b.dataset.nmode; pick(); }); pick();
 }
-let seasonMode = "avg", seasonCls = "all", seasonLoc = "all";
+let seasonMode = "avg", seasonCls = "all", seasonLoc = "all", seasonMin = 1;
 // Локация игры — поле location в файле игры. Известные идут первыми, новая (например, Подвал) появится сама после первой игры там.
 const LOC_ORDER = ["Склады", "Зубр", "Подвал"];
 const locsOf = () => [...new Set(DATA.games.map(g => g.location).filter(Boolean))].sort((a, b) => ((LOC_ORDER.indexOf(a) + 1) || 99) - ((LOC_ORDER.indexOf(b) + 1) || 99) || a.localeCompare(b, "ru"));
-const locSeg = () => { const l = locsOf(); return l.length > 1 ? `<div class="seg" role="group" aria-label="Локация"><button data-loc="all">Все локации</button>${l.map(x => `<button data-loc="${esc(x)}">${esc(x)}</button>`).join("")}</div>` : ""; };
+const locSeg = () => { const l = locsOf(); return (l.length > 1 ? `<div class="seg" role="group" aria-label="Локация"><button data-loc="all">Все локации</button>${l.map(x => `<button data-loc="${esc(x)}">${esc(x)}</button>`).join("")}</div>` : "")
+  + `<div class="seg" role="group" aria-label="Сколько игр сыграл"><button data-min="1">Все игроки</button><button data-min="2">От 2 игр</button><button data-min="3">От 3 игр</button><button data-min="5">От 5 игр</button></div>`; };
 const clsSeg = () => `<div class="seg" role="group" aria-label="Оружие">${Object.entries(CLS).map(([k, v]) => `<button data-cls="${k}">${v}</button>`).join("")}</div>`;
 function seasonTableInit(S) {
   const one = x => x.toFixed(1).replace(".", ",");
@@ -401,7 +402,8 @@ function seasonTableInit(S) {
     document.querySelectorAll("[data-mode]").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === seasonMode));
     document.querySelectorAll("[data-cls]").forEach(b => b.setAttribute("aria-pressed", b.dataset.cls === seasonCls));
     document.querySelectorAll("[data-loc]").forEach(b => b.setAttribute("aria-pressed", b.dataset.loc === seasonLoc));
-    const L = src(), rows = seasonCls === "all" ? L.rows : L.rows.filter(r => r.byCls && r.byCls[seasonCls]).map(r => r.byCls[seasonCls]);
+    document.querySelectorAll("[data-min]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.min === seasonMin));
+    const L = src(), rows = (seasonCls === "all" ? L.rows : L.rows.filter(r => r.byCls && r.byCls[seasonCls]).map(r => r.byCls[seasonCls])).filter(r => r.games >= seasonMin);
     const max = Object.fromEntries(cols.slice(1).map(([k, , f]) => [k, Math.max(1e-9, ...rows.map(f).filter(isFinite))]));
     // полоса — в столбце, по которому отсортирована таблица
     const td = (r, key, [k, , f, show]) => k === key && isFinite(f(r))
@@ -412,6 +414,7 @@ function seasonTableInit(S) {
   document.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => { seasonMode = b.dataset.mode; draw(); });
   document.querySelectorAll("[data-cls]").forEach(b => b.onclick = () => { seasonCls = b.dataset.cls; draw(); });
   document.querySelectorAll("[data-loc]").forEach(b => b.onclick = () => { seasonLoc = b.dataset.loc; draw(); });
+  document.querySelectorAll("[data-min]").forEach(b => b.onclick = () => { seasonMin = +b.dataset.min; draw(); });
   draw();
 }
 
@@ -476,7 +479,7 @@ function spreadInit(S) {
 function viewGames(S) { return `${header("games")}<section><h1>Игры</h1>${gameCards(S)}</section>${footer()}`; }
 
 function viewPlayers(S) {
-  return `${header("players")}<section><div class="head"><h1>Игроки</h1><div class="row">${clsSeg()}<div class="seg" role="group" aria-label="Режим таблицы"><button data-mode="avg">Среднее за игру</button><button data-mode="rnd">За раунд</button><button data-mode="tot">Всего</button><button data-mode="dth">На 1 смерть</button></div>${locSeg()}</div></div><div class="scroll"><table id="seasonTable"></table></div><p class="note">Нажмите на имя, чтобы открыть страницу игрока. «Автоматы» и «Пистолет» показывают только игры с этим оружием: у пистолета 5 жизней и одиночные выстрелы, поэтому его цифры отдельно. «На 1 смерть» — попадания и выстрелы делим на число смертей игрока; кто не умирал ни разу, тот внизу. Локации: на каждой считаются только игры, сыгранные там.</p></section>${footer()}`;
+  return `${header("players")}<section><div class="head"><h1>Игроки</h1><div class="row">${clsSeg()}<div class="seg" role="group" aria-label="Режим таблицы"><button data-mode="avg">Среднее за игру</button><button data-mode="rnd">За раунд</button><button data-mode="tot">Всего</button><button data-mode="dth">На 1 смерть</button></div>${locSeg()}</div></div><div class="scroll"><table id="seasonTable"></table></div><p class="note">Нажмите на имя, чтобы открыть страницу игрока. «Автоматы» и «Пистолет» показывают только игры с этим оружием: у пистолета 5 жизней и одиночные выстрелы, поэтому его цифры отдельно. «На 1 смерть» — попадания и выстрелы делим на число смертей игрока; кто не умирал ни разу, тот внизу. Локации: на каждой считаются только игры, сыгранные там. «От N игр» скрывает тех, кто сыграл меньше (с учётом выбранной локации и оружия).</p></section>${footer()}`;
 }
 
 // ---------- пушки ----------
