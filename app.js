@@ -293,7 +293,6 @@ function header(active) {
     <a class="tab" href="#players" ${active === "players" ? 'aria-current="page"' : ""}>Игроки</a>
     <a class="tab" href="#guns" ${active === "guns" ? 'aria-current="page"' : ""}>Пушки</a>
     <a class="tab" href="#spread" ${active === "spread" ? 'aria-current="page"' : ""}>Разброс по играм <span class="tag">бета</span></a>
-    <a class="tab" href="beta/">Новый дизайн <span class="tag">бета</span></a>
     ${state.canEdit ? `<a class="tab" href="#upload" ${active === "upload" ? 'aria-current="page"' : ""}>+ Добавить игру</a>` : ""}
   </nav></header>`;
 }
