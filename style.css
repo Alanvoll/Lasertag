@@ -417,3 +417,4 @@ h1 .tag, h2 .tag, .tab .tag { font: 600 10px var(--mono); letter-spacing: .16em;
   .scroll tbody tr > :first-child :is(small, .muted) { display: none }
   .scroll tbody tr > :first-child .row { display: block; overflow: hidden; text-overflow: ellipsis }
 }
+@media (max-width: 560px) { :root .seg button { padding: 7px 8px; letter-spacing: .04em; white-space: nowrap } }
