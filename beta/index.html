@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Лазертаг</title>
+<meta name="description" content="Статистика игр в лазертаг: сезон, игры, игроки, пушки. Демо дизайна «W · Агент ЧБ».">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alumni+Sans:wght@800;900&family=Oswald:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app"><div class="load">ЗАГРУЗКА…</div></div>
+<script>
+// Бета: игры и повторы берутся с основного сайта (../games, ../replays), поэтому новые игры появляются сами.
+(async () => {
+  const bust = "?t=" + Date.now();
+  try {
+    const list = await (await fetch("../games/index.json" + bust, { cache: "no-store" })).json();
+    const games = await Promise.all(list.map(async x => { try { const r = await fetch("../games/" + encodeURIComponent(x.file) + "?v=" + (x.v || "")); if (!r.ok) return null; const g = await r.json(); return g && Array.isArray(g.players) && Array.isArray(g.hits) ? { ...g, file: x.file } : null; } catch (e) { return null; } }));
+    window.LT_GAMES = games.filter(Boolean);
+  } catch (e) { document.querySelector("#app").innerHTML = '<div class="load">Не удалось загрузить игры</div>'; return; }
+  try { const r = await fetch("../replays/index.json" + bust, { cache: "no-store" }); window.LT_REPLAYS = r.ok ? await r.json() : []; } catch (e) { window.LT_REPLAYS = []; }
+  for (const src of ["model.js", "ui.js", "derive.js", "pages-game.js", "pages-people.js", "main.js"]) await new Promise((ok, no) => { const sc = document.createElement("script"); sc.src = src; sc.onload = ok; sc.onerror = no; document.body.appendChild(sc); });
+})();
+</script>
+</body>
+</html>
