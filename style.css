@@ -418,3 +418,12 @@ h1 .tag, h2 .tag, .tab .tag { font: 600 10px var(--mono); letter-spacing: .16em;
   .scroll tbody tr > :first-child .row { display: block; overflow: hidden; text-overflow: ellipsis }
 }
 @media (max-width: 560px) { :root .seg button { padding: 7px 8px; letter-spacing: .04em; white-space: nowrap } }
+
+/* таблица игроков в игре: без бокового скролла на ПК — заголовки переносятся, отступы меньше */
+#gameTable thead th { white-space: normal; vertical-align: bottom; line-height: 1.25 }
+#gameTable th, #gameTable td { padding: 8px 6px }
+#gameTable .barcell { min-width: 0; text-align: right }
+#gameTable thead th:not(.l) { text-align: right }
+#seasonTable .barcell { text-align: right }
+#seasonTable thead th { white-space: normal; vertical-align: bottom; line-height: 1.25 }
+#seasonTable thead th:not(.l) { text-align: right }
