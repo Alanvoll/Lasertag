@@ -163,15 +163,20 @@ function gameModel(g) {
   for (const p of P) {
     p.e = { dealt: P.some(v => estH(p, v)), recv: p.est.has("recv"), shots: p.est.has("shots"), deaths: p.est.has("deaths") };
     Object.assign(p.e, { acc: p.e.dealt || p.e.shots, ratio: p.e.dealt || p.e.recv, alive: p.e.deaths && !p.died });
-    p.e.mvp = p.e.dealt || p.e.ratio;
+    p.e.mvp = p.e.dealt || p.e.recv || p.e.deaths;
   }
-  // рейтинг MVP (временная формула): 100 — средний игрок этой игры; половина — попадания, половина — коэффициент (не больше 3)
-  const rc = p => Math.min(isFinite(p.ratio) ? p.ratio : 3, 3), avgD = sum(P, p => p.dealt) / P.length || 1, avgR = sum(P, rc) / P.length || 1;
-  for (const p of P) p.mvp = 50 * p.dealt / avgD + 50 * rc(p) / avgR;
-  // рейтинг игрока за одну команду: та же формула, но только по тому, что он сделал за неё
+  // Рейтинг — вклад в победу за раунд: попал − получил − 5 × смерти. Веса выведены из модели шансов на победу, обученной на 172 раундах из журналов тагеров
+  // (смерть стоит команде ~5 попаданий сверх тех, что её принесли: ствол выбывает до конца раунда). Формула объясняет 90% пользы по модели
+  // и лучше неё предсказывает победителя следующей игры. 100 — средний игрок игры, ±30 — заметно лучше или хуже.
+  const DEATH_COST = 5, K_MVP = 14.5;
+  const contrib = (d, r, k, gr) => gr ? (d - r - DEATH_COST * k) / gr : 0;
+  const avgC = sum(P, p => contrib(p.dealt, p.recv, p.deaths, p.gr)) / P.length || 0;
+  for (const p of P) p.mvp = 100 + K_MVP * (contrib(p.dealt, p.recv, p.deaths, p.gr) - avgC);
+  // рейтинг игрока за одну команду: та же формула, но только по тому, что он сделал за неё (раунды за неё — по segRounds, иначе по доле выстрелов)
   const valT0 = (a, v, t) => HT[`${a.i}:${v.i}:${t}`] || 0;
-  const mvpT = (p, t) => { if (!p.swap) return p.mvp; const d = sum(P, v => valT0(p, v, t)), r = sum(p.segs.filter(s => s.team === t), s => s.recv), x = div(d, r);
-    return 50 * d / avgD + 50 * Math.min(isFinite(x) ? x : 3, 3) / avgR; };
+  const mvpT = (p, t) => { if (!p.swap) return p.mvp; const sg = p.segs.filter(s => s.team === t), d = sum(P, v => valT0(p, v, t)), r = sum(sg, s => s.recv), k = sum(sg, s => s.deaths);
+    const gr = p.segRounds ? sum(p.segRounds.filter((_, j) => p.segs[j].team === t), ([a, b]) => b - a + 1) : p.gr * div(sum(sg, s => s.shots), p.shots);
+    return 100 + K_MVP * (contrib(d, r, k, gr) - avgC); };
   // доля игры за команду: по раундам, если они известны, иначе по выстрелам
   const shareT = (p, t) => { if (!p.swap) return 1;
     if (p.segRounds) { const n = q => sum(q, ([a, b]) => b - a + 1), all = n(p.segRounds); return div(n(p.segRounds.filter((_, k) => p.segs[k].team === t)), all); }
@@ -223,6 +228,9 @@ function season(games = DATA.games) {
       }
     }
   });
+  // MVP команды: то же правило, что на странице игры — среди игравших за команду больше половины игры, по рейтингу за неё
+  models.forEach(m => m.teamIds.forEach(t => { const tm = m.P.filter(p => p.teams.includes(t) && m.shareT(p, t) > .5).sort((a, b) => m.mvpT(b, t) - m.mvpT(a, t))[0];
+    if (tm) { const s = S.get(tm.name); s.tmvps = (s.tmvps || 0) + 1; } }));
   const rows = [...S.values()].sort((a, b) => a.name.localeCompare(b.name, "ru"));
   rows.forEach((s, k) => { s.key = "p" + k; s.acc = div(s.dealt, s.shots); s.ratio = div(s.dealt, s.recv); s.lastTeam = s.teams[s.teams.length - 1] ?? 0; s.ratioPerGame = s.gameRatios && s.gameRatios.length ? sum(s.gameRatios, x => x) / s.gameRatios.length : 0; s.accPerGame = s.gameAcc && s.gameAcc.length ? sum(s.gameAcc, x => x) / s.gameAcc.length : 0; });
   const guns = [...G.values()].map(g => ({ ...g, name: cap(Object.entries(g.aliases).sort((a, b) => b[1] - a[1])[0][0]).replace(/^([a-z]+)(\d+)$/i, (_, l, d) => l.toUpperCase() + d) }))
@@ -258,30 +266,34 @@ const NOMS = [
   ["Невидимка", "Меньше всех получил", r => r.recv, -1, fmt],
   ["Кенни", "Больше всех смертей", r => r.deaths, 1, fmt],
   ["Горец", "Меньше всех смертей", r => r.deaths, -1, fmt],
+  ["Берсерк", "Больше всех попаданий на 1 смерть", r => r.dealt / r.deaths, 1, x => x.toFixed(1).replace(".", ",")],
   ["Последний герой", "Больше всех раундов без смерти", r => r.alive, 1, fmt, r => r.alive != null && r.rounds],
 ];
 // для сезона счётные номинации берутся в среднем за игру, иначе сыгравшие меньше игр выигрывают «меньше всех»
 const one = x => x.toFixed(1).replace(".", ",");
 const HERO = ["Последний герой", "Чаще всех доживал до конца раунда", r => r.alive / r.rounds, 1, pct, r => r.alive != null && r.rounds];
 const SEASON_NOMS = NOMS.map(([t, l, f, dir, show, ok]) => t === HERO[0] ? HERO
+  : t === "Берсерк" ? [t, l + " за сезон", f, dir, show, ok]
   : show === fmt ? [t, l + " за игру", r => f(r) / r.games, dir, /выстрел|рейтинг/.test(l) ? fmt : one, ok]
   : [t, l + " за игру", show === pct ? r => r.accPerGame : r => r.ratioPerGame, dir, show, ok]);
 // рекорды: лучшее значение за одну игру среди всех игроков всех игр
 const REC_NOMS = NOMS.map(n => n[0] === HERO[0] ? [HERO[0], "Больше всех раундов без смерти", r => r.alive, 1, fmt, HERO[5]] : n);
 // в номинациях игры не участвуют цифры, которых нет совсем (тагер не считан), а частичные оценки помечены «≈»
 const NOM_KEY = { MVP: "mvp", "Терминатор": "dealt", "Спонсор патронного завода": "shots", "Бережливый": "shots", "Белке в глаз": "acc", "Штурмовик Империи": "acc", "Джон Уик": "ratio",
-  "Живой щит": "recv", "Невидимка": "recv", "Кенни": "deaths", "Горец": "deaths", "Последний герой": "alive" };
-const unknownOf = r => r.est && r.e ? { shots: r.est.has("shots"), acc: r.est.has("shots"), recv: r.est.has("recv"), ratio: r.est.has("recv"), deaths: r.est.has("deaths"), alive: r.e.alive, mvp: r.est.has("recv") } : {};
+  "Живой щит": "recv", "Невидимка": "recv", "Кенни": "deaths", "Горец": "deaths", "Берсерк": "dpd", "Последний герой": "alive" };
+const unknownOf = r => r.est && r.e ? { shots: r.est.has("shots"), acc: r.est.has("shots"), recv: r.est.has("recv"), ratio: r.est.has("recv"), deaths: r.est.has("deaths"), dpd: r.est.has("deaths"), alive: r.e.alive, mvp: r.est.has("recv") || r.est.has("deaths") } : {};
 const approx = on => on ? "≈" : "";
-function nomTiles(rows, who, extra = [], noms = NOMS) {
-  return noms.map(([title, label, f, dir, show, ok]) => {
+function nomTiles(rows, who, extra = [], noms = NOMS, afterFirst = []) {
+  const tiles = noms.map(([title, label, f, dir, show, ok]) => {
     const k = NOM_KEY[title];
     const list = rows.filter(r => (ok ? ok(r) : true) && isFinite(f(r)) && !unknownOf(r)[k]);
     if (!list.length) return "";
     const best = dir > 0 ? Math.max(...list.map(f)) : Math.min(...list.map(f));
     const w = list.filter(r => Math.abs(f(r) - best) < 1e-9);
-    return `<div class="nom"><span class="nt">${title}</span><span class="lab">${label}</span><span class="ws">${w.map(who).join("")}</span><span class="v">${approx(w.some(r => r.e && r.e[k]))}${show(best)}</span></div>`;
-  }).concat(extra).join("");
+    return `<div class="nom"><span class="nt">${title}</span><span class="lab">${label}</span><span class="ws">${w.map(who).join("")}</span><span class="v">${approx(w.some(r => r.e && (k === "dpd" ? r.e.dealt || r.e.deaths : r.e[k])))}${show(best)}</span></div>`;
+  });
+  tiles.splice(1, 0, ...afterFirst);
+  return tiles.concat(extra).join("");
 }
 
 // ---------- шапка ----------
@@ -398,18 +410,26 @@ function seasonTableInit(S) {
   const byLoc = { all: S };
   const src = () => byLoc[seasonLoc] || (byLoc[seasonLoc] = season(DATA.games.filter(g => g.location === seasonLoc)));
   const draw = () => {
-    const cols = COLS[seasonMode];
+    const cols = [...COLS[seasonMode]];
+    // рейтинг (средний за игру) и сколько раз был MVP игры и MVP команды — всегда по всем пушкам
+    const M = r => main[r.name] || r;
+    if (seasonMode === "avg" || seasonMode === "tot") {
+      cols.push(["mvps", "MVP игры", r => M(r).mvps || 0, String], ["tmvps", "MVP команды", r => M(r).tmvps || 0, String]);
+      // порядок: игрок, рейтинг, попал / получил, остальное
+      const ri = cols.findIndex(c => /^ratio/.test(c[0])); cols.splice(1, 0, cols.splice(ri, 1)[0]);
+      cols.splice(1, 0, ["rating", "Рейтинг", r => M(r).mvp / M(r).games, x => fmt(x)]);
+    }
     document.querySelectorAll("[data-mode]").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === seasonMode));
     document.querySelectorAll("[data-cls]").forEach(b => b.setAttribute("aria-pressed", b.dataset.cls === seasonCls));
     document.querySelectorAll("[data-loc]").forEach(b => b.setAttribute("aria-pressed", b.dataset.loc === seasonLoc));
     document.querySelectorAll("[data-min]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.min === seasonMin));
-    const L = src(), rows = (seasonCls === "all" ? L.rows : L.rows.filter(r => r.byCls && r.byCls[seasonCls]).map(r => r.byCls[seasonCls])).filter(r => r.games >= seasonMin);
+    const L = src(), main = Object.fromEntries(L.rows.map(r => [r.name, r])), rows = (seasonCls === "all" ? L.rows : L.rows.filter(r => r.byCls && r.byCls[seasonCls]).map(r => r.byCls[seasonCls])).filter(r => r.games >= seasonMin);
     const max = Object.fromEntries(cols.slice(1).map(([k, , f]) => [k, Math.max(1e-9, ...rows.map(f).filter(isFinite))]));
     // полоса — в столбце, по которому отсортирована таблица
     const td = (r, key, [k, , f, show]) => k === key && isFinite(f(r))
       ? `<td class="num barcell"><span class="bar" style="--c:var(--gold);width:${Math.round(f(r) / max[k] * 70)}px;margin-right:8px"></span>${show(f(r))}</td>`
       : `<td class="num">${show(f(r))}</td>`;
-    sortable("seasonTable", cols, rows, (r, key) => `<tr><th class="l">${playerLink(r.name, S.rows, [])}</th>${cols.slice(1).map(c => td(r, key, c)).join("")}</tr>`, { avg: "perGame", rnd: "dealtPR", tot: "dealt", dth: "dealtPD" }[seasonMode]);
+    sortable("seasonTable", cols, rows, (r, key) => `<tr><th class="l">${playerLink(r.name, S.rows, [])}</th>${cols.slice(1).map(c => td(r, key, c)).join("")}</tr>`, { avg: "rating", rnd: "dealtPR", tot: "rating", dth: "dealtPD" }[seasonMode]);
   };
   document.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => { seasonMode = b.dataset.mode; draw(); });
   document.querySelectorAll("[data-cls]").forEach(b => b.onclick = () => { seasonCls = b.dataset.cls; draw(); });
@@ -635,6 +655,7 @@ function viewGame(S, key) {
   const segOf = (p, t) => p.segs.filter(s => s.team === t);
   const swappers = P.filter(p => p.swap);
   // табло
+  const teamMvp = {};
   const board = teamIds.map(t => {
     const mem = inTeam(t), dealt = sum(P, a => sum(P, v => valT(a, v, t)));
     const recv = sum(mem, p => sum(segOf(p, t), s => s.recv)), shots = sum(mem, p => sum(segOf(p, t), s => s.shots)), deaths = sum(mem, p => sum(segOf(p, t), s => s.deaths));
@@ -644,7 +665,7 @@ function viewGame(S, key) {
       <div class="score">${A(eD)}${fmt(dealt)}<small>попаданий</small></div>
       <dl class="kv"><div><dt>Получил</dt><dd>${A(eR)}${fmt(recv)}</dd></div><div><dt>Попал / получил</dt><dd>${A(eD || eR)}${r2(div(dealt, recv))}</dd></div>
       ${m.winners.length ? `<div><dt>Раундов</dt><dd>${won}</dd></div>` : ""}<div><dt>Смертей</dt><dd>${A(eK)}${deaths}</dd></div><div><dt>Выстрелов</dt><dd>${A(eS)}${fmt(shots)}</dd></div><div><dt>Точность</dt><dd>${A(eD || eS)}${pct(div(dealt, shots))}</dd></div></dl>
-      ${tm ? `<p class="gmvp"><span class="tag">MVP команды</span>${who(tm)}<span class="muted num">${A(tm.e.mvp)}${fmt(m.mvpT(tm, t))}</span></p>` : ""}</div>`;
+      ${(teamMvp[t] = tm) ? `<p class="gmvp"><span class="tag">MVP команды</span>${who(tm)}<span class="muted num">${A(tm.e.mvp)}${fmt(m.mvpT(tm, t))}</span></p>` : ""}</div>`;
   }).join("");
   const swapNote = swappers.length ? `<p class="note">По ходу игры ${(n => n.length > 1 ? n.slice(0, -1).join(", ") + " и " + n[n.length - 1] : n[0])(swappers.map(p => esc(p.name)))} ${swappers.length > 1 ? "сменили" : "сменил(а)"} команду${m.swaps.length ? ` после ${m.swaps.map(r => r + "-го").join(" и ")} раунда` : ""}. Попадания, смерти и выстрелы засчитаны той команде, за которую игрок был в тот момент. Цветные точки у имени показывают команды по порядку.</p>` : "";
   // раунды
@@ -663,6 +684,8 @@ function viewGame(S, key) {
   const pairs = P.flatMap(a => P.map(v => ({ a, v, n: estH(a, v) ? 0 : val(a, v) })));
   const tp = pairs.reduce((a, y) => y.n > a.n ? y : a, { n: 0 });
   const nomRows = P.map(p => ({ ...p, rounds: p.nR }));
+  // MVP каждой команды отдельной номинацией, рядом с MVP игры
+  const teamNoms = teamIds.filter(t => teamMvp[t]).map(t => { const p = teamMvp[t]; return `<div class="nom"><span class="nt">MVP ${TEAMS[t].name.toLowerCase().replace(/е$/, "х")}</span><span class="lab">Лучший рейтинг в команде</span><span class="ws">${who(p)}</span><span class="v">${approx(p.e.mvp)}${fmt(m.mvpT(p, t))}</span></div>`; });
   const extraNom = tp.n ? [`<div class="nom"><span class="nt">Охота открыта</span><span class="lab">Больше всех в одного соперника</span><span class="ws">${who(tp.a)}<span class="muted">→ ${esc(tp.v.name)}</span></span><span class="v">${tp.n}</span></div>`] : [];
   // дуэли
   const maxPair = Math.max(1, ...P.flatMap(a => P.map(v => val(a, v))));
@@ -717,8 +740,8 @@ function viewGame(S, key) {
   <section><div class="board">${board}</div>${swapNote}${(g.notes || []).map(n => `<p class="note">${esc(n)}</p>`).join("")}</section>
   ${roundsHtml}
   ${replayHtml}
-  <section><div class="head"><h2>Игроки</h2><div class="seg" role="group" aria-label="Режим таблицы"><button data-gmode="tot">Всего</button><button data-gmode="rnd">За раунд</button></div></div><div class="scroll"><table id="gameTable"></table></div><p class="note">Рейтинг MVP — пока простая формула: 100 — средний игрок этой игры. Половина рейтинга — попадания относительно среднего в игре, половина — коэффициент попал / получил относительно среднего (коэффициент выше 3 считается за 3). Например, рейтинг 150 — заметно лучше среднего.</p></section>
-  <section><h2>Номинации</h2><div class="noms">${nomTiles(nomRows, who, extraNom)}</div></section>
+  <section><div class="head"><h2>Игроки</h2><div class="seg" role="group" aria-label="Режим таблицы"><button data-gmode="tot">Всего</button><button data-gmode="rnd">За раунд</button></div></div><div class="scroll"><table id="gameTable"></table></div><p class="note">Рейтинг — вклад игрока в победу. Модель обучена на 172 раундах из журналов тагеров: она знает, сколько стоит каждое попадание и во что команде обходится смерть, когда ствол выбывает до конца раунда. 100 — средний игрок этой игры, 130 — заметно лучше, 70 — заметно хуже.</p></section>
+  <section><h2>Номинации</h2><div class="noms">${nomTiles(nomRows, who, extraNom, NOMS, teamNoms)}</div></section>
   ${awards.length ? `<section><h2>Ачивки</h2><div class="awards">${awards.map(([t, names, stat, txt]) => `<div class="award"><span class="nt">${esc(t)}</span><span class="row">${String(names || "").split(",").map(n => n.trim()).filter(Boolean).map(n => { const p = P.find(z => z.name === n); return p ? who(p) : esc(n); }).join(" ")}</span><span class="stat">${esc(stat)}</span><span class="txt">${esc(txt)}</span></div>`).join("")}</div></section>` : ""}
   <section><h2>Дуэли</h2><div class="duels">${duels}</div><p class="note">Заголовки столбцов в карточке сортируют её список. Слева — сколько раз игрок попал в соперника, справа — сколько раз соперник попал в него. «Всего» — сумма, то есть как часто эти двое сходились в бою. У сменивших команду отдельный блок за каждую команду.</p></section>
   <section><h2>Кто в кого</h2><div class="grids">${grids}</div><p class="note">Строка — кто стрелял, столбец — в кого попал.${P.some(p => p.e.recv && p.est.size) ? " Курсивом и «≈» — оценка: тагер не считан, попадания по нему поделены между стрелявшими по тому, как каждый попадал в остальных соперников и как тот попадал в него." : ""}</p></section>
@@ -741,9 +764,20 @@ function gameTableInit(S, key) {
     const pd = x => isFinite(x) ? one(x) : "∞";
     if (m.winners.length) cols.push(["alive", "Раундов без смерти", p => p.alive]);
     cols.push(["mvp", "Рейтинг", p => p.mvp]);
-    sortable("gameTable", cols, m.P, p => `<tr><th class="l"><span class="row" style="gap:6px">${playerLink(p.name, S.rows, p.teams)}<small class="muted num">${esc(p.gun !== p.name ? p.gun : "")}${p.swap ? " · смена команды" : ""}</small></span></th>
-      <td class="num barcell">${p.teams.map(t => { const n = sum(m.P, v => m.valT(p, v, t)); return `<span class="bar" style="--c:${TEAMS[t].c};width:${Math.round(pr(p, n) / max * 80)}px;margin-right:${p.swap ? 1 : 0}px"></span>`; }).join("")}<span style="margin-left:8px">${approx(p.e.dealt)}${nf(pr(p, p.dealt), fmt)}</span></td>
-      <td class="num">${approx(p.e.recv)}${nf(pr(p, p.recv), fmt)}</td><td class="num">${approx(p.e.ratio)}${r2(p.ratio)}</td><td class="num">${approx(p.e.deaths)}${nf(pr(p, p.deaths), fmt)}</td><td class="num">${approx(p.e.dealt || p.e.deaths)}${pd(div(p.dealt, p.deaths))}</td><td class="num">${approx(p.e.recv || p.e.deaths)}${pd(div(p.recv, p.deaths))}</td><td class="num">${approx(p.e.shots)}${R ? one(pr(p, p.shots)) : fmt(p.shots)}</td><td class="num">${approx(p.e.acc)}${pct(p.acc)}</td>${m.winners.length ? `<td class="num">${p.alive == null ? "—" : approx(p.e.alive) + p.alive}</td>` : ""}<td class="num">${approx(p.e.mvp)}${fmt(p.mvp)}${m.mvp === p ? " ★" : ""}</td></tr>`, "mvp");
+    // порядок: игрок, рейтинг, попал / получил, остальное
+    for (const k of ["ratio", "mvp"]) cols.splice(1, 0, cols.splice(cols.findIndex(c => c[0] === k), 1)[0]);
+    // полоска рисуется в колонке, по которой сейчас сортировка (в «Попал» у сменивших команду — по командам)
+    const cell = (k, p) => ({ dealt: `${approx(p.e.dealt)}${nf(pr(p, p.dealt), fmt)}`, recv: `${approx(p.e.recv)}${nf(pr(p, p.recv), fmt)}`, ratio: `${approx(p.e.ratio)}${r2(p.ratio)}`,
+      deaths: `${approx(p.e.deaths)}${nf(pr(p, p.deaths), fmt)}`, dpd: `${approx(p.e.dealt || p.e.deaths)}${pd(div(p.dealt, p.deaths))}`, rpd: `${approx(p.e.recv || p.e.deaths)}${pd(div(p.recv, p.deaths))}`,
+      shots: `${approx(p.e.shots)}${R ? one(pr(p, p.shots)) : fmt(p.shots)}`, acc: `${approx(p.e.acc)}${pct(p.acc)}`, alive: p.alive == null ? "—" : approx(p.e.alive) + p.alive,
+      mvp: `${approx(p.e.mvp)}${fmt(p.mvp)}${m.mvp === p ? " ★" : ""}` })[k];
+    const BW = 56, fin = v => isFinite(v) && v > 0 ? v : 0;
+    const colMax = k => { const c = cols.find(x => x[0] === k); return Math.max(1e-9, ...m.P.map(p => fin(c[2](p)))); };
+    const bar = (k, p) => { const c = cols.find(x => x[0] === k), mx = colMax(k), lt = TEAMS[p.teams[p.teams.length - 1]].c;
+      if (k === "dealt") return p.teams.map(t => { const n = sum(m.P, v => m.valT(p, v, t)); return `<span class="bar" style="--c:${TEAMS[t].c};width:${Math.round(pr(p, n) / mx * BW)}px;margin-right:${p.swap ? 1 : 0}px"></span>`; }).join("");
+      const v = c[2](p); return `<span class="bar" style="--c:${lt};width:${Math.round((isFinite(v) ? fin(v) : mx) / mx * BW)}px"></span>`; };
+    sortable("gameTable", cols, m.P, (p, key) => `<tr><th class="l"><span class="row" style="gap:6px">${playerLink(p.name, S.rows, p.teams)}<small class="muted num">${esc(p.gun !== p.name ? p.gun : "")}${p.swap ? " · смена команды" : ""}</small></span></th>
+      ${cols.slice(1).map(([k]) => k === key ? `<td class="num barcell">${bar(k, p)}<span style="margin-left:6px">${cell(k, p)}</span></td>` : `<td class="num">${cell(k, p)}</td>`).join("")}</tr>`, "mvp");
   };
   document.querySelectorAll("[data-gmode]").forEach(b => b.onclick = () => { gameMode = b.dataset.gmode; draw(); });
   draw();
