@@ -165,18 +165,29 @@ function gameModel(g) {
     Object.assign(p.e, { acc: p.e.dealt || p.e.shots, ratio: p.e.dealt || p.e.recv, alive: p.e.deaths && !p.died });
     p.e.mvp = p.e.dealt || p.e.recv || p.e.deaths;
   }
-  // Рейтинг — вклад в победу за раунд: попал − получил − 5 × смерти. Веса выведены из модели шансов на победу, обученной на 172 раундах из журналов тагеров
-  // (смерть стоит команде ~5 попаданий сверх тех, что её принесли: ствол выбывает до конца раунда). Формула объясняет 90% пользы по модели
-  // и лучше неё предсказывает победителя следующей игры. 100 — средний игрок игры, ±30 — заметно лучше или хуже.
-  const DEATH_COST = 5, K_MVP = 14.5;
-  const contrib = (d, r, k, gr) => gr ? (d - r - DEATH_COST * k) / gr : 0;
-  const avgC = sum(P, p => contrib(p.dealt, p.recv, p.deaths, p.gr)) / P.length || 0;
-  for (const p of P) p.mvp = 100 + K_MVP * (contrib(p.dealt, p.recv, p.deaths, p.gr) - avgC);
-  // рейтинг игрока за одну команду: та же формула, но только по тому, что он сделал за неё (раунды за неё — по segRounds, иначе по доле выстрелов)
+  // Рейтинг — вклад в победу за раунд: попал − получил − 5 × смерти. Веса выведены из модели шансов на победу, обученной на раундах из журналов тагеров
+  // (смерть стоит команде ~5 попаданий сверх тех, что её принесли: ствол выбывает до конца раунда).
+  // Поправка на команду: полученные попадания и смерти считаются относительно своей команды (в проигранном раунде погибают все,
+  // поэтому у проигравших их больше просто из-за счёта). Так рейтинг игрока не прыгает вместе с результатом команды.
+  // 100 — средний игрок игры, ±30 — заметно лучше или хуже.
+  const DEATH_COST = 5, K_MVP = 16;
   const valT0 = (a, v, t) => HT[`${a.i}:${v.i}:${t}`] || 0;
-  const mvpT = (p, t) => { if (!p.swap) return p.mvp; const sg = p.segs.filter(s => s.team === t), d = sum(P, v => valT0(p, v, t)), r = sum(sg, s => s.recv), k = sum(sg, s => s.deaths);
-    const gr = p.segRounds ? sum(p.segRounds.filter((_, j) => p.segs[j].team === t), ([a, b]) => b - a + 1) : p.gr * div(sum(sg, s => s.shots), p.shots);
-    return 100 + K_MVP * (contrib(d, r, k, gr) - avgC); };
+  // раунды игрока за команду t: по segRounds, иначе по доле выстрелов
+  const grT = (p, t) => !p.swap ? (p.teams[0] === t ? p.gr : 0) : p.segRounds ? sum(p.segRounds.filter((_, j) => p.segs[j].team === t), ([a, b]) => b - a + 1)
+    : p.gr * div(sum(p.segs.filter(s => s.team === t), s => s.shots), p.shots);
+  const partT = (p, t) => { const sg = p.segs.filter(s => s.team === t);
+    return { d: p.swap ? sum(P, v => valT0(p, v, t)) : p.dealt, r: sum(sg, s => s.recv), k: sum(sg, s => s.deaths), gr: grT(p, t) }; };
+  const tAvg = {};
+  for (const t of new Set(P.flatMap(p => p.teams))) { const parts = P.filter(p => p.teams.includes(t)).map(p => partT(p, t)), g0 = sum(parts, x => x.gr);
+    tAvg[t] = { r: g0 ? sum(parts, x => x.r) / g0 : 0, k: g0 ? sum(parts, x => x.k) / g0 : 0 }; }
+  // сырой вклад по набору частей (за одну команду или за все сразу): попадания как есть, полученное и смерти — сверх среднего по своей команде
+  const contrib = (parts, ts) => { const gr = sum(parts, x => x.gr); if (!gr) return 0;
+    return parts.reduce((s, x, j) => s + x.d - (x.r - tAvg[ts[j]].r * x.gr) - DEATH_COST * (x.k - tAvg[ts[j]].k * x.gr), 0) / gr; };
+  for (const p of P) p.c = contrib(p.teams.map(t => partT(p, t)), p.teams);
+  const avgC = sum(P, p => p.c) / P.length || 0;
+  for (const p of P) p.mvp = 100 + K_MVP * (p.c - avgC);
+  // рейтинг игрока за одну команду: та же формула, но только по тому, что он сделал за неё
+  const mvpT = (p, t) => !p.swap ? p.mvp : 100 + K_MVP * (contrib([partT(p, t)], [t]) - avgC);
   // доля игры за команду: по раундам, если они известны, иначе по выстрелам
   const shareT = (p, t) => { if (!p.swap) return 1;
     if (p.segRounds) { const n = q => sum(q, ([a, b]) => b - a + 1), all = n(p.segRounds); return div(n(p.segRounds.filter((_, k) => p.segs[k].team === t)), all); }
@@ -775,7 +786,7 @@ function viewGame(S, key) {
   <section><div class="board">${board}</div>${swapNote}${(g.notes || []).map(n => `<p class="note">${esc(n)}</p>`).join("")}</section>
   ${roundsHtml}
   ${replayHtml}
-  <section><div class="head"><h2>Игроки</h2><div class="seg" role="group" aria-label="Режим таблицы"><button data-gmode="tot">Всего</button><button data-gmode="rnd">За раунд</button></div></div><div class="scroll"><table id="gameTable"></table></div><p class="note">Рейтинг — вклад игрока в победу. Модель обучена на 172 раундах из журналов тагеров: она знает, сколько стоит каждое попадание и во что команде обходится смерть, когда ствол выбывает до конца раунда. 100 — средний игрок этой игры, 130 — заметно лучше, 70 — заметно хуже.</p></section>
+  <section><div class="head"><h2>Игроки</h2><div class="seg" role="group" aria-label="Режим таблицы"><button data-gmode="tot">Всего</button><button data-gmode="rnd">За раунд</button></div></div><div class="scroll"><table id="gameTable"></table></div><p class="note">Рейтинг — вклад игрока в победу. Модель обучена на раундах из журналов тагеров: она знает, сколько стоит каждое попадание и во что команде обходится смерть, когда ствол выбывает до конца раунда. Полученные попадания и смерти сравниваются со своей командой, поэтому проигрыш команды не тянет рейтинг вниз. 100 — средний игрок этой игры, 130 — заметно лучше, 70 — заметно хуже.</p></section>
   <section><h2>Номинации</h2><div class="noms">${nomTiles(nomRows, who, extraNom, NOMS, teamNoms)}</div></section>
   ${awards.length ? `<section><h2>Ачивки</h2><div class="awards">${awards.map(([t, names, stat, txt]) => `<div class="award"><span class="nt">${esc(t)}</span><span class="row">${String(names || "").split(",").map(n => n.trim()).filter(Boolean).map(n => { const p = P.find(z => z.name === n); return p ? who(p) : esc(n); }).join(" ")}</span><span class="stat">${esc(stat)}</span><span class="txt">${esc(txt)}</span></div>`).join("")}</div></section>` : ""}
   <section><h2>Дуэли</h2><div class="duels">${duels}</div><p class="note">Заголовки столбцов в карточке сортируют её список. Слева — сколько раз игрок попал в соперника, справа — сколько раз соперник попал в него. «Всего» — сумма, то есть как часто эти двое сходились в бою. У сменивших команду отдельный блок за каждую команду.</p></section>
