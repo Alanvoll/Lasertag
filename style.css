@@ -427,3 +427,9 @@ h1 .tag, h2 .tag, .tab .tag { font: 600 10px var(--mono); letter-spacing: .16em;
 #seasonTable .barcell { text-align: right }
 #seasonTable thead th { white-space: normal; vertical-align: bottom; line-height: 1.25 }
 #seasonTable thead th:not(.l) { text-align: right }
+
+/* перетаскивание колонок */
+body.col-dragging, body.col-dragging * { cursor: grabbing !important; user-select: none }
+thead th.dragging { opacity: .4 }
+thead th.drop-l { box-shadow: inset 2px 0 0 var(--fg) }
+thead th.drop-r { box-shadow: inset -2px 0 0 var(--fg) }

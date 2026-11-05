@@ -326,17 +326,52 @@ function gameCards(S) {
 // ---------- таблица с сортировкой ----------
 // числа сравниваем по направлению, а бесконечность (например, «на смерть» без смертей) всегда внизу
 const cmpNum = (x, y, dir) => isFinite(x) !== isFinite(y) ? (isFinite(x) ? -1 : 1) : isFinite(x) ? dir * (x - y) : 0;
+// Порядок колонок можно менять перетаскиванием заголовка (кроме колонки с игроком); порядок запоминается в браузере для каждой таблицы.
+// Строки собираются по тому же массиву cols, поэтому меняем его на месте.
+const colOrderKey = id => "lt-cols:" + id;
+function applyColOrder(id, cols) {
+  let saved; try { saved = JSON.parse(localStorage.getItem(colOrderKey(id)) || "null"); } catch (e) {}
+  if (!Array.isArray(saved)) return;
+  const pos = k => { const i = saved.indexOf(k); return i < 0 ? 1e6 : i; };
+  const rest = cols.slice(1).map((c, i) => [c, i]).sort((a, b) => (pos(a[0][0]) - pos(b[0][0])) || (a[1] - b[1])).map(x => x[0]);
+  cols.splice(1, cols.length - 1, ...rest);
+}
 function sortable(id, cols, rows, rowHtml, initial, group = "") {
   let key = initial, dir = -1;
+  const movable = !group;
+  if (movable) applyColOrder(id, cols);
   const draw = () => {
     const c = cols.find(x => x[0] === key);
     const sorted = [...rows].sort((a, b) => key === "name" ? dir * a.name.localeCompare(b.name, "ru") : cmpNum(c[2](a) ?? -1, c[2](b) ?? -1, dir));
     const el = document.getElementById(id); if (!el) return;
-    el.innerHTML = `<thead>${group}<tr>${cols.map(([k, label, , cls]) => `<th class="${k === "name" ? "l" : ""} ${cls || ""}" ${k === key ? `aria-sort="${dir < 0 ? "descending" : "ascending"}"` : ""}><button data-k="${k}">${label}</button></th>`).join("")}</tr></thead><tbody>${sorted.map(r => rowHtml(r, key)).join("")}</tbody>`;
+    el.innerHTML = `<thead>${group}<tr>${cols.map(([k, label, , cls]) => `<th class="${k === "name" ? "l" : ""} ${typeof cls === "string" ? cls : ""}" ${movable && k !== "name" ? `data-col="${k}" title="Нажмите, чтобы отсортировать; потяните в сторону, чтобы переставить колонку"` : ""} ${k === key ? `aria-sort="${dir < 0 ? "descending" : "ascending"}"` : ""}><button data-k="${k}">${label}</button></th>`).join("")}</tr></thead><tbody>${sorted.map(r => rowHtml(r, key)).join("")}</tbody>`;
   };
   setTimeout(() => {
     const el = document.getElementById(id); if (!el) return;
     el.onclick = e => { const k = e.target.dataset && e.target.dataset.k; if (!k) return; if (k === key) dir = -dir; else { key = k; dir = k === "name" ? 1 : -1; } draw(); };
+    if (movable) {
+      // перетаскивание мышью: нажать на заголовок и вести в сторону; простой клик по-прежнему сортирует
+      let drag = null, sx = 0, moved = false, target = null;
+      const clear = () => el.querySelectorAll("th.drop-l, th.drop-r, th.dragging").forEach(t => t.classList.remove("drop-l", "drop-r", "dragging"));
+      const spot = x => { const ths = [...el.querySelectorAll("thead th[data-col]")]; let best = null;
+        for (const th of ths) { const r = th.getBoundingClientRect(); if (x >= r.left && x <= r.right) best = { th, after: x >= r.left + r.width / 2 }; }
+        if (!best && ths.length) { const f = ths[0].getBoundingClientRect(), l = ths[ths.length - 1].getBoundingClientRect(); if (x < f.left) best = { th: ths[0], after: false }; else if (x > l.right) best = { th: ths[ths.length - 1], after: true }; }
+        return best; };
+      el.onpointerdown = e => { if (e.pointerType !== "mouse" || e.button !== 0) return; const th = e.target.closest && e.target.closest("thead th[data-col]"); if (!th) return;
+        drag = th.dataset.col; sx = e.clientX; moved = false; target = null; };
+      const move = e => { if (!drag) return; if (!moved && Math.abs(e.clientX - sx) < 8) return;
+        moved = true; document.body.classList.add("col-dragging"); clear(); el.querySelector(`th[data-col="${drag}"]`)?.classList.add("dragging");
+        target = spot(e.clientX); if (target && target.th.dataset.col !== drag) target.th.classList.add(target.after ? "drop-r" : "drop-l"); };
+      const up = () => { if (!drag) return; const d = drag; drag = null; document.body.classList.remove("col-dragging");
+        if (moved) {
+          el.addEventListener("click", ev => { ev.stopPropagation(); ev.preventDefault(); }, { capture: true, once: true });
+          if (target && target.th.dataset.col !== d) { const from = cols.findIndex(c => c[0] === d), col = cols.splice(from, 1)[0];
+            const at = cols.findIndex(c => c[0] === target.th.dataset.col) + (target.after ? 1 : 0); cols.splice(Math.max(1, at), 0, col);
+            try { localStorage.setItem(colOrderKey(id), JSON.stringify(cols.slice(1).map(c => c[0]))); } catch (x) {} }
+          clear(); draw(); } };
+      if (el._colMove) { removeEventListener("pointermove", el._colMove); removeEventListener("pointerup", el._colUp); }
+      el._colMove = move; el._colUp = up; addEventListener("pointermove", move); addEventListener("pointerup", up);
+    }
     draw();
   });
 }
