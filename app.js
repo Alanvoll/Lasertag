@@ -305,12 +305,12 @@ function gameCards(S) {
   const list = allGames();
   if (!list.length) return `<div class="empty">Игр пока нет.${state.canEdit ? ' <a href="#upload">Добавьте первую</a>.' : ""}</div>`;
   return `<div class="games">${list.map(({ g, i, key }) => {
-    const m = S.models[i], sc = scoreOf(m), top = [...m.P].sort((a, b) => b.dealt - a.dealt)[0], topR = [...m.P].filter(p => isFinite(p.ratio)).sort((a, b) => b.ratio - a.ratio)[0];
+    const m = S.models[i], sc = scoreOf(m);
     return `<a class="gcard" href="#${key}"><span class="date">${dateShort(g.date)}${g.location ? " · " + esc(g.location) : ""}</span><h3>${esc(g.title || "Игра " + dateShort(g.date))}</h3>
       <span class="gscore">${hitsOf(m).map(([t, n]) => `<span class="num" style="color:${TEAMS[t].c}">${n}</span>`).join('<span class="muted">:</span>')}<small>попадания</small></span>
       ${sc.kind === "раунды" ? `<span class="grounds"><span class="muted">Раунды</span> ${sc.parts.map(([t, n]) => `<b style="color:${TEAMS[t].c}">${n}</b>`).join('<span class="muted">:</span>')}</span>` : ""}
       <span class="gmeta">${plural(m.P.length, ["игрок", "игрока", "игроков"])}${m.winners.length ? " · " + plural(m.winners.length, ["раунд", "раунда", "раундов"]) : ""}</span>
-      <span class="gbest">${top ? `<span><span class="muted">Попадания</span> ${esc(top.name)} (${top.dealt})</span>` : ""}${topR ? `<span><span class="muted">Коэффициент</span> ${esc(topR.name)} (${r2(topR.ratio)})</span>` : ""}</span></a>`;
+      </a>`;
   }).join("")}</div>`;
 }
 
@@ -387,7 +387,7 @@ function viewSeason(S) {
   <section><h2>Игры</h2>${gameCards(S)}</section>
   ${S.rows.length ? `<section><div class="head"><h2>Игроки за сезон</h2><div class="row">${clsSeg()}<div class="seg" role="group" aria-label="Режим таблицы"><button data-mode="avg">Среднее за игру</button><button data-mode="rnd">За раунд</button><button data-mode="tot">Всего</button><button data-mode="dth">На 1 смерть</button></div>${locSeg()}</div></div><div class="scroll"><table id="seasonTable"></table></div><p class="note">Нажмите на имя, чтобы открыть страницу игрока. Заголовки столбцов сортируют таблицу. «Автоматы» и «Пистолет» показывают только игры с этим оружием: у пистолета 5 жизней и одиночные выстрелы, поэтому его цифры отдельно. «На 1 смерть» — попадания и выстрелы делим на число смертей игрока; кто не умирал ни разу, тот внизу. Локации: на каждой считаются только игры, сыгранные там. «От N игр» скрывает тех, кто сыграл меньше (с учётом выбранной локации и оружия).</p></section>
   <section><div class="head"><h2>Номинации сезона</h2><div class="seg" role="group" aria-label="Режим номинаций"><button data-nmode="avg">Среднее</button><button data-nmode="rec">Рекорд за игру</button></div></div>
-    <div data-npane="avg"><div class="noms">${nomTiles(S.rows.filter(r => r.games >= Math.ceil(Math.max(...S.rows.map(z => z.games)) * 0.6)), who, (() => { const mx = Math.max(...S.rows.map(r => r.mvps)); return mx ? [`<div class="nom"><span class="nt">Коллекционер MVP</span><span class="lab">Чаще всех MVP игры</span><span class="ws">${S.rows.filter(r => r.mvps === mx).map(who).join("")}</span><span class="v">${plural(mx, ["раз", "раза", "раз"])}</span></div>`] : []; })(), SEASON_NOMS)}</div>
+    <div data-npane="avg"><div class="noms">${nomTiles(S.rows.filter(r => r.games >= Math.ceil(Math.max(...S.rows.map(z => z.games)) * 0.6)), who, [], SEASON_NOMS)}</div>
     <p class="note">В среднем за игру: каждая цифра — среднее по играм игрока. Доля раундов без смерти считается только по тагерам с журналом событий.</p></div>
     <div data-npane="rec"><div class="noms">${nomTiles(per.map(({ p, m }) => ({ ...p, rounds: p.nR, date: m.g.date })), r => `${playerLink(r.name, S.rows, [])}<span class="muted">${dateShort(r.date).slice(0, 5)}</span>`, [], REC_NOMS)}</div>
     <p class="note">Лучший результат за одну игру среди всех игроков сезона, рядом дата игры.</p></div></section>
@@ -437,10 +437,8 @@ function seasonTableInit(S) {
   const src = () => byLoc[seasonLoc] || (byLoc[seasonLoc] = season(DATA.games.filter(g => g.location === seasonLoc)));
   const draw = () => {
     const cols = [...COLS[seasonMode]];
-    // сколько раз был MVP игры и MVP команды (по попаданиям) — всегда по всем пушкам
     const M = r => main[r.name] || r;
     if (seasonMode === "avg" || seasonMode === "tot") {
-      cols.push(["mvps", "MVP игры", r => M(r).mvps || 0, String], ["tmvps", "MVP команды", r => M(r).tmvps || 0, String]);
       // порядок: игрок, попал / получил, остальное
       const ri = cols.findIndex(c => /^ratio/.test(c[0])); cols.splice(1, 0, cols.splice(ri, 1)[0]);
     }
@@ -690,7 +688,7 @@ function viewGame(S, key) {
       <div class="score">${A(eD)}${fmt(dealt)}<small>попаданий</small></div>
       <dl class="kv"><div><dt>Получил</dt><dd>${A(eR)}${fmt(recv)}</dd></div><div><dt>Попал / получил</dt><dd>${A(eD || eR)}${r2(div(dealt, recv))}</dd></div>
       ${m.winners.length ? `<div><dt>Раундов</dt><dd>${won}</dd></div>` : ""}<div><dt>Смертей</dt><dd>${A(eK)}${deaths}</dd></div><div><dt>Выстрелов</dt><dd>${A(eS)}${fmt(shots)}</dd></div><div><dt>Точность</dt><dd>${A(eD || eS)}${pct(div(dealt, shots))}</dd></div></dl>
-      ${(teamMvp[t] = tm) ? `<p class="gmvp"><span class="tag">MVP команды</span>${who(tm)}<span class="muted num">${A(tm.e.dealt)}${plural(m.mvpT(tm, t), HIT)}</span></p>` : ""}</div>`;
+      </div>`;
   }).join("");
   const swapNote = swappers.length ? `<p class="note">По ходу игры ${(n => n.length > 1 ? n.slice(0, -1).join(", ") + " и " + n[n.length - 1] : n[0])(swappers.map(p => esc(p.name)))} ${swappers.length > 1 ? "сменили" : "сменил(а)"} команду${m.swaps.length ? ` после ${m.swaps.map(r => r + "-го").join(" и ")} раунда` : ""}. Попадания, смерти и выстрелы засчитаны той команде, за которую игрок был в тот момент. Цветные точки у имени показывают команды по порядку.</p>` : "";
   // раунды
@@ -761,12 +759,12 @@ function viewGame(S, key) {
   const awards = (g.awards || []).filter(a => a && a[0]);
   return `${header("games")}
   <section><span class="eyebrow">${dateRu(g.date)}${g.location ? " · " + esc(g.location) : ""}</span><h1>${esc(g.title || "Игра " + dateShort(g.date))}</h1>
-    ${m.mvp ? `<p class="gmvp"><span class="tag">MVP игры</span>${who(m.mvp)}<span class="muted num">${plural(m.mvp.dealt, HIT)}</span></p>` : ""}</section>
+</section>
   <section><div class="board">${board}</div>${swapNote}${(g.notes || []).map(n => `<p class="note">${esc(n)}</p>`).join("")}</section>
   ${roundsHtml}
   ${replayHtml}
   <section><div class="head"><h2>Игроки</h2><div class="seg" role="group" aria-label="Режим таблицы"><button data-gmode="tot">Всего</button><button data-gmode="rnd">За раунд</button></div></div><div class="scroll"><table id="gameTable"></table></div></section>
-  <section><h2>Номинации</h2><div class="noms">${nomTiles(nomRows, who, extraNom, NOMS, teamNoms)}</div></section>
+  <section><h2>Номинации</h2><div class="noms">${nomTiles(nomRows, who, extraNom, NOMS)}</div></section>
   ${awards.length ? `<section><h2>Ачивки</h2><div class="awards">${awards.map(([t, names, stat, txt]) => `<div class="award"><span class="nt">${esc(t)}</span><span class="row">${String(names || "").split(",").map(n => n.trim()).filter(Boolean).map(n => { const p = P.find(z => z.name === n); return p ? who(p) : esc(n); }).join(" ")}</span><span class="stat">${esc(stat)}</span><span class="txt">${esc(txt)}</span></div>`).join("")}</div></section>` : ""}
   <section><h2>Дуэли</h2><div class="duels">${duels}</div><p class="note">Заголовки столбцов в карточке сортируют её список. Слева — сколько раз игрок попал в соперника, справа — сколько раз соперник попал в него. «Всего» — сумма, то есть как часто эти двое сходились в бою. У сменивших команду отдельный блок за каждую команду.</p></section>
   <section><h2>Кто в кого</h2><div class="grids">${grids}</div><p class="note">Строка — кто стрелял, столбец — в кого попал.${P.some(p => p.e.recv && p.est.size) ? " Курсивом и «≈» — оценка: тагер не считан, попадания по нему поделены между стрелявшими по тому, как каждый попадал в остальных соперников и как тот попадал в него." : ""}</p></section>
