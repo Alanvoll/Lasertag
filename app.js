@@ -269,11 +269,49 @@ const SEASON_NOMS = NOMS.map(([t, l, f, dir, show, ok]) => t === HERO[0] ? HERO
   : [t, l + " за игру", show === pct ? r => r.accPerGame : r => r.ratioPerGame, dir, show, ok]);
 // рекорды: лучшее значение за одну игру среди всех игроков всех игр
 const REC_NOMS = NOMS.map(n => n[0] === HERO[0] ? [HERO[0], "Больше всех раундов без смерти", r => r.alive, 1, fmt, HERO[5]] : n);
+// Номинации сезона считаются за раунд (игры бывают от 17 до 32 раундов). Игры на пистолете учитываются с поправкой на 5 жизней;
+// выстрелы, точность и раунды без смерти так не поправить (одиночный огонь), они — только по играм на автоматах.
+const pr1 = x => x.toFixed(2).replace(".", ",");
+// У пистолета 5 жизней, у автомата 4: за одну жизнь пистолет принимает на попадание больше. Для честного сравнения
+// полученные на пистолете умножаем на 4/5, смерти — на 5/4 (как если бы у него было 4 жизни, как у автомата).
+const PIST_R = 0.8, PIST_D = 1.25;
+const AGG = (items) => { const a = { games: items.length, dealt: 0, recv: 0, deaths: 0, shots: 0, gr: 0, alive: 0, rounds: 0, accs: [], ratios: [] };
+  for (const p of items) { const pi = clsOf(p) === "pistol", rv = p.recv * (pi ? PIST_R : 1);
+    a.dealt += p.dealt; a.recv += rv; a.deaths += pi ? Math.min(p.deaths * PIST_D, p.gr || Infinity) : p.deaths; /* смертей не больше, чем раундов */ a.shots += p.shots; a.gr += p.gr;
+    if (p.alive != null && p.nR) { a.alive += p.alive; a.rounds += p.nR; } if (p.shots) a.accs.push(p.acc); const ra = div(p.dealt, rv); if (isFinite(ra)) a.ratios.push(ra); }
+  a.acc = a.accs.length ? sum(a.accs, x => x) / a.accs.length : NaN; a.ratio = a.ratios.length ? sum(a.ratios, x => x) / a.ratios.length : NaN; return a; };
+// игра игрока по тагерам: сменивший тагер (например, пистолет → автомат) делится на части, у каждой своё оружие
+const unitsOf = p => p.parts ? gunUnits(p).map(u => ({ ...u, alive: null, nR: 0 })) : [p];
+const perR = (a, k) => a && a.gr ? a[k] / a.gr : NaN;
+// [название, подпись, значение по агрегату, направление, формат, только автоматы]
+const SNOMS = [
+  ["Терминатор", "Больше всех попаданий за раунд", a => perR(a, "dealt"), 1, pr1, false],
+  ["Спонсор патронного завода", "Больше всех выстрелов за раунд", a => perR(a, "shots"), 1, one, true],
+  ["Бережливый", "Меньше всех выстрелов за раунд", a => perR(a, "shots"), -1, one, true],
+  ["Белке в глаз", "Лучшая точность", a => a && a.acc, 1, pct, true],
+  ["Штурмовик Империи", "Худшая точность", a => a && a.acc, -1, pct, true],
+  ["Джон Уик", "Лучший КД (попал / получил)", a => a && a.ratio, 1, r2, false],
+  ["Живой щит", "Больше всех получил за раунд", a => perR(a, "recv"), 1, pr1, false],
+  ["Невидимка", "Меньше всех получил за раунд", a => perR(a, "recv"), -1, pr1, false],
+  ["Кенни", "Чаще всех погибал (доля раундов)", a => perR(a, "deaths"), 1, pct, false],
+  ["Горец", "Реже всех погибал (доля раундов)", a => perR(a, "deaths"), -1, pct, false],
+  ["Берсерк", "Больше всех попаданий на 1 смерть", a => a && a.deaths ? a.dealt / a.deaths : NaN, 1, one, false],
+  ["Последний герой", "Чаще всех доживал до конца раунда", a => a && a.rounds ? a.alive / a.rounds : NaN, 1, pct, true],
+];
+// превращаем в формат nomTiles: строка — { name, T: все пушки, A: автоматы }
+const SEASON_NOMS2 = SNOMS.map(([t, l, f, dir, show, auto]) => [t, l, r => { const a = auto ? r.A : r.T; return a && a.games >= (r.minG || 1) ? f(a) : NaN; }, dir, show]);
 // в номинациях игры не участвуют цифры, которых нет совсем (тагер не считан), а частичные оценки помечены «≈»
 const NOM_KEY = { MVP: "mvp", "Терминатор": "dealt", "Спонсор патронного завода": "shots", "Бережливый": "shots", "Белке в глаз": "acc", "Штурмовик Империи": "acc", "Джон Уик": "ratio",
   "Живой щит": "recv", "Невидимка": "recv", "Кенни": "deaths", "Горец": "deaths", "Берсерк": "dpd", "Последний герой": "alive" };
 const unknownOf = r => r.est && r.e ? { shots: r.est.has("shots"), acc: r.est.has("shots"), recv: r.est.has("recv"), ratio: r.est.has("recv"), deaths: r.est.has("deaths"), dpd: r.est.has("deaths"), alive: r.e.alive, mvp: r.est.has("recv") || r.est.has("deaths") } : {};
 const approx = on => on ? "≈" : "";
+function seasonNomRows(S) {
+  const by = {}; S.models.forEach(m => m.P.forEach(p => (by[p.name] = by[p.name] || []).push(p)));
+  // в среднем — только у кого не меньше 3 игр (для номинаций «только автоматы» — 3 игры на автоматах)
+  return Object.entries(by).map(([name, l]) => { const u = l.flatMap(unitsOf), au = u.filter(x => clsOf(x) === "auto");
+    const T = AGG(u), A = au.length ? AGG(au) : null; T.games = l.length; if (A) A.games = l.filter(p => unitsOf(p).some(x => clsOf(x) === "auto")).length;
+    return { name, minG: 3, T, A }; });
+}
 function nomTiles(rows, who, extra = [], noms = NOMS, afterFirst = []) {
   const tiles = noms.map(([title, label, f, dir, show, ok]) => {
     const k = NOM_KEY[title];
@@ -387,10 +425,10 @@ function viewSeason(S) {
   <section><h2>Игры</h2>${gameCards(S)}</section>
   ${S.rows.length ? `<section><div class="head"><h2>Игроки за сезон</h2><div class="row">${clsSeg()}<div class="seg" role="group" aria-label="Режим таблицы"><button data-mode="avg">Среднее за игру</button><button data-mode="rnd">За раунд</button><button data-mode="tot">Всего</button><button data-mode="dth">На 1 смерть</button></div>${locSeg()}</div></div><div class="scroll"><table id="seasonTable"></table></div><p class="note">Нажмите на имя, чтобы открыть страницу игрока. Заголовки столбцов сортируют таблицу. «Автоматы» и «Пистолет» показывают только игры с этим оружием: у пистолета 5 жизней и одиночные выстрелы, поэтому его цифры отдельно. «На 1 смерть» — попадания и выстрелы делим на число смертей игрока; кто не умирал ни разу, тот внизу. Локации: на каждой считаются только игры, сыгранные там. «От N игр» скрывает тех, кто сыграл меньше (с учётом выбранной локации и оружия).</p></section>
   <section><div class="head"><h2>Номинации сезона</h2><div class="seg" role="group" aria-label="Режим номинаций"><button data-nmode="avg">Среднее</button><button data-nmode="rec">Рекорд за игру</button></div></div>
-    <div data-npane="avg"><div class="noms">${nomTiles(S.rows.filter(r => r.games >= Math.ceil(Math.max(...S.rows.map(z => z.games)) * 0.6)), who, [], SEASON_NOMS)}</div>
-    <p class="note">В среднем за игру: каждая цифра — среднее по играм игрока. Доля раундов без смерти считается только по тагерам с журналом событий.</p></div>
-    <div data-npane="rec"><div class="noms">${nomTiles(per.map(({ p, m }) => ({ ...p, rounds: p.nR, date: m.g.date })), r => `${playerLink(r.name, S.rows, [])}<span class="muted">${dateShort(r.date).slice(0, 5)}</span>`, [], REC_NOMS)}</div>
-    <p class="note">Лучший результат за одну игру среди всех игроков сезона, рядом дата игры.</p></div></section>
+    <div data-npane="avg"><div class="noms">${nomTiles(seasonNomRows(S), who, [], SEASON_NOMS2)}</div>
+    <p class="note">Всё за раунд: игры бывают разной длины. Учитываются те, кто сыграл не меньше 3 игр. У пистолета 5 жизней вместо 4, поэтому его полученные и смерти пересчитаны как для 4 жизней. Выстрелы, точность и раунды без смерти — только по играм на автоматах (и от 3 таких игр): одиночный огонь с очередями не сравнить. Доля раундов без смерти — только по тагерам с журналом событий.</p></div>
+    <div data-npane="rec"><div class="noms">${nomTiles(per.filter(({ p, m }) => p.gr && p.gr === (m.winners.length || p.gr)).map(({ p, m }) => ({ name: p.name, date: m.g.date, T: AGG(unitsOf(p)), A: unitsOf(p).every(x => clsOf(x) === "auto") ? AGG([p]) : null })), r => `${playerLink(r.name, S.rows, [])}<span class="muted">${dateShort(r.date).slice(0, 5)}</span>`, [], SEASON_NOMS2)}</div>
+    <p class="note">Лучший результат за одну игру, за раунд, рядом дата игры. Учитываются только те, кто отыграл всю игру. Пистолет — с поправкой на 5 жизней; выстрелы, точность и раунды без смерти — только автоматы.</p></div></section>
   ${(() => { const pr = []; S.rows.forEach((a, i) => S.rows.slice(i + 1).forEach(b => { const x = a.pairs[b.name] || 0, y = b.pairs[a.name] || 0; if (x + y) pr.push(x >= y ? { a, b, x, y, n: x + y, g: (a.meet || {})[b.name] || 1 } : { a: b, b: a, x: y, y: x, n: x + y, g: (a.meet || {})[b.name] || 1 }); }));
     pr.sort((p, q) => q.n - p.n); const top = pr, mx = top.length ? top[0].n : 1;
     const cards = S.rows.map(s => ({ s, rows: [...new Set([...Object.keys(s.pairs), ...Object.keys(s.against)])].map(n => ({ n, gave: s.pairs[n] || 0, took: s.against[n] || 0 })).sort((a, b) => (b.gave + b.took) - (a.gave + a.took)) })).filter(c => c.rows.length).sort((a, b) => b.s.ratio - a.s.ratio);
