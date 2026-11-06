@@ -306,7 +306,7 @@ table.at { border-collapse: collapse; width: 100%; min-width: 640px; font-varian
     <div class="col g" id="colG"></div>
     <svg class="beams" id="beams" aria-hidden="true"></svg>
     <div class="blg" aria-label="Виды попаданий"><span><i class="b0"></i>обычное</span><span><i class="b1"></i>ассист</span><span><i class="b2"></i>летальное</span></div>
-    <div class="flash" id="flash"><div><small id="flS">Раунд 1</small><span id="flT"></span><em id="flM"></em></div></div>
+    <div class="flash" id="flash"><div><small id="flS">Раунд 1</small><span id="flT"></span></div></div>
   </section>
 
   <section class="deck" aria-label="Управление">
@@ -323,7 +323,7 @@ table.at { border-collapse: collapse; width: 100%; min-width: 640px; font-varian
       <div class="lab"><b class="c0" id="wpR">50%</b><span>шанс победы в раунде по модели</span><b class="c3" id="wpG">50%</b></div>
       <div class="bar"><i id="wpRb" style="width:50%"></i><i id="wpGb" style="width:50%"></i></div>
     </div>
-    <div class="rinfo"><span><span class="tag">первая кровь</span><span id="riFB">ещё нет</span></span><span><span class="tag">MVP раунда</span><span id="riM">в конце раунда</span></span></div>
+    <div class="rinfo"><span><span class="tag">первая кровь</span><span id="riFB">ещё нет</span></span></div>
     <div class="tl" id="tl" role="slider" tabindex="0" aria-label="Шкала боя" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
       <canvas id="tlc"></canvas><div class="head" id="head"></div>
     </div>
@@ -519,7 +519,6 @@ function roundFlash(i) {
   const w = R[i][2], f = $('flash');
   f.style.setProperty('--c', w === 0 ? 'var(--red)' : w === 3 ? 'var(--green)' : 'var(--dim)');
   $('flS').textContent = 'Раунд ' + (i + 1) + ' из ' + NR; $('flT').textContent = w == null ? 'Победитель не определён' : 'Победа ' + TEAMN[w];
-  const m = RD[i].mvp; $('flM').textContent = m != null ? 'MVP · ' + P[m].name : '';
   f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
   if (w == null) return;
   const s = $(w === 0 ? 'sR' : 'sG'); s.classList.remove('pop'); void s.offsetWidth; s.classList.add('pop');
@@ -542,7 +541,7 @@ function render() {
   $('mClock').textContent = fmt(tg - R[ri][0]);
   const q = quietAt(tg) && tg > R[ri][0]; $('mF').classList.toggle('on', q); $('mbF').classList.toggle('on', q);
   const c = toC(tg); $('head').style.left = (c / TOTAL * 100) + '%'; $('tl').setAttribute('aria-valuenow', Math.round(c / TOTAL * 100));
-  // шанс победы, первая кровь, MVP
+  // шанс победы, первая кровь
   const cv = RD[ri].curve; let pr = cv.length ? cv[0][1] : .5;
   for (const [t, p] of cv) { if (t <= tg) pr = p; else break; }
   if (tg >= R[ri][1] && R[ri][2] != null) pr = R[ri][2] === 0 ? 1 : 0;
@@ -550,8 +549,6 @@ function render() {
   $('wpR').textContent = pp + '%'; $('wpG').textContent = (100 - pp) + '%'; $('wpRb').style.width = pp + '%'; $('wpGb').style.width = (100 - pp) + '%';
   const fb = RD[ri].fb;
   $('riFB').innerHTML = fb && tg >= fb[2] ? `<b class="c${P[fb[0]].team}">${P[fb[0]].name}</b> → <b class="c${P[fb[1]].team}">${P[fb[1]].name}</b> · ${fmt(fb[2] - R[ri][0])}` : 'ещё нет';
-  const mv = RD[ri].mvp;
-  $('riM').innerHTML = tg >= R[ri][1] && mv != null ? `<b class="c${P[mv].team}">${P[mv].name}</b> · +${Math.round(RD[ri].mvpv * 100)}% к шансу` : 'в конце раунда';
   // лента
   const feed = $('feed'); const ks = S.kills.slice(-7).reverse();
   const sig = ri + ':' + S.kills.length;
