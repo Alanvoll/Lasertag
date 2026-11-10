@@ -1048,3 +1048,7 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 @media (max-width:760px){.gq .gx-l.eq a{height:46px}.gq .gx-l.eq a img{height:44px}.mt{font-size:8px;padding:3px 5px 2px}.gx-l.eq a>span:nth-child(2){gap:2px}}
 .calf{display:flex;align-items:center;gap:14px;margin-top:12px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);white-space:nowrap}.calf b{color:var(--ink);font-weight:600}
 .calf .calb{flex:1;margin:0}.calf .calb i{background:var(--uv2)}
+/* значок «MVP игры»: тот же контурный, но двухцветный — цвет команды переходит в цвет лучшего (приглушённое золото топа) */
+.mt.g{--b:#d6b46e;background:transparent;border:1px solid;border-image:linear-gradient(90deg,var(--c),var(--b)) 1;color:var(--b)}
+.mt.g::first-letter{color:inherit}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){.mt.g{background:linear-gradient(90deg,var(--c),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}}
