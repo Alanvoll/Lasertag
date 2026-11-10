@@ -66,6 +66,8 @@ function gameCard(m) {
   return { m, key: gameKey(m.g), date: m.g.date, loc: m.g.location || "", kind: sc.kind, teams, win, rounds: m.winners.length, players: m.P.length, hits: sum(teams, t => t.hits), top: m.mvp.name, awards: m.g.awards || [], winners: m.winners, swaps: m.swaps };
 }
 const roundsStrip = (g, big = false) => `<span class="rounds${big ? " big" : ""}">${g.winners.map((w, i) => (g.swaps.includes(i) ? `<i class="sw"></i>` : "") + (w == null ? `<i class="none">${big ? i + 1 : ""}</i>` : `<i style="--c:${tc(w)}" title="Раунд ${i + 1}">${big ? i + 1 : ""}</i>`)).join("")}</span>`;
+// попадания команд рядом со счётом: счёт по раундам часто перекошен сильнее, чем сама перестрелка
+const teamHits = g => g.kind === "попадания" ? "" : `<small class="th num">${ic("hit")}<b style="color:${tc(g.teams[0].t)}">${ru(g.teams[0].hits)}</b><i>:</i><b style="color:${tc(g.teams[1].t)}">${ru(g.teams[1].hits)}</b></small>`;
 const scoreHtml = (g, cls = "sc") => `<div class="${cls} num"><span style="color:${tc(g.teams[0].t)}">${ru(g.teams[0].score)}</span><i>:</i><span style="color:${tc(g.teams[1].t)}">${ru(g.teams[1].score)}</span>${g.kind === "попадания" ? `<small>попадания</small>` : ""}</div>`;
 
 
@@ -75,14 +77,14 @@ function gameTile(g, k = 0) {
   const d = dDay(g.date);
   const duo = mvpDuo(g), pl = n => plural(n, ["игрок", "игрока", "игроков"]);
   const tt = (x, cls) => { const d = duo.find(z => z.t === x.t); return `<div class="${cls}"><div class="t${x.t === g.win ? " w" : ""}" style="--c:${tc(x.t)}">${pl(x.n)}</div><div class="mv"><img src="${portrait(d.name)}" alt=""><span><b>${esc(d.name)}</b><small>${mvpTitle(d)}</small><small class="sts">${st("star", ru(d.rating))}${st("hit", d.dealt)}</small></span></div></div>`; };
-  return panel("gcard A", `<div class="d"><b>${d.day} ${d.monFull}</b><span class="mono">${esc(g.loc)}</span></div>${scoreHtml(g)}<div class="tt">${tt(g.teams[0], "")}${tt(g.teams[1], "r")}</div><div class="ft">${roundsStrip(g)}<span class="mono sts">${st("hit", ru(g.hits))}</span></div>`, "a", `href="#${g.key}" style="--k:${Math.min(k, 8)}" data-loc="${esc(g.loc)}"`);
+  return panel("gcard A", `<div class="d"><b>${d.day} ${d.monFull}</b><span class="mono">${esc(g.loc)}</span></div>${scoreHtml(g)}<div class="tt">${tt(g.teams[0], "")}${tt(g.teams[1], "r")}</div><div class="ft">${roundsStrip(g)}${teamHits(g) || `<span class="mono sts">${st("hit", ru(g.hits))}</span>`}</div>`, "a", `href="#${g.key}" style="--k:${Math.min(k, 8)}" data-loc="${esc(g.loc)}"`);
 }
 // карточки ленты игр: «Постер» — арт площадки сверху, под ним дата и счёт
 const GM = "5";
 function miniStrip(cards, cur) {
   let html = "", mk = "";
   cards.forEach((g, i) => { const d = dDay(g.date), rw = n => plural(n, ["раунд", "раунда", "раундов"]); if (monthKey(g.date) !== mk) { mk = monthKey(g.date); html += `<div class="gmon"><span>${monthName(g.date).split(" ")[0]}</span></div>`; }
-    html += `<a class="gmini${g.key === cur ? " cur" : ""}" href="#${g.key}" data-key="${g.key}" style="--k:${Math.min(i, 10)};--img:url(${placeArt(g.loc, g.date)})"><span class="dt"><b>${dateShort(g.date).slice(0, 5)}</b></span><span class="pl mono">${esc(g.loc)}</span><span class="s num"><span style="color:${tc(g.teams[0].t)}">${ru(g.teams[0].score)}</span><i>:</i><span style="color:${tc(g.teams[1].t)}">${ru(g.teams[1].score)}</span></span><span class="r mono">${vsHtml(g)}${g.kind === "попадания" ? " · по попаданиям" : ""}</span><span class="sb">${g.teams.map(t => `<i style="flex:${t.score};background:${tc(t.t)}"></i>`).join("")}</span></a>`; });
+    html += `<a class="gmini${g.key === cur ? " cur" : ""}" href="#${g.key}" data-key="${g.key}" style="--k:${Math.min(i, 10)};--img:url(${placeArt(g.loc, g.date)})"><span class="dt"><b>${dateShort(g.date).slice(0, 5)}</b></span><span class="pl mono">${esc(g.loc)}</span><span class="s num"><span style="color:${tc(g.teams[0].t)}">${ru(g.teams[0].score)}</span><i>:</i><span style="color:${tc(g.teams[1].t)}">${ru(g.teams[1].score)}</span>${teamHits(g)}</span><span class="r mono">${vsHtml(g)}${g.kind === "попадания" ? " · по попаданиям" : ""}</span><span class="sb">${g.teams.map(t => `<i style="flex:${t.score};background:${tc(t.t)}"></i>`).join("")}</span></a>`; });
   return html;
 }
 // два MVP на игру: лучший в каждой команде; тот из них, кто MVP игры, получает титул «MVP игры» вместо «MVP команды».
@@ -281,6 +283,43 @@ function stripInit(el) {
   el.addEventListener("click", e => { if (moved) { e.preventDefault(); moved = false; } }, true);
 }
 
+// ---------- экран «Дуэли»: кто в кого сколько попал + рейтинг по дуэлям ----------
+// Рейтинг по дуэлям: каждому подбирается сила так, чтобы она лучше всего объясняла все личные перестрелки сразу
+// (модель Брэдли–Терри по попаданиям, 3 условных обмена со средним игроком как страховка, 100 = средний игрок).
+const DU = { loc: "", min: 3 };
+function duelData(S, loc) {
+  const ms = S.models.filter(m => !loc || m.g.location === loc), N = [], ix = {}, games = [];
+  ms.forEach(m => m.P.forEach(p => { if (!(p.name in ix)) { ix[p.name] = N.length; N.push(p.name); games.push(0); } games[ix[p.name]]++; }));
+  const n = N.length, G = N.map(() => N.map(() => 0)), MT = N.map(() => N.map(() => 0));
+  ms.forEach(m => m.P.forEach(a => m.P.forEach(c => { if (a === c) return; const v = m.val(a, c); G[ix[a.name]][ix[c.name]] += v; if (v + m.val(c, a) > 0) MT[ix[a.name]][ix[c.name]]++; })));
+  let s = N.map(() => 1); const prior = 3;
+  for (let it = 0; it < 300; it++) { const ns = s.map((_, i) => { let w = prior, d = 2 * prior / (s[i] + 1); for (let j = 0; j < n; j++) { if (i === j) continue; const t = G[i][j] + G[j][i]; if (!t) continue; w += G[i][j]; d += t / (s[i] + s[j]); } return w / d; });
+    const gm = Math.exp(sum(ns, x => Math.log(x)) / n); s = ns.map(x => x / gm); }
+  return { N, games, G, MT, bt: s.map(x => Math.round(100 * x)), max: Math.max(1, ...games), nG: ms.length };
+}
+function viewDuels(S) {
+  const locs = [...new Set(S.models.map(m => m.g.location).filter(Boolean))];
+  return `<div class="page dupage">
+  <div class="aghead"><div><div class="mono">личные перестрелки за все игры</div><h1>Дуэли</h1></div>
+    <div class="agf du-f"><div class="seg" data-dloc><button data-loc="">все игры</button>${locs.map(l => `<button data-loc="${esc(l)}">${esc(l)} · ${S.models.filter(m => m.g.location === l).length}</button>`).join("")}</div>
+      <label class="du-r"><span class="mono">сыграл от <b id="duN"></b></span><input type="range" id="duMin" min="1" step="1"></label></div></div>
+  ${panel("tbl", `<div class="sc" style="--h:none"><table class="mx dmx sticky1" id="duT"></table></div>
+    <div class="ft">В клетке: попал : получил, под счётом коэффициент (попал, делённое на получил) и сколько игр встречались. Чем ярче фон, тем больше встреч и тем надёжнее счёт. ${ic("star")} по дуэлям: сила, которая лучше всего объясняет все личные перестрелки сразу. Перестрелять сильного стоит дороже, чем слабого, 100 это средний игрок. Считается по всем, кто играл, бегунок только прячет строки.</div>`)}
+  </div>`;
+}
+function duelsInit(S) {
+  const root = document.querySelector(".dupage"); if (!root) return; const T = root.querySelector("#duT"), R = root.querySelector("#duMin"), key = n => (S.rows.find(r => r.name === n) || {}).key;
+  const draw = () => { const D = duelData(S, DU.loc); DU.min = Math.min(DU.min, D.max); R.max = D.max; R.value = DU.min; R.style.setProperty("--p", D.max > 1 ? (DU.min - 1) / (D.max - 1) * 100 + "%" : "100%");
+    root.querySelector("#duN").textContent = plural(DU.min, ["игры", "игр", "игр"]);
+    root.querySelectorAll("[data-dloc] button").forEach(b => b.setAttribute("aria-pressed", b.dataset.loc === DU.loc));
+    const I = D.N.map((_, i) => i).filter(i => D.games[i] >= DU.min).sort((a, b) => D.bt[b] - D.bt[a] || D.games[b] - D.games[a]);
+    T.innerHTML = `<thead><tr><th class="l">игрок \\ соперник</th><th class="rt">${ic("star")} по дуэлям</th>${I.map(j => `<th>${esc(D.N[j])}</th>`).join("")}</tr></thead>
+    <tbody>${I.map(i => `<tr><td class="l"><a class="pl" href="#${key(D.N[i])}">${esc(D.N[i])}</a><small>${plural(D.games[i], ["игра", "игры", "игр"])}</small></td><td class="rt num">${D.bt[i]}</td>${I.map(j => { if (i === j) return `<td class="tot">—</td>`; const m = D.MT[i][j]; if (!m) return `<td class="tot" title="не встречались">·</td>`; const g = D.G[i][j], t = D.G[j][i];
+      return `<td class="cell num" style="--a:${Math.min(46, 7 * m)}%"><b>${g} : ${t}</b><em class="${g > t ? "up" : g < t ? "dn" : ""}">${t ? r2(g / t) : "∞"}</em><small>${plural(m, ["игра", "игры", "игр"])}</small></td>`; }).join("")}</tr>`).join("")}</tbody>`; };
+  R.oninput = () => { DU.min = +R.value; draw(); };
+  root.querySelectorAll("[data-dloc] button").forEach(b => b.onclick = () => { DU.loc = b.dataset.loc; draw(); });
+  draw();
+}
 // ---------- экран «Все игры» ----------
 function viewGames(S) {
   const cards = [...S.models].sort((x, y) => (y.g.date || "").localeCompare(x.g.date || "")).map(gameCard), locs = [...new Set(cards.map(g => g.loc).filter(Boolean))];
@@ -593,7 +632,7 @@ function gunInit(S, key) {
 const app = document.getElementById("app");
 let SEASON = null, homeShown = false;
 function crumb(html) { const el = document.getElementById("crumb"); el.innerHTML = html; }
-const RANK = h => /^s[1-4]$/.test(h) || h === "home" ? 0 : h === "games" || h === "itogi" ? 1 : 2;
+const RANK = h => /^s[1-4]$/.test(h) || h === "home" ? 0 : h === "games" || h === "itogi" || h === "duels" ? 1 : 2;
 let lastRoute = null;
 // «назад» ведёт туда, откуда пришли: стек пройденных экранов с позицией прокрутки и открытой вкладкой
 const NAV = []; let restore = null;
@@ -608,6 +647,7 @@ function navLabel(S, h) {
   if (isHomeH(h)) return { s1: "Главная", s2: "Игры", s3: "Игроки", s4: "Пушки", home: "Главная" }[h];
   if (h === "games") return "Все игры";
   if (h === "itogi") return "Итоги";
+  if (h === "duels") return "Дуэли";
   if (h.startsWith("game-")) { const x = allGames().find(z => z.key === h); if (x) { const d = dDay(x.g.date); return `Игра ${d.day} ${d.monFull}`; } }
   const r = S.rows.find(z => z.key === h) || S.guns.find(z => z.key === h); return r ? r.name : "Назад";
 }
@@ -643,6 +683,7 @@ function draw(h) {
   let html, after = () => {}, back = "#s1", label = "";
   if (h === "games") { html = viewGames(S); after = gamesInit; back = "#s2"; label = "Игры"; }
   else if (h === "itogi") { html = viewItogi(S); after = itogiInit; back = "#itogi"; label = ""; }
+  else if (h === "duels") { html = viewDuels(S); after = () => duelsInit(S); back = "#duels"; label = ""; }
   else if (h.startsWith("game-")) { html = viewGame(S, h); after = () => gameInit(S, h); back = "#s2"; label = "Игры"; }
   else if (/^p\d+$/.test(h)) { html = viewPlayer(S, h); after = () => playerInit(S, h); back = "#s3"; label = "Игроки"; }
   else if (/^gun\d+$/.test(h)) { html = viewGun(S, h); after = () => gunInit(S, h); back = "#s4"; label = "Пушки"; }

@@ -915,3 +915,26 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
   .gi2-t{grid-template-columns:1fr;justify-items:center;text-align:center;gap:12px}.gi2-mv{justify-self:center;grid-template-columns:1fr 1fr}.gi2-mv .gbm em{display:none}
   .gi2-g{padding:8px 6px}.gi2-g>div{gap:1px}.gi2-g .rw i{height:30px;font-size:9px;font-weight:700}.gi2-g .ax i{font-size:6px}
 }
+
+/* экран «Дуэли» */
+.du-f{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.du-r{display:flex;gap:12px;align-items:center}.du-r .mono{min-width:112px}
+.du-r input{-webkit-appearance:none;appearance:none;width:190px;height:22px;background:transparent;cursor:pointer;margin:0}
+.du-r input::-webkit-slider-runnable-track{height:2px;background:linear-gradient(90deg,var(--uv) var(--p,0%),var(--line) var(--p,0%))}
+.du-r input::-moz-range-track{height:2px;background:linear-gradient(90deg,var(--uv) var(--p,0%),var(--line) var(--p,0%))}
+.du-r input::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:18px;margin-top:-8px;background:var(--uv2);border:0;border-radius:0;box-shadow:0 0 12px rgba(154,107,255,.7)}
+.du-r input::-moz-range-thumb{width:12px;height:18px;background:var(--uv2);border:0;border-radius:0;box-shadow:0 0 12px rgba(154,107,255,.7)}
+.dmx{--c:var(--uv)}.dmx th{cursor:default}
+.dmx td{padding:8px 8px;border-left:1px solid var(--line2)}
+.dmx td.l{font-weight:700;white-space:nowrap}.dmx td.l small{font-family:var(--mono);font-weight:400;letter-spacing:.08em;text-transform:uppercase}
+.dmx td b{display:block;font-weight:600;white-space:nowrap}
+.dmx td em{display:block;font-style:normal;font-weight:700;font-size:15px;color:var(--mute)}.dmx em.up{color:var(--green)}.dmx em.dn{color:var(--red)}
+.dmx td.rt{font-family:var(--disp);font-size:24px;font-weight:800;color:var(--uv2);border-left:0;border-right:1px solid var(--line)}
+.dmx th.rt{color:var(--uv2);white-space:nowrap}.dmx th.rt svg{vertical-align:-2px}
+@media (max-width:760px){.du-f{gap:10px}.du-r input{width:140px}.dmx td{padding:6px 6px;font-size:13px}.dmx td em{font-size:13px}.dmx td.rt{font-size:19px}}
+
+/* попадания команд под счётом */
+.th{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.04em;line-height:1}
+.th .ic{width:13px;height:13px;color:var(--mute)}.th b{font-weight:600}.th i{font-style:normal;color:var(--mute)}
+.gm-5 .gmini .s{flex-wrap:wrap;align-content:center;row-gap:6px;padding:12px 0}
+.gm-5 .gmini .s .th{flex-basis:100%;justify-content:center;font-size:13px;text-shadow:0 1px 6px rgba(0,0,0,.9)}.gm-5 .gmini .s .th i{font-size:13px;opacity:1;color:var(--ink)}.gm-5 .gmini .s .th .ic{color:var(--ink)}
