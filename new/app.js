@@ -100,7 +100,7 @@ function mvpDuo(G, pure) { // pure — только MVP команд, без п�
 const mvpTitle = d => d.game ? "MVP игры" : "MVP команды";
 const vsHtml = g => `<b style="color:${tc(g.teams[0].t)}">${g.teams[0].n}</b> vs <b style="color:${tc(g.teams[1].t)}">${g.teams[1].n}</b>`;
 // ---------- блок «Игры» на главной: большая карточка последней игры (варианты G / H / I) + лента игр ----------
-let GV = (() => { try { const v = localStorage.getItem("lt-gv"); return ["z", "r"].includes(v) ? v : "z"; } catch (e) { return "z"; } })();
+let GV = "r"; // большая карточка игры: выбрана «Диаграмма»
 const pw = (n, w) => plural(n, w).split(" ")[1];
 const teamStats = (S, G) => { const m = G.m; return G.teams.map(t => { const sg = m.P.flatMap(p => (p.segs || []).filter(x => x.team === t.t)), shots = sum(sg, x => x.shots || 0), deaths = sum(sg, x => x.deaths || 0); return { hits: t.hits, shots, deaths, acc: div(t.hits, shots), hd: div(t.hits, deaths), rt: sum(m.P.filter(p => p.teams.includes(t.t)), p => m.mvpT(p, t.t)),
       rs: sum(m.P.filter(p => p.teams.includes(t.t)), p => { const r = S.rows.find(x => x.name === p.name); return r && r.games ? r.mvp / r.games * m.shareT(p, t.t) : 0; }) }; }); }; // rs — сумма средних рейтингов игроков за все игры
