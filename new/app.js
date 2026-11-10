@@ -54,7 +54,7 @@ function gameCard(m) {
   const win = [...teams].sort((a, b) => b.score - a.score)[0].t;
   return { m, key: gameKey(m.g), date: m.g.date, loc: m.g.location || "", kind: sc.kind, teams, win, rounds: m.winners.length, players: m.P.length, hits: sum(teams, t => t.hits), top: m.mvp.name, awards: m.g.awards || [], winners: m.winners, swaps: m.swaps };
 }
-const roundsStrip = (g, big = false) => `<span class="rounds${big ? " big" : ""}">${g.winners.map((w, i) => (g.swaps.includes(i) ? `<i class="sw"></i>` : "") + (w == null ? `<i class="none">${big ? i + 1 : ""}</i>` : `<i style="--c:${tc(w)}" title="Раунд ${i + 1}: ${TEAMS[w].name}">${big ? i + 1 : ""}</i>`)).join("")}</span>`;
+const roundsStrip = (g, big = false) => `<span class="rounds${big ? " big" : ""}">${g.winners.map((w, i) => (g.swaps.includes(i) ? `<i class="sw"></i>` : "") + (w == null ? `<i class="none">${big ? i + 1 : ""}</i>` : `<i style="--c:${tc(w)}" title="Раунд ${i + 1}">${big ? i + 1 : ""}</i>`)).join("")}</span>`;
 const scoreHtml = (g, cls = "sc") => `<div class="${cls} num"><span style="color:${tc(g.teams[0].t)}">${ru(g.teams[0].score)}</span><i>:</i><span style="color:${tc(g.teams[1].t)}">${ru(g.teams[1].score)}</span>${g.kind === "попадания" ? `<small>попадания</small>` : ""}</div>`;
 
 
@@ -62,7 +62,7 @@ const MONTHS_NOM = ["Январь", "Февраль", "Март", "Апрель"
 const monthKey = d => (d || "").slice(0, 7), monthName = d => { const [y, m] = (d || "").split("-").map(Number); return `${MONTHS_NOM[m - 1]} ${y}`; };
 function gameTile(g, k = 0) {
   const d = dDay(g.date);
-  const tt = (x, cls) => `<div class="${cls}"><div class="t${x.t === g.win ? " w" : ""}" style="--c:${tc(x.t)}">${x.name}</div><div class="mv"><img src="${portrait(x.mvp)}" alt=""><span><b>${esc(x.mvp)}</b><small>MVP · ${x.mvpDealt} попад.</small></span></div></div>`;
+  const tt = (x, cls) => `<div class="${cls}"><div class="t${x.t === g.win ? " w" : ""}" style="--c:${tc(x.t)}">${x.n} чел.</div><div class="mv"><img src="${portrait(x.mvp)}" alt=""><span><b>${esc(x.mvp)}</b><small>MVP · ${x.mvpDealt} попад.</small></span></div></div>`;
   return panel("gcard A", `<div class="d"><b>${d.day} ${d.mon}</b><span class="mono">${esc(g.loc)}</span></div>${scoreHtml(g)}<div class="tt">${tt(g.teams[0], "")}${tt(g.teams[1], "r")}</div><div class="ft">${roundsStrip(g)}<span class="mono">${g.players} игр.${g.rounds ? ` · ${g.rounds} р.` : ""} · ${ru(g.hits)} поп.</span></div>`, "a", `href="#${g.key}" style="--k:${Math.min(k, 8)}" data-loc="${esc(g.loc)}"`);
 }
 function miniStrip(cards, cur) {
@@ -258,7 +258,7 @@ function viewGame(S, key) {
     const recv = sum(mem, p => sum(segOf(p, t), s => s.recv)), shots = sum(mem, p => sum(segOf(p, t), s => s.shots)), deaths = sum(mem, p => sum(segOf(p, t), s => s.deaths));
     const won = m.winners.filter(w => w === t).length, tm = mem.filter(p => m.shareT(p, t) > .5).sort((a, b) => m.mvpT(b, t) - m.mvpT(a, t))[0];
     const eD = P.some(v => !v.teams.includes(t) && v.est.has("recv") && P.some(a => estH(a, v))), eR = mem.some(p => p.e.recv), eK = mem.some(p => p.e.deaths), eS = mem.some(p => p.e.shots);
-    return panel("team", `<div class="nm"><b>${TEAMS[t].name}</b><span class="mono">${mem.length} чел.${m.winners.length ? ` · раундов <b>${won}</b>` : ""}</span></div>
+    return panel("team", `<div class="nm"><b>${plural(mem.length, ["игрок", "игрока", "игроков"])}</b><span class="mono">${m.winners.length ? `раундов <b>${won}</b>` : ""}</span></div>
       <div class="roster">${mem.map(p => `${who(p)}${p.swap ? ` <small>(${when(p, t)})</small>` : ""}`).join(", ")}</div>
       <div class="kv"><div><div class="num">${A(eD)}${fmt(dealt)}</div><div class="lab">попал</div></div><div><div class="num">${A(eR)}${fmt(recv)}</div><div class="lab">получил</div></div><div><div class="num">${A(eD || eR)}${r2(div(dealt, recv))}</div><div class="lab">попал / получил</div></div><div><div class="num">${A(eK)}${deaths}</div><div class="lab">смертей</div></div><div><div class="num">${A(eS)}${fmt(shots)}</div><div class="lab">выстрелов</div></div><div><div class="num">${A(eD || eS)}${pct(div(dealt, shots))}</div><div class="lab">точность</div></div></div>
       ${tm ? `<div class="mvp"><div class="ring" style="--s:56px;--c:${tc(t)}"><img src="${portrait(tm.name)}" alt=""></div><div><div class="k">MVP команды</div><div class="n">${who(tm)}</div><div class="mono">рейтинг <b>${A(tm.e.mvp)}${fmt(m.mvpT(tm, t))}</b> · попал <b>${sum(P, v => valT(tm, v, t))}</b></div></div></div>` : ""}`, "div", `style="--c:${tc(t)}"`);
@@ -283,7 +283,7 @@ function viewGame(S, key) {
     else body = p.teams.map(t => { const u = otherTeam(t);
       const rows = byRatio(P.filter(o => o !== p).map(o => ({ o, gave: valT(p, o, t), took: valT(o, p, u), cp: tc(t), co: tc(u) })).filter(r => r.gave || r.took));
       const gs = sum(rows, r => r.gave), ks = sum(rows, r => r.took);
-      return `<div class="dpart"><div class="dpart-h"><span class="dot" style="--c:${tc(t)}"></span><b>За ${TEAMS[t].name.toLowerCase().replace(/е$/, "х")}</b><span class="muted">${when(p, t)}</span><span class="dpart-s num">${gs} : ${ks} · ${coefS(gs, ks)}</span></div>${dhd}${drowsHtml(rows, maxPair)}</div>`; }).join("");
+      return `<div class="dpart"><div class="dpart-h"><span class="dot" style="--c:${tc(t)}"></span><b>${when(p, t)}</b><span class="dpart-s num">${gs} : ${ks} · ${coefS(gs, ks)}</span></div>${dhd}${drowsHtml(rows, maxPair)}</div>`; }).join("");
     return panel("dcard", `<div class="dhead"><div><div class="n">${who(p)}</div><div class="s">попал ${A(p.e.dealt)}${p.dealt} · получил ${A(p.e.recv)}${p.recv}</div></div><div class="ratio num">${A(p.e.ratio)}${r2(p.ratio)}<small>попал / получил</small></div></div><div class="drows" data-sortable>${body}</div>`);
   }).join("");
   // кто в кого
@@ -291,7 +291,7 @@ function viewGame(S, key) {
   const grids = teamIds.map(t => {
     const att = inTeam(t).sort((a, b) => sum(P, v => valT(b, v, t)) - sum(P, v => valT(a, v, t)));
     const vic = P.filter(p => p.teams.some(z => z !== t)).sort((a, b) => sum(P, k => valT(k, b, t)) - sum(P, k => valT(k, a, t)));
-    return panel("tbl", `<div class="cap"><span class="dot" style="--c:${tc(t)}"></span> ${TEAMS[t].name} стреляют</div><div class="sc" style="--h:none"><table class="mx sticky1" style="--c:${tc(t)}"><thead><tr><th class="l">↓ кто → в кого</th>${vic.map(v => `<th>${esc(v.name)}</th>`).join("")}<th>Всего</th></tr></thead>
+    return panel("tbl", `<div class="cap"><span class="dot" style="--c:${tc(t)}"></span> стреляет эта команда</div><div class="sc" style="--h:none"><table class="mx sticky1" style="--c:${tc(t)}"><thead><tr><th class="l">↓ кто → в кого</th>${vic.map(v => `<th>${esc(v.name)}</th>`).join("")}<th>Всего</th></tr></thead>
     <tbody>${att.map(a => `<tr><td class="l">${who(a)}${a.swap ? `<small>${when(a, t)}</small>` : ""}</td>${vic.map(v => { if (a === v) return `<td class="tot">—</td>`; const n = valT(a, v, t), s = n / maxT, e = estH(a, v);
       return `<td class="cell${s > .55 ? " hi" : ""}${e ? " est" : ""}" style="--a:${Math.round(6 + s * 84)}%">${A(e)}${n}</td>`; }).join("")}<td class="tot">${sum(vic, v => valT(a, v, t))}</td></tr>`).join("")}</tbody></table></div>`);
   }).join("");
