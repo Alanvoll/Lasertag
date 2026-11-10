@@ -1026,3 +1026,5 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 /* сдвиг среднего — не колонкой, а «+X / −X» вплотную к рейтингу за игру */
 .rr{grid-template-columns:50px 62px 30px}.rr .dl{justify-self:start;margin-left:5px;font-size:11px}
 @media (max-width:760px){.rr{grid-template-columns:42px 56px 26px}.rr .dl{font-size:10px;margin-left:4px}}
+.rr{grid-template-columns:50px 30px 62px}.gx-h .rr i:first-child{grid-column:1/3;justify-self:center}.gx-h .rr i:nth-child(2){display:none}
+@media (max-width:760px){.rr{grid-template-columns:42px 26px 56px}}
