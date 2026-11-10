@@ -178,8 +178,8 @@ function viewHome(S) {
   const b2 = `<div class="shead A"><h2>Игры · ${cards.length}</h2><a class="allg" href="#games">все игры <i>→</i></a></div>
   ${gamesBlock(S, cards)}`;
   // блок 3: игроки
-  const b3 = `<div class="shead A"><h2>Игроки · ${S.rows.length}</h2><span class="r mono">${ic("star")} 100 = среднее число попаданий в игре · среднее за игру</span><a class="allg" href="#itogi">итоги сезона <i>→</i></a></div>
-  <div class="players">${panel("tbl A", `<div class="hd"><span class="mono">все игроки</span><div class="seg" data-pmin><button data-min="1">все</button><button data-min="3" aria-pressed="true">от 3 игр</button></div></div><div class="sc"><table id="ptable" class="sticky1"></table></div>`)}</div>`;
+  const b3 = `<div class="shead A"><h2>Игроки · ${S.rows.length}</h2><span class="r mono">${ic("star")} 100 = среднее число попаданий в игре</span><a class="allg" href="#itogi">итоги сезона <i>→</i></a></div>
+  <div class="players">${panel("tbl A", `<div class="hd"><span class="mono">все игроки</span><div class="segs"><div class="seg" data-pmode><button data-mode="game" aria-pressed="true">за игру</button><button data-mode="round">за раунд</button></div><div class="seg" data-pmin><button data-min="1">все</button><button data-min="3" aria-pressed="true">от 3 игр</button></div></div></div><div class="sc"><table id="ptable" class="sticky1"></table></div>`)}</div>`;
   // блок 4: пушки
   const guns = [...S.guns].sort((a, b) => b.dealt / b.games - a.dealt / a.games);
   const topGun = (f, filt = () => true) => { const l = S.guns.filter(g => filt(g) && isFinite(f(g))); return l.length ? l.reduce((a, b) => f(b) > f(a) ? b : a) : null; };
@@ -195,12 +195,15 @@ function viewHome(S) {
   <section class="slide" id="s3"><div class="wrap">${b3}</div></section>
   <section class="slide" id="s4"><div class="wrap">${b4}</div></section>`;
 }
-let pmin = 3;
+let pmin = 3, pmode = "game", psort = "rating";
 function homeInit(S) {
-  const cols = [["name", "Игрок", r => r.name, null], ["games", "Игр", r => r.games, String], ["rating", ic("star") + "Рейтинг", r => r.mvp / r.games, ru, 1], ["dealt", ic("hit") + "Попал", r => r.dealt / r.games, one, 1], ["recv", ic("recv") + "Получил", r => r.recv / r.games, one], ["ratio", "Попал / получил", r => r.ratio, r2, 1], ["acc", ic("acc") + "Точность", r => r.acc, pct, 1], ["deaths", ic("death") + "Смерти", r => r.deaths / r.games, one], ["alive", "Дожил до конца", r => r.rounds ? r.alive / r.rounds : NaN, pct, 1], ["mvps", "MVP игры", r => r.mvps, String]];
-  const draw = () => { const rows = S.rows.filter(r => r.games >= pmin); const max = Object.fromEntries(cols.slice(1).map(c => [c[0], Math.max(...rows.map(c[2]).filter(isFinite))]));
-    sortable("ptable", cols, rows, (r, key) => `<tr class="${r.games < 3 ? "dim" : ""}"><td class="l"><a class="pl" href="#${r.key}">${esc(r.name)}</a></td>${cols.slice(1).map(c => `<td class="num">${c[0] === key && c[0] !== "games" && isFinite(c[2](r)) ? `<span class="bar" style="--w:${Math.round(c[2](r) / max[c[0]] * 48)}px"></span>` : ""}${isFinite(c[2](r)) || typeof c[2](r) === "string" ? c[3](c[2](r)) : "—"}</td>`).join("")}</tr>`, "rating"); };
-  document.querySelectorAll("[data-pmin] button").forEach(b => b.onclick = () => { pmin = +b.dataset.min; document.querySelectorAll("[data-pmin] button").forEach(x => x.setAttribute("aria-pressed", x === b)); draw(); });
+  // режим таблицы: счётные показатели в среднем за игру или за раунд
+  const draw = () => { const R = pmode === "round", per = r => R ? r.gr : r.games, f1 = R ? pr1 : one;
+    const cols = [["name", "Игрок", r => r.name, null], ["games", "Игр", r => r.games, String], ["rating", ic("star") + "Рейтинг", r => r.mvp / r.games, ru, 1], ["dealt", ic("hit") + "Попал", r => div(r.dealt, per(r)), f1, 1], ["recv", ic("recv") + "Получил", r => div(r.recv, per(r)), f1], ["ratio", "Попал / получил", r => r.ratio, r2, 1], ["perdeath", "Попал на смерть", r => div(r.dealt, r.deaths), one, 1], ["acc", ic("acc") + "Точность", r => r.acc, pct, 1], ["deaths", ic("death") + "Смерти", r => div(r.deaths, per(r)), f1], ["alive", "Дожил до конца", r => r.rounds ? r.alive / r.rounds : NaN, pct, 1], ["mvps", "MVP игры", r => r.mvps, String]];
+    const rows = S.rows.filter(r => r.games >= pmin); const max = Object.fromEntries(cols.slice(1).map(c => [c[0], Math.max(...rows.map(c[2]).filter(isFinite))]));
+    sortable("ptable", cols, rows, (r, key) => `<tr class="${r.games < 3 ? "dim" : ""}"><td class="l"><a class="pl" href="#${r.key}">${esc(r.name)}</a></td>${cols.slice(1).map(c => `<td class="num">${c[0] === key && c[0] !== "games" && isFinite(c[2](r)) ? `<span class="bar" style="--w:${Math.round(c[2](r) / max[c[0]] * 48)}px"></span>` : ""}${isFinite(c[2](r)) || typeof c[2](r) === "string" ? c[3](c[2](r)) : "—"}</td>`).join("")}</tr>`, psort); };
+  document.querySelectorAll("[data-pmode] button").forEach(b => b.onclick = () => { pmode = b.dataset.mode; const th = document.querySelector("#ptable th[aria-sort] button"); if (th) psort = th.dataset.k; document.querySelectorAll("[data-pmode] button").forEach(x => x.setAttribute("aria-pressed", x === b)); draw(); });
+  document.querySelectorAll("[data-pmin] button").forEach(b => b.onclick = () => { pmin = +b.dataset.min; { const th = document.querySelector("#ptable th[aria-sort] button"); if (th) psort = th.dataset.k; } document.querySelectorAll("[data-pmin] button").forEach(x => x.setAttribute("aria-pressed", x === b)); draw(); });
   draw();
   const gcols = [["name", "Пушка", g => g.name, null], ["games", "Игр", g => g.games, String], ["players", "Игроков", g => g.players.length, String], ["dealtPG", "Попал", g => g.dealt / g.games, one], ["recvPG", "Получил", g => g.recv / g.games, one], ["ratio", "Попал / получил", g => g.ratio, r2], ["acc", "Точность", g => g.acc, pct], ["deathsPG", "Смерти", g => g.deaths / g.games, one], ["shotsPG", "Выстрелы", g => g.shots / g.games, fmt]];
   const gmax = Object.fromEntries(gcols.slice(1).map(([k, , f]) => [k, Math.max(1e-9, ...S.guns.map(f).filter(isFinite))]));

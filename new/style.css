@@ -844,3 +844,4 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .tcard .v .ic,.fact .v .ic{width:.74em;height:.74em;vertical-align:baseline;margin-right:.22em;stroke-width:2}
 .tcard .v .ic{color:var(--m)}.fact .v .ic{color:var(--uv2)}.tcard .v{gap:0}
 .st .ic{width:.95em;height:.95em}
+.segs{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
