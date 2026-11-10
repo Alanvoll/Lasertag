@@ -980,3 +980,6 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
   .gz-l.c2{grid-template-columns:repeat(2,minmax(0,1fr))}.gz-l.c3{grid-template-columns:repeat(3,minmax(0,1fr))}.gz-l.c4,.gz-l.c5{grid-template-columns:repeat(4,minmax(0,1fr))}.gz-l .gy-c,.gz-r .gz-l .gy-c{height:92px}
   .gz-l.c3 .gy-c b,.gz-l.c4 .gy-c b,.gz-l.c5 .gy-c b{font-size:9.5px;letter-spacing:-.02em;text-overflow:clip}.gz-l.c3 .gy-c span,.gz-l.c4 .gy-c span{left:3px;right:1px}.gz-l.c4 .gy-c .st,.gz-l.c3 .gy-c .st{font-size:10px}
   .gz-row{gap:8px}.gz-row b{font-size:17px}.gz-row span{font-size:8px;letter-spacing:.06em}.gr{width:190px;height:190px;margin:24px 80px 24px}.gr-l small{font-size:7px;letter-spacing:.04em}.gr-l em,.gr-l.e em,.gr-l.w em{font-size:13px}}
+.z0{text-decoration:none;opacity:.32}
+.th i{display:inline-flex;align-items:center;padding:0 8px}.gm-5 .gmini .s .th i{padding:4px 7px 3px}
+.gm-5 .gmini .s .th span{min-width:calc(3ch + 18px);justify-content:flex-end}.gm-5 .gmini .s .th>b{min-width:calc(3ch + 18px);justify-content:flex-start}
