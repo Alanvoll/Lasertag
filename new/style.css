@@ -983,15 +983,36 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .z0{text-decoration:none;opacity:.32}
 .th i{display:inline-flex;align-items:center;padding:0 8px}.gm-5 .gmini .s .th i{padding:4px 7px 3px}
 .gm-5 .gmini .s .th span{min-width:calc(3ch + 18px);justify-content:flex-end}.gm-5 .gmini .s .th>b{min-width:calc(3ch + 18px);justify-content:flex-start}
-/* состав списком в карточке игры */
-.gz-b .gx-l{width:min(100%,250px);justify-self:end;gap:7px}.gz-b .gx-l.r{justify-self:start}.gz-b .gx-l a{font-size:17px;line-height:1.25}.gz-b .gx-l .st{font-size:15px}
-@media (max-width:760px){.gz-b .gx-l{width:100%;gap:4px}.gz-b .gx-l a{font-size:13px}.gz-b .gx-l .st{font-size:12px}}
-.gr-l.s{transform:translate(-50%,6px);justify-items:center}
-.gz-b .gx-l{width:min(100%,330px)}
-.gz-b .gx-l a,.gz-b .gx-h{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
-.gz-b .gx-l.r a,.gz-b .gx-l.r .gx-h{grid-template-columns:auto minmax(0,1fr)}.gz-b .gx-l.r a>span:first-child,.gz-b .gx-l.r .gx-h>span:first-child{order:2;text-align:right}
-.rr{display:grid;grid-template-columns:52px 62px 44px;justify-items:end;align-items:center}.rr i{font-style:normal}
+/* состав списком в карточке игры: строка-плашка с аватаркой у внешнего края, имя, средний до игры, за игру, сдвиг */
+.gq .gx-l{width:100%;max-width:440px;justify-self:end;gap:5px;border:0;padding:0}.gq .gx-l.r{justify-self:start;border:0;padding:0}
+.gq .gx-l a,.gq .gx-h{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center}
+.gq .gx-l a{height:48px;padding-right:12px;background:rgba(14,15,18,.72);border:1px solid var(--line2);font-size:18px;font-weight:700;line-height:1.2;transition:border-color .2s}
+.gq .gx-l a:hover{border-color:var(--uv2)}.gq .gx-l a:hover span{color:inherit}
+.gq .gx-l a img{width:48px;height:46px;object-fit:cover;object-position:50% 12%;border-left:2px solid var(--c)}
+.gq .gx-l a.sw img{opacity:.45}.gq .gx-l a>span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.gq .gx-l.d a{height:40px;font-size:16px}.gq .gx-l.d a img{height:38px}
+.gq .gx-h{height:14px;padding-right:12px}
+.gq .gx-l.r a,.gq .gx-l.r .gx-h{grid-template-columns:auto minmax(0,1fr) 48px;padding:0 0 0 12px}
+.gq .gx-l.r a>img,.gq .gx-l.r .gx-h>b{order:3}.gq .gx-l.r a>span:nth-child(2),.gq .gx-l.r .gx-h>span:nth-child(2){order:2;text-align:right}
+.gq .gx-l.r a img{border-left:0;border-right:2px solid var(--c)}
+.rr{display:grid;grid-template-columns:50px 62px 42px;justify-items:end;align-items:center}.rr i{font-style:normal}
 .gx-h .rr i{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
-.rr .b0{color:var(--mute);font-size:15px}.rr .dl{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--mute)}.rr .dl.up{color:var(--green)}.rr .dl.dn{color:var(--red)}
-@media (max-width:760px){.gz-b .gx-l{grid-column:1/-1;width:100%;justify-self:stretch}.gz-b .gx-l.r{border-right:0;border-left:2px solid var(--c);padding:0 0 0 12px}.gz-b .gx-l.r a,.gz-b .gx-l.r .gx-h{grid-template-columns:minmax(0,1fr) auto}.gz-b .gx-l.r a>span:first-child,.gz-b .gx-l.r .gx-h>span:first-child{order:0;text-align:left}.rr .b0{font-size:13px}}
-.gz-b .gx-l{width:min(100%,390px)}.le-c .dl{font-style:normal;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--mute);margin:0 8px 0 -4px}.le-c .dl.up{color:var(--green)}.le-c .dl.dn{color:var(--red)}
+.rr .b0{color:var(--mute);font-size:15px;font-weight:400}.rr .st{font-size:16px}.rr .dl{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--mute)}.rr .dl.up{color:var(--green)}.rr .dl.dn{color:var(--red)}
+.le-c .dl{font-style:normal;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--mute);margin:0 8px 0 -4px}.le-c .dl.up{color:var(--green)}.le-c .dl.dn{color:var(--red)}
+.gr-l.s{transform:translate(-50%,6px);justify-items:center}
+@media (max-width:760px){.gq .gx-l,.gq .gx-l.r{grid-column:1/-1;max-width:none;justify-self:stretch}
+  .gq .gx-l a,.gq .gx-l.r a,.gq .gx-h,.gq .gx-l.r .gx-h{grid-template-columns:40px minmax(0,1fr) auto;padding:0 10px 0 0;gap:10px}.gq .gx-l a{height:40px;font-size:15px}.gq .gx-l a img,.gq .gx-l.r a img{width:40px;height:38px;border-right:0;border-left:2px solid var(--c)}
+  .gq .gx-l.r a>img,.gq .gx-l.r .gx-h>b{order:0}.gq .gx-l.r a>span:nth-child(2),.gq .gx-l.r .gx-h>span:nth-child(2){order:0;text-align:left}.rr{grid-template-columns:42px 56px 36px}.rr .b0{font-size:13px}.rr .st{font-size:14px}}
+/* карточка игры, раскладка «команда колонкой»: слева и справа MVP команды и под ним состав, по центру счёт и сравнение */
+.gq{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:28px;align-items:stretch;position:relative}
+.gq-s{display:grid;grid-template-rows:minmax(132px,1fr) auto;gap:8px;min-width:0}
+.gq-m{display:grid;justify-items:center;align-content:space-between;gap:12px;min-width:300px}
+.gq-m .gb-s .lgn{font-size:clamp(84px,7vw,112px)}.gq-m .gx-c{gap:8px}
+.gq .le-c{min-height:132px}.gq .le-c img{object-position:50% 18%}.gq .le-c b{font-size:26px}.gq .le-c small{font-size:10px}.gq .le-c span{left:14px;right:14px;bottom:12px}.gq .le-c .st{font-size:15px}
+.gq .le-c .rb{position:absolute;left:0;top:0;padding:4px 8px;font-size:10px;background:rgba(12,13,16,.85)}
+.gq-s.r .le-c span{text-align:right}.gq-s.r .le-c em{justify-content:flex-end}.gq-s.r .le-c .rb{left:auto;right:0}
+.gq .gx-l,.gq .gx-l.r{max-width:none;justify-self:stretch}
+.gq .gz-l,.gq .gz-l.r{justify-content:stretch;gap:6px}.gq .gz-l.c2,.gq .gz-l.c4,.gq .gz-l.c5{grid-template-columns:repeat(4,minmax(0,1fr))}.gq .gz-l.c3{grid-template-columns:repeat(3,minmax(0,1fr))}.gq .gz-l .gy-c,.gq-r .gz-l .gy-c{height:104px}.gq .gz-l.c3 .gy-c{height:84px}.gq .gz-l.c5 .gy-c{height:70px}
+.gq .gz-c{width:100%;border-top:1px solid var(--line);padding-top:14px}.gq .gr{margin:34px 76px 34px}
+@media (max-width:760px){.gq{grid-template-columns:minmax(0,1fr);gap:12px}.gq-m{order:-1;min-width:0}.gq-s{grid-template-rows:150px auto}.gq-s.r .le-c span{text-align:left}.gq-s.r .le-c em{justify-content:flex-start}.gq-s.r .le-c .rb{left:0;right:auto}.gq .gr{margin:24px 80px 28px}}
+.gq .gr{margin-top:26px}
