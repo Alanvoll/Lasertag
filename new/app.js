@@ -60,7 +60,7 @@ function homeData(S) {
 }
 function gameCard(m) {
   const sc = scoreOf(m), hitsT = Object.fromEntries(hitsOf(m));
-  const teams = m.teamIds.map(t => { const mem = m.P.filter(p => p.teams.includes(t) && m.shareT(p, t) > .5).sort((a, b) => b.mvp - a.mvp); // MVP команды — лучший за всю игру среди тех, кто сыграл за неё большую часть
+  const teams = m.teamIds.map(t => { const mem = m.P.filter(p => p.teams.includes(t) && m.shareT(p, t) > .5).sort((a, b) => m.mvpT(b, t) - m.mvpT(a, t)); // MVP команды — кто больше всех сделал именно за неё, среди сыгравших за неё большую часть игры
     return { t, name: TEAMS[t].name, score: (sc.parts.find(x => x[0] === t) || [0, 0])[1], hits: hitsT[t] || 0, mvp: mem[0] ? mem[0].name : "", mvpDealt: mem[0] ? sum(m.P, v => m.valT(mem[0], v, t)) : 0, n: m.P.filter(p => p.teams.includes(t)).length }; });
   const win = [...teams].sort((a, b) => b.score - a.score)[0].t;
   return { m, key: gameKey(m.g), date: m.g.date, loc: m.g.location || "", kind: sc.kind, teams, win, rounds: m.winners.length, players: m.P.length, hits: sum(teams, t => t.hits), top: m.mvp.name, awards: m.g.awards || [], winners: m.winners, swaps: m.swaps };
@@ -426,7 +426,7 @@ function viewGame(S, key) {
   const board = teamIds.map(t => {
     const mem = inTeam(t), dealt = sum(P, a => sum(P, v => valT(a, v, t)));
     const recv = sum(mem, p => sum(segOf(p, t), s => s.recv)), shots = sum(mem, p => sum(segOf(p, t), s => s.shots)), deaths = sum(mem, p => sum(segOf(p, t), s => s.deaths));
-    const won = m.winners.filter(w => w === t).length, tm = mem.filter(p => m.shareT(p, t) > .5).sort((a, b) => b.mvp - a.mvp)[0];
+    const won = m.winners.filter(w => w === t).length, tm = mem.filter(p => m.shareT(p, t) > .5).sort((a, b) => m.mvpT(b, t) - m.mvpT(a, t))[0];
     const eD = P.some(v => !v.teams.includes(t) && v.est.has("recv") && P.some(a => estH(a, v))), eR = mem.some(p => p.e.recv), eK = mem.some(p => p.e.deaths), eS = mem.some(p => p.e.shots);
     return panel("team", `<div class="nm"><b>${plural(mem.length, ["игрок", "игрока", "игроков"])}</b><span class="mono">${m.winners.length ? `раундов <b>${won}</b>` : ""}</span></div>
       <div class="roster">${mem.map(p => `${who(p)}${p.swap ? ` <small>(${when(p, t)})</small>` : ""}`).join(", ")}</div>
