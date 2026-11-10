@@ -211,7 +211,7 @@ function viewHome(S) {
   ${panel("sumx A", `<div class="hd"><span class="mono"><span class="blink"></span>сводка сезона</span><span class="mono">обновлено <b>${dateShort(L.date)}</b></span></div><div class="cells">${sumx.map(([v, l, s], k) => `<div class="cell A" style="--k:${k}"><div class="num" data-count>${typeof v === "number" ? ru(v) : v}</div><div class="lab">${l}</div><div class="sub">${s}</div></div>`).join("")}</div>`)}
   <div class="home2 h2b">
     ${lastGame(S, L, gS)}
-    ${panel("topl top3 A", `<div class="hd"><span class="mono">Топ-3 сезона</span><a class="lnk mono" href="#s3" style="color:var(--ink)">все игроки →</a></div><div class="tcards">${[1, 2, 3].map(k => `<div class="tcard cal A m${k}" style="--k:${k - 1}"><img src="art/body/unknown.webp" alt=""><span class="no">${k}</span><span class="info"><b>Калибруется</b></span></div>`).join("")}</div><div class="calf mono"><span>сыграно игр <b>${S.models.length}</b> из 20</span><i class="calb"><i style="width:${Math.min(100, S.models.length * 5)}%"></i></i></div>`)}
+    ${panel("topl top3 A", `<div class="hd"><span class="mono">Топ-3 сезона</span><a class="lnk mono" href="#s3" style="color:var(--ink)">все игроки →</a></div><div class="tcards">${[1, 2, 3].map(k => `<div class="tcard cal A m${k}" style="--k:${k - 1}"><img src="art/body/unknown.webp" alt=""><span class="no">${k}</span><span class="info"><b>Калибруется</b></span></div>`).join("")}</div>`)}
   </div>`;
   // блок 2: игры — большая последняя игра + лента всех игр
   const cards = H.models.map(gameCard), G = cards[0], dG = dDay(G.date), gp = [...G.m.P].sort((x, y) => y.mvp - x.mvp).slice(0, 5);
