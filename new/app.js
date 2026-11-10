@@ -4,18 +4,9 @@ const ROOT = "../"; // новый дизайн лежит в /new/, игры б�
 // Данные: games/*.json (список в games/index.json), модель — model.js (та же, что на старом сайте).
 
 // ---------- аватары ----------
-const FEM_NAMES = ["Виталина", "Даша", "Кобра", "Лина", "Маша", "Саша", "Яна"];
-const FEM_AVA = ["a02", "a07", "a09", "a12", "a14", "a18", "a21", "a24", "a29", "a33", "a35", "a50", "a51", "a52", "a53", "a54", "a55"];
-const AVA_SET = { "Яна": "a50", "Глеб": "a30", "Кобра": "a12", "Арсений": "a42", "Женя": "a43" }; // выбор игроков; остальным — постоянный случайный
-function avaOf(name) {
-  if (AVA_SET[name]) return AVA_SET[name];
-  const fem = FEM_NAMES.includes(name), pool = [];
-  for (let i = 1; i <= 56; i++) { const id = "a" + String(i).padStart(2, "0"); if (FEM_AVA.includes(id) === fem && !Object.values(AVA_SET).includes(id)) pool.push(id); }
-  let h = 7; for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return pool[h % pool.length];
-}
-// пока у всех игроков общий шаблон «неизвестный боец»; свои аватары подключим позже (avaOf)
-const portrait = n => `art/av/unknown.jpg`, figure = n => `art/body/unknown.webp`;
+// выбор игроков на странице персонажей (/chars/): имя → номер персонажа; остальным — общий шаблон «Дым»
+const AVA_SET = { "Арсений": "a25", "Глеб": "a30", "Антон": "a56", "Лина": "a83", "Петя": "a86", "Данила": "a87", "Евгений": "a88" };
+const portrait = n => AVA_SET[n] ? `art/av/${AVA_SET[n]}.webp` : `art/av/unknown.jpg`, figure = n => AVA_SET[n] ? `art/body/${AVA_SET[n]}.webp` : `art/body/unknown.webp`;
 const TEAM_HEX = { 0: "var(--red)", 1: "var(--blue)", 2: "var(--yellow)", 3: "var(--green)" };
 const tc = t => TEAM_HEX[t];
 // арт пушек (10.11): у каждой модели свой рисунок; все «фениксы» — одна модель, «акашка» — прежнее имя Хищника
