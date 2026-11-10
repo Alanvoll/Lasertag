@@ -829,3 +829,11 @@ a.lc-r:hover .n{color:var(--uv2)}
 .gmini .dt b{font-size:26px}.gm-1 .gmini .dt b{font-size:22px}.gm-4 .gmini .dt b{font-size:44px}.gm-4 .gmini{flex-basis:200px}.gm-4 .gmini .dt{min-width:52px}
 .gm-3 .gmini .dt{top:2px}
 .gm-1 .gmini .pl{display:block}
+/* ---------- иконки показателей ---------- */
+.ic{width:1.15em;height:1.15em;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:square;stroke-linejoin:miter;vertical-align:-.2em}
+.sts{display:flex!important;gap:12px;align-items:center;font-style:normal;white-space:nowrap}
+.st{font-style:normal;display:inline-flex;align-items:center;gap:4px;font-weight:600;color:var(--ink);font-size:13px}.st .ic{color:var(--mute)}
+.st:first-child .ic{color:var(--uv2)}
+.le-c .sts,.gbm .sts{margin-top:3px}.gh .le-c .st{font-size:15px}
+.gcard .sts{gap:8px}.gcard .st{font-size:11px}.gcard .r .sts{justify-content:flex-end}
+.le-k span,.gh-k span{display:inline-flex;align-items:center;gap:5px}.le-k .ic,.gh-k .ic{width:13px;height:13px}
