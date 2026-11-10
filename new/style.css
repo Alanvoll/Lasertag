@@ -857,3 +857,12 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
   #ptable td.num .bar{margin-right:8px}
 }
 @media (min-width:981px){#ptable td.num .bar{margin-left:calc(48px - var(--w))}}
+/* ---------- полосы прокрутки в стиле сайта: тонкие, прямоугольные, фиолетовый бегунок ---------- */
+*{scrollbar-width:thin;scrollbar-color:rgba(154,107,255,.55) transparent}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(154,107,255,.45);border-radius:0}
+::-webkit-scrollbar-thumb:hover{background:var(--uv2)}
+::-webkit-scrollbar-button,::-webkit-scrollbar-corner{display:none;width:0;height:0}
+@supports selector(::-webkit-scrollbar){*{scrollbar-width:auto;scrollbar-color:auto}}
+.gstrip{scrollbar-width:none}.gstrip::-webkit-scrollbar{display:none}
