@@ -1095,3 +1095,10 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 /* число в значке: у лучшего в команде в цвете команды, у лучшего в игре белое */
 .mt:not(.g) b{color:var(--c);-webkit-text-fill-color:var(--c)}.mt.g b{color:var(--gb,var(--ink));-webkit-text-fill-color:var(--gb,var(--ink))}
 .mt.n{border-color:var(--mute);color:var(--ink)}.mt.n .ic{color:var(--uv2)}
+/* значки-медальки: только иконка, без подписи и числа (они в подсказке); ряд внизу плашки, от внутреннего края к портрету */
+.gq .gx-l.eq a>.mts,.gq .gx-l.eq.r a>.mts{grid-column:3;grid-row:1;align-self:end;margin:0 0 8px;flex-direction:row-reverse;flex-wrap:nowrap;max-height:none;gap:5px;justify-content:flex-start;align-items:center;align-content:normal}
+.gq .gx-l.eq .mt,.gq .gx-l.eq .mt.g{font-size:0;letter-spacing:0;gap:0;padding:5px;border-width:1px}.gq .gx-l.eq .mt b{display:none}
+.gq .gx-l.eq .mt .ic,.gq .gx-l.eq .mt.g .ic{width:15px;height:15px;padding:0;margin:0}
+.gq .gx-l.eq .mt.g{background:none;border-image:linear-gradient(135deg,var(--c),var(--gb,var(--ink))) 1}.gq .gx-l.eq .mt.g .ic{color:var(--gb,var(--ink))}
+@media (min-width:761px){.gq .gx-l.eq.r a>.mts{grid-column:1;flex-direction:row}}
+@media (max-width:760px){.gq .gx-l.eq a.hb{height:50px;min-height:0;padding-bottom:0;align-items:center}.gq .gx-l.eq a>.mts,.gq .gx-l.eq.r a>.mts{align-self:center;margin:0;gap:4px}.gq .gx-l.eq .mt{padding:4px}.gq .gx-l.eq .mt .ic{width:13px;height:13px}}
