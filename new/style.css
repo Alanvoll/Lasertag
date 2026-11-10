@@ -1117,3 +1117,7 @@ td.cal{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transfor
 .dsp{display:flex;align-items:center;gap:8px;padding:12px 16px;font-size:13px;cursor:pointer;width:max-content;user-select:none}
 .dsp input{width:16px;height:16px;accent-color:var(--ink);cursor:pointer}
 .sc[hidden]{display:none}
+/* таблица дуэлей: без зелёного и красного (могут совпасть с цветами команд): выиграл ярко, проиграл приглушённо */
+.gdt td b.up,.gdt td.dk.up{color:var(--ink)}
+.gdt td b.dn,.gdt td.dk.dn{color:var(--mute);font-weight:600}
+.gdt td b{color:var(--mute)}.gdt td b.up{font-weight:800}
