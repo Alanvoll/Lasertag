@@ -611,14 +611,24 @@ a.vb-c:hover{border-color:var(--uv2)}
   .vc-h{flex-direction:column;align-items:start}.vc-b{grid-template-columns:1fr;gap:10px}
 }
 
-/* главная: счёт последней игры — цифры по центру своих колонок, двоеточие посередине, MVP команд под своей цифрой */
-.lastc .lgl{display:grid;grid-template-columns:1fr auto 1fr;grid-template-rows:auto auto;align-content:center;justify-items:center;row-gap:16px;column-gap:10px}
-.lastc .lgn{grid-row:1;font-family:var(--disp);font-weight:800;font-size:clamp(84px,7.4vw,112px);line-height:.8;color:var(--c)}
-.lastc .lgx{grid-row:1;grid-column:2;align-self:center;display:grid;gap:14px;font-style:normal}
-.lastc .lgx b{width:8px;height:8px;background:var(--mute);opacity:.7}
-.lastc .lgmv{grid-row:2;display:grid;justify-items:center;text-align:center;gap:2px;flex-direction:initial}
-.lastc .lgmv img{width:48px;height:48px;margin-bottom:4px}
-.lastc .lgmv small{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+/* главная, последняя игра: сетка 2×2 — счёт | MVP игры, MVP команд | цифры игры; строки общие, пустот нет */
+.lastc .lgb{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-areas:"s m" "t k";gap:0;align-items:stretch}
+.lastc .lgs{grid-area:s;display:grid;grid-template-columns:1fr 20px 1fr;align-items:center;justify-items:center;padding:4px 22px 14px 0}
+.lastc .lgn{font-family:var(--disp);font-weight:800;font-size:clamp(84px,7.2vw,108px);line-height:.8;color:var(--c)}
+.lastc .lgx{display:grid;gap:14px;font-style:normal}.lastc .lgx b{width:8px;height:8px;background:var(--mute);opacity:.7}
+.lastc .lgmvp{grid-area:m;align-self:stretch;align-items:center;border-left:1px solid var(--line);padding:4px 0 14px 22px;gap:14px}
+.lastc .lgmvp img{width:72px;height:72px}.lastc .lgmvp b{font-size:26px;line-height:1.1}
+.lastc .lgt2{grid-area:t;display:grid;grid-template-columns:1fr 20px 1fr;align-items:center;justify-items:center;border-top:1px solid var(--line);padding:14px 22px 2px 0}
+.lastc .lgmv{display:flex;flex-direction:row;align-items:center;gap:10px;text-align:left}
+.lastc .lgmv img{width:44px;height:44px;flex:none}.lastc .lgmv span{min-width:0}.lastc .lgmv b{overflow:hidden;text-overflow:ellipsis}
+.lastc .lgmv span{display:grid;line-height:1.2}
 .lastc .lgmv b{font-size:17px}
-.lastc .lgmv em{font-style:normal;font-size:11px;color:var(--mute)}
-@media (max-width:760px){.lastc .lgn{font-size:72px}.lastc .lgmv b{font-size:15px}}
+.lastc .gkv{grid-area:k;display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;align-content:center;border-left:1px solid var(--line);border-top:1px solid var(--line);padding:14px 0 2px 22px}
+@media (max-width:760px){
+  .lastc .lgb{grid-template-columns:1fr;grid-template-areas:"s" "t" "m" "k"}
+  .lastc .lgs,.lastc .lgt2{padding-right:0}.lastc .lgn{font-size:72px}
+  .lastc .lgmv{flex-direction:column;text-align:center;gap:4px}.lastc .lgmv b{font-size:15px}
+  .lastc .lgmvp,.lastc .gkv{border-left:0;padding-left:0}.lastc .lgmvp{border-top:1px solid var(--line);padding-top:14px}.lastc .lgmvp img{width:60px;height:60px}.lastc .lgmvp b{font-size:22px}
+}
+.lastc .lgmv small{white-space:nowrap}.lastc .lgmvp span{min-width:0}.lastc .lgmvp em{white-space:normal}
+@media (max-width:1250px) and (min-width:761px){.lastc .lgmv{flex-direction:column;text-align:center;gap:4px}.lastc .lgmvp img{width:56px;height:56px}.lastc .lgmvp b{font-size:21px}}
