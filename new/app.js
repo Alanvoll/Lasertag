@@ -112,10 +112,10 @@ function gameBig(S, G) {
   let v = GV, body; if (v === "i" && (!G.winners.length || G.kind === "попадания")) v = "h";
   const head = `${tag}<h3>${dG.day} ${dG.monFull}</h3>`, c0 = tc(G.teams[0].t), c1 = tc(G.teams[1].t);
   if (v === "k" || v === "x") { // «Табло»: половины в цветах команд и сравнение команд по цифрам; «Дуэль + табло»: то же между двумя портретами MVP
-    const ts = G.teams.map(t => { const sg = m.P.flatMap(p => (p.segs || []).filter(x => x.team === t.t)), shots = sum(sg, x => x.shots || 0), deaths = sum(sg, x => x.deaths || 0); return { hits: t.hits, shots, deaths, acc: div(t.hits, shots), hd: div(t.hits, deaths) }; });
+    const ts = G.teams.map(t => { const sg = m.P.flatMap(p => (p.segs || []).filter(x => x.team === t.t)), shots = sum(sg, x => x.shots || 0), deaths = sum(sg, x => x.deaths || 0); return { hits: t.hits, shots, deaths, acc: div(t.hits, shots), hd: div(t.hits, deaths), rt: sum(m.P.filter(p => p.teams.includes(t.t)), p => m.mvpT(p, t.t)) }; });
     const row = (k, l, f, i, low) => { const a = ts[0][k] || 0, b = ts[1][k] || 0, mx = Math.max(a, b) || 1, w = a === b || low === 0 ? -1 : (a > b) !== !!low ? 0 : 1;
       return `<div class="gk-row"><b${w === 1 ? ` class="lo"` : ""}>${f(a)}</b><i class="l" style="--w:${a / mx * 100}%;--c:${c0}"></i><span>${ic(i)}${l}</span><i style="--w:${b / mx * 100}%;--c:${c1}"></i><b${w === 0 ? ` class="lo"` : ""}>${f(b)}</b></div>`; };
-    const rows = `<div class="gk-c">${row("hits", "попаданий", ru, "hit")}${row("acc", "точность", pct, "acc")}${row("hd", "попаданий на смерть", one, "hit")}${row("deaths", "смертей", ru, "death", 1)}${row("shots", "выстрелов", ru, "shot", 0)}</div>`;
+    const rows = `<div class="gk-c">${row("rt", "в сумме", ru, "star")}${row("hits", "попаданий", ru, "hit")}${row("acc", "точность", pct, "acc")}${row("hd", "попаданий на смерть", one, "hit")}${row("deaths", "смертей", ru, "death", 1)}${row("shots", "выстрелов", ru, "shot", 0)}</div>`;
     // остальные игроки команды (без тех, кто на портретах) с рейтингом, лучшие сверху
     const rest = k => { const t = G.teams[k].t, L = m.P.filter(p => p.teams.includes(t) && m.shareT(p, t) > .5 && !duo.some(d => d.name === p.name)).sort((a, b) => m.mvpT(b, t) - m.mvpT(a, t));
       return `<div class="gx-l${k ? " r" : ""}" style="--c:${tc(t)}">${L.map(p => `<a href="#${key(p.name)}"><span>${esc(p.name)}</span>${st("star", ru(m.mvpT(p, t)))}</a>`).join("")}</div>`; };
