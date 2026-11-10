@@ -1052,3 +1052,13 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .mt.g{--b:#d6b46e;background:transparent;border:1px solid;border-image:linear-gradient(90deg,var(--c),var(--b)) 1;color:var(--b)}
 .mt.g::first-letter{color:inherit}
 @supports ((-webkit-background-clip:text) or (background-clip:text)){.mt.g{background:linear-gradient(90deg,var(--c),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}}
+.mts{display:flex;gap:5px;flex-wrap:wrap}.gx-l.eq.r .mts{justify-content:flex-end}
+.mt{display:inline-flex;align-items:center;gap:4px}.mt .ic{width:10px;height:10px;flex:none;color:var(--c)}.mt.g .ic{color:var(--c)}
+@media (max-width:760px){.mts{gap:3px}.mt .ic{width:9px;height:9px}}
+.gx-l.eq .mts{flex-wrap:nowrap}.gx-l.eq .mt{font-size:8px;letter-spacing:.05em;padding:3px 5px 2px}.gx-l.eq a{gap:10px}
+/* значки — отдельной строкой под именем и числом попаданий, на всю ширину плашки */
+.gx-l.eq .mts{font-style:normal;flex-wrap:wrap;row-gap:3px}
+.gx-l.eq a>img{grid-column:1;grid-row:1/-1}.gx-l.eq a>span:nth-child(2){grid-column:2;grid-row:1}.gx-l.eq a>.rr{grid-column:3;grid-row:1}.gx-l.eq a>.mts{grid-column:2/4;grid-row:2;align-self:start;margin-top:-4px}
+.gx-l.eq a.hb{grid-template-rows:1fr 1fr;row-gap:0}.gx-l.eq a.hb>span{align-self:end;padding-bottom:5px}.gx-l.eq a.hb>.rr{padding-bottom:5px}
+@media (min-width:761px){.gx-l.eq.r a>img{grid-column:3;order:0}.gx-l.eq.r a>span:nth-child(2){grid-column:2;order:0}.gx-l.eq.r a>.rr{grid-column:1}.gx-l.eq.r a>.mts{grid-column:1/3}}
+@media (max-width:760px){.gq .gx-l.eq a.hb{height:56px}.gq .gx-l.eq a.hb img{height:54px}}
