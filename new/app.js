@@ -111,8 +111,7 @@ function gameBig(S, G, gp) {
   }
   return panel(`gbig gv-${GV} A`, bg + body, "div", `data-go="#${G.key}"`);
 }
-// ---------- главная: карточка последней игры (варианты компоновки 1–4) ----------
-let LV = (() => { try { return localStorage.getItem("lt-lv") === "d" ? "d" : "b"; } catch (e) { return "b"; } })();
+// ---------- главная: карточка последней игры («Дуэль») ----------
 function lastGame(S, L, gS) {
   const dL = dDay(L.date), key = n => (S.rows.find(r => r.name === n) || {}).key || L.key, pw = (n, w) => plural(n, w).split(" ")[1];
   const rt = (n, t) => ru(L.m.mvpT(L.m.P.find(p => p.name === n), t));
@@ -122,16 +121,10 @@ function lastGame(S, L, gS) {
   const nums = L.teams.map(t => `<div class="lgn num" style="--c:${tc(t.t)}">${ru(t.score)}</div>`), colon = `<i class="lgx"><b></b><b></b></i>`;
   const duo = mvpDuo(L);
   const tm = (d, cls = "") => `<a class="lgmv ${cls}${d.game ? " g" : ""}" href="#${key(d.name)}" style="--c:${tc(d.t)}"><img src="${portrait(d.name)}" alt=""><span><small>${mvpTitle(d)}</small><b>${esc(d.name)}</b><em>рейтинг ${ru(d.rating)} · ${d.dealt} поп.</em></span></a>`;
-  let body;
-  if (LV !== "d") {
-    // «Табло»: счёт по центру, по бокам лучшие игроки команд, ниже строка цифр всей игры
-    body = `<div class="lb-m">${tm(duo[0])}<div class="lb-s">${nums.join(colon)}</div>${tm(duo[1], "r")}</div><div class="lb-k">${kv}</div>`;
-  } else {
-    // «Дуэль»: два портрета лучших игроков по краям, между ними счёт и цифры игры
-    const card = d => `<a class="le-c${d.game ? " g" : ""}" href="#${key(d.name)}" style="--c:${tc(d.t)}"><img src="${portrait(d.name)}" alt=""><span><small>${mvpTitle(d)}</small><b>${esc(d.name)}</b><em>рейтинг ${ru(d.rating)} · ${d.dealt} поп.</em></span></a>`;
-    body = `<div class="le">${card(duo[0])}<div class="le-m"><div class="le-s">${nums.join(colon)}</div><div class="le-k">${kv}</div></div>${card(duo[1])}</div>`;
-  }
-  return panel(`lastc lg2 lv-${LV} A`, hd + body + rounds, "div", `data-go="#${L.key}"`);
+  // «Дуэль»: два портрета лучших игроков по краям, между ними счёт и цифры игры
+  const card = d => `<a class="le-c${d.game ? " g" : ""}" href="#${key(d.name)}" style="--c:${tc(d.t)}"><img src="${portrait(d.name)}" alt=""><span><small>${mvpTitle(d)}</small><b>${esc(d.name)}</b><em>рейтинг ${ru(d.rating)} · ${d.dealt} поп.</em></span></a>`;
+  const body = `<div class="le">${card(duo[0])}<div class="le-m"><div class="le-s">${nums.join(colon)}</div><div class="le-k">${kv}</div></div>${card(duo[1])}</div>`;
+  return panel(`lastc lg2 lv-d A`, hd + body + rounds, "div", `data-go="#${L.key}"`);
 }
 // ---------- главная ----------
 function viewHome(S) {
@@ -472,11 +465,33 @@ let SEASON = null, homeShown = false;
 function crumb(html) { const el = document.getElementById("crumb"); el.innerHTML = html; }
 const RANK = h => /^s[1-4]$/.test(h) || h === "home" ? 0 : h === "games" ? 1 : 2;
 let lastRoute = null;
+// «назад» ведёт туда, откуда пришли: стек пройденных экранов с позицией прокрутки и открытой вкладкой
+const NAV = []; let restore = null;
+const isHomeH = h => /^s[1-4]$/.test(h) || h === "home";
+function hereState(prev) {
+  const main = document.getElementById("main"); let h = prev;
+  if (isHomeH(prev)) { const mid = main.scrollTop + main.clientHeight / 2; const sl = [...document.querySelectorAll(".slide")].filter(x => x.offsetTop <= mid).pop(); if (sl) h = sl.id; }
+  const tab = document.querySelector(".ptabs a.on");
+  return { h, y: main.scrollTop, tab: tab ? tab.dataset.tab : null };
+}
+function navLabel(S, h) {
+  if (isHomeH(h)) return { s1: "Главная", s2: "Игры", s3: "Игроки", s4: "Пушки", home: "Главная" }[h];
+  if (h === "games") return "Все игры";
+  if (h.startsWith("game-")) { const x = allGames().find(z => z.key === h); if (x) { const d = dDay(x.g.date); return `Игра ${d.day} ${d.mon}`; } }
+  const r = S.rows.find(z => z.key === h) || S.guns.find(z => z.key === h); return r ? r.name : "Назад";
+}
 function render() {
   const h = (location.hash || "#s1").slice(1), prev = lastRoute; lastRoute = h;
+  restore = null;
+  if (prev !== null && prev !== h) {
+    const top = NAV[NAV.length - 1];
+    if (top && top.h === h) { restore = NAV.pop(); if (isHomeH(h)) NAV.length = 0; }
+    else if (isHomeH(h)) { if (!isHomeH(prev)) NAV.length = 0; }
+    else NAV.push(hereState(prev));
+  }
   const pageChange = prev !== null && (RANK(prev) !== RANK(h) || (RANK(h) === 2 && prev !== h));
   if (pageChange && document.startViewTransition && !matchMedia("(prefers-reduced-motion:reduce)").matches) {
-    document.documentElement.dataset.dir = RANK(h) >= RANK(prev) ? "fwd" : "back";
+    document.documentElement.dataset.dir = !restore && RANK(h) >= RANK(prev) ? "fwd" : "back";
     document.startViewTransition(() => draw(h));
   } else draw(h);
 }
@@ -490,6 +505,7 @@ function draw(h) {
     if (fresh) { app.innerHTML = viewHome(S); homeInit(S); homeShown = true; main.classList.add("snap"); }
     crumb("");
     const target = document.getElementById(h === "home" ? "s1" : h); if (target) target.scrollIntoView({ behavior: fresh ? "instant" : "smooth" });
+    if (restore && fresh) main.scrollTo({ top: restore.y, behavior: "instant" });
     return;
   }
   homeShown = false; main.classList.remove("snap");
@@ -500,7 +516,9 @@ function draw(h) {
   else if (/^gun\d+$/.test(h)) { html = viewGun(S, h); after = () => gunInit(S, h); back = "#s4"; label = "Пушки"; }
   else { location.hash = "#s1"; return; }
   app.innerHTML = `<div class="wrap">${html}</div>`; after(); main.scrollTo(0, 0);
-  crumb(`<a href="${back}">← ${label}</a>`);
+  if (restore) { if (restore.tab) { const t = document.querySelector(`.ptabs a[data-tab="${restore.tab}"]`); if (t) t.click(); } const y = restore.y; main.scrollTo({ top: y, behavior: "instant" }); requestAnimationFrame(() => main.scrollTo({ top: y, behavior: "instant" })); }
+  const from = NAV[NAV.length - 1];
+  crumb(from ? `<a href="#${from.h}" data-back>← ${esc(navLabel(S, from.h))}</a>` : `<a href="${back}">← ${label}</a>`);
   document.querySelectorAll("#tabs a").forEach(a => a.classList.toggle("on", a.getAttribute("href") === back));
   countUp();
 }
@@ -520,6 +538,9 @@ app.addEventListener("click", e => {
 });
 // карточка последней игры целиком ведёт на разбор игры
 document.addEventListener("click", e => { if (e.target.closest("a, button")) return; const c = e.target.closest("[data-go]"); if (c && !getSelection().toString()) location.hash = c.dataset.go; });
+// «назад» в шапке — настоящий шаг назад по истории, чтобы кнопка браузера и ссылка вели себя одинаково
+document.addEventListener("click", e => { const a = e.target.closest("a[data-back]"); if (!a || !NAV.length) return; e.preventDefault(); const want = a.getAttribute("href"), was = location.hash;
+  history.back(); setTimeout(() => { if (location.hash === was) location.hash = want; }, 350); });
 addEventListener("hashchange", render);
 
 // ---------- загрузка ----------
