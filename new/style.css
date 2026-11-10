@@ -837,3 +837,5 @@ a.lc-r:hover .n{color:var(--uv2)}
 .le-c .sts,.gbm .sts{margin-top:3px}.gh .le-c .st{font-size:15px}
 .gcard .sts{gap:8px}.gcard .st{font-size:11px}.gcard .r .sts{justify-content:flex-end}
 .le-k span,.gh-k span{display:inline-flex;align-items:center;gap:5px}.le-k .ic,.gh-k .ic{width:13px;height:13px}
+th .ic{width:15px;height:15px;color:var(--uv2);vertical-align:-3px}.tcard .v em .ic{width:16px;height:16px;color:var(--m)}
+.fact .k .ic{width:16px;height:16px;color:var(--uv2)}.shead .r .ic,.ft .ic,.eyebrow .ic,.rcc .l .ic,.mono .ic{color:var(--uv2)}
