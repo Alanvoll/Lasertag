@@ -96,7 +96,7 @@ function mvpDuo(G) {
 const mvpTitle = d => d.game ? "MVP игры" : "MVP команды";
 const vsHtml = g => `<b style="color:${tc(g.teams[0].t)}">${g.teams[0].n}</b> vs <b style="color:${tc(g.teams[1].t)}">${g.teams[1].n}</b>`;
 // ---------- блок «Игры» на главной: большая карточка последней игры (варианты G / H / I) + лента игр ----------
-let GV = (() => { try { const v = localStorage.getItem("lt-gv"); return ["h", "k", "x", "i"].includes(v) ? v : "h"; } catch (e) { return "h"; } })();
+let GV = (() => { try { const v = localStorage.getItem("lt-gv"); return ["h", "k", "x", "i"].includes(v) ? v : "x"; } catch (e) { return "x"; } })();
 const pw = (n, w) => plural(n, w).split(" ")[1];
 function gameBig(S, G) {
   const m = G.m, dG = dDay(G.date), key = n => (S.rows.find(r => r.name === n) || {}).key || G.key, duo = mvpDuo(G);
