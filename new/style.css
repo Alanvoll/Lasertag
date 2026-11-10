@@ -850,3 +850,10 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 @media (min-width:981px){#ptable{table-layout:fixed;width:100%}#ptable th:first-child{width:15%}#ptable th:nth-child(2){width:6%}}
 .pfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}.players{gap:0}.pfoot .ic{vertical-align:-3px}
 .slide .pfoot.A{--d:.4s}
+/* таблица игроков: числа и заголовки по центру своей колонки */
+@media (min-width:981px){
+  #ptable th:not(.l),#ptable td.num{text-align:center}#ptable th button{text-align:center}
+  #ptable th:first-child{width:auto}#ptable th:nth-child(2){width:6%}#ptable th:nth-child(3){width:12%}#ptable th:nth-child(n+4){width:9%}#ptable th:nth-child(n+10){width:8%}
+  #ptable td.num .bar{margin-right:8px}
+}
+@media (min-width:981px){#ptable td.num .bar{margin-left:calc(48px - var(--w))}}
