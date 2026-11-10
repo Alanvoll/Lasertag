@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лазертаг · статистика</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stage"><div class="map"></div></div><div class="grid"></div><div class="lens"><div class="map"></div></div><canvas id="fx" aria-hidden="true"></canvas><div class="ret" aria-hidden="true"><i></i></div><div class="scan"></div>
+<header class="top"><div class="wrap"><a class="logo" href="#s1"><i></i>Лазертаг</a><div class="crumb" id="crumb"></div>
+<nav class="tabs" id="tabs"><a href="#s1" class="on">Главная</a><a href="#s2">Игры</a><a href="#s3">Игроки</a><a href="#s4">Пушки</a></nav></div></header>
+<main id="main"><div id="app"></div></main>
+<nav class="dots" id="dots"><a href="#s1" class="on"></a><a href="#s2"></a><a href="#s3"></a><a href="#s4"></a></nav>
+<script src="model.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
