@@ -724,3 +724,5 @@ a.lc-r:hover .n{color:var(--uv2)}
 .lv-b .lgmv,.lv-b .lgmv.r{flex-direction:column;text-align:center;justify-self:center;gap:6px}
 .lv-b .lgmv img{width:56px;height:56px}.lv-b .lgmv span{justify-items:center}
 .lv-b .lb-m{padding:2px 0 12px}
+/* титул «MVP команды» — цветом команды; «MVP игры» остаётся фиолетовым */
+.lastc .lgmv:not(.g) small,.gbm:not(.g) small,.le-c:not(.g) small{color:var(--c)}
