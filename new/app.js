@@ -92,7 +92,7 @@ function viewHome(S) {
   <div class="home2 h2b">
     ${panel("lastc lg2 A", `<div class="hd"><h3>Последняя игра · ${dL.day} ${dL.monFull}</h3><span class="mono">${esc(L.loc)} · <b>${L.players}</b> игроков · <b>${L.rounds}</b> раунда</span></div>
       <div class="lgb"><div class="lgl A">
-        <div class="lgt">${L.teams.map(t => `<span class="t${t.t === L.win ? " w" : ""}" style="--c:${tc(t.t)}">${t.name} · ${t.n} чел.</span>`).join("")}</div>
+        <div class="lgt">${L.teams.map(t => `<span class="t${t.t === L.win ? " w" : ""}" style="--c:${tc(t.t)}">${t.n} чел.</span>`).join("")}</div>
         ${scoreHtml(L)}
         <div class="lgm">${L.teams.map((t, k) => `<a class="lgmv${k ? " r" : ""}" href="#${(S.rows.find(r => r.name === t.mvp) || {}).key || L.key}" style="--c:${tc(t.t)}"><img src="${portrait(t.mvp)}" alt=""><span><small>MVP команды</small><b>${esc(t.mvp)}</b><em>${t.mvpDealt} попаданий</em></span></a>`).join("")}</div>
       </div><div class="lgr A">
@@ -104,7 +104,7 @@ function viewHome(S) {
   </div>`;
   // блок 2: игры — большая последняя игра + лента всех игр
   const cards = H.models.map(gameCard), G = cards[0], dG = dDay(G.date), gp = [...G.m.P].sort((x, y) => y.mvp - x.mvp).slice(0, 5);
-  const gTeam = (t, cls) => `<div class="gbt ${cls}" style="--c:${tc(t.t)}"><div class="t${t.t === G.win ? " w" : ""}">${t.name} · ${t.n} чел.</div><a class="gbm" href="#${(S.rows.find(r => r.name === t.mvp) || {}).key || G.key}"><img src="${portrait(t.mvp)}" alt=""><span><small>MVP команды</small><b>${esc(t.mvp)}</b><em>${t.mvpDealt} попаданий</em></span></a></div>`;
+  const gTeam = (t, cls) => `<div class="gbt ${cls}" style="--c:${tc(t.t)}"><div class="t${t.t === G.win ? " w" : ""}">${t.n} чел.</div><a class="gbm" href="#${(S.rows.find(r => r.name === t.mvp) || {}).key || G.key}"><img src="${portrait(t.mvp)}" alt=""><span><small>MVP команды</small><b>${esc(t.mvp)}</b><em>${t.mvpDealt} попаданий</em></span></a></div>`;
   const b2 = `<div class="shead A"><h2>Игры · ${cards.length}</h2><a class="allg" href="#games">все игры <i>→</i></a></div>
   ${panel("gbig A", `<div class="bgimg" style="--img:url(${placeArt(G.loc, G.date)})"></div>
     <div class="gbh"><div><div class="mono"><span class="blink"></span>последняя игра · ${esc(G.loc)}</div><h3>${dG.day} ${dG.monFull}</h3></div><div class="mono">${G.players} игроков · ${G.rounds} раунда · ${ru(G.hits)} попаданий</div></div>
