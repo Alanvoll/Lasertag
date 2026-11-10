@@ -72,6 +72,15 @@ function miniStrip(cards, cur) {
   return html;
 }
 
+// два MVP на игру: лучший в каждой команде; тот из них, кто MVP игры, получает титул «MVP игры» вместо «MVP команды».
+// если MVP игры менял команду и не лучший ни в одной, он занимает место в команде, за которую сыграл больше
+function mvpDuo(G) {
+  const m = G.m, top = m.mvp;
+  const duo = G.teams.map(t => { const p = m.P.find(x => x.name === t.mvp); return { t: t.t, name: t.mvp, rating: p ? m.mvpT(p, t.t) : 0, dealt: t.mvpDealt, game: p === top }; });
+  if (top && !duo.some(d => d.game)) { const tt = [...top.teams].sort((a, b) => m.shareT(top, b) - m.shareT(top, a))[0], d = duo.find(x => x.t === tt) || duo[0]; Object.assign(d, { name: top.name, rating: top.mvp, dealt: top.dealt, game: true }); }
+  return duo;
+}
+const mvpTitle = d => d.game ? "MVP игры" : "MVP команды";
 const vsHtml = g => `<b style="color:${tc(g.teams[0].t)}">${g.teams[0].n}</b> vs <b style="color:${tc(g.teams[1].t)}">${g.teams[1].n}</b>`;
 // ---------- большая карточка последней игры (варианты компоновки A / B / C) ----------
 let GV = (() => { try { return localStorage.getItem("lt-gv") || "a"; } catch (e) { return "a"; } })();
@@ -79,7 +88,7 @@ function gameBig(S, G, gp) {
   const dG = dDay(G.date), key = n => (S.rows.find(r => r.name === n) || {}).key || G.key;
   const pw = (n, w) => plural(n, w).split(" ")[1];
   const meta = `${vsHtml(G)}${G.rounds ? ` · <b>${G.rounds}</b> ${pw(G.rounds, ["раунд", "раунда", "раундов"])}` : ""} · <b>${ru(G.hits)}</b> ${pw(G.hits, ["попадание", "попадания", "попаданий"])}`;
-  const mvpA = (t, cls = "") => `<a class="gbm ${cls}" href="#${key(t.mvp)}"><img src="${portrait(t.mvp)}" alt=""><span><small>MVP команды</small><b>${esc(t.mvp)}</b><em>рейтинг ${ru(G.m.mvpT(G.m.P.find(p => p.name === t.mvp), t.t))} · ${t.mvpDealt} поп.</em></span></a>`;
+  const duo = mvpDuo(G), mvpA = (t, cls = "") => { const d = duo.find(x => x.t === t.t); return `<a class="gbm ${cls}${d.game ? " g" : ""}" href="#${key(d.name)}"><img src="${portrait(d.name)}" alt=""><span><small>${mvpTitle(d)}</small><b>${esc(d.name)}</b><em>рейтинг ${ru(d.rating)} · ${d.dealt} поп.</em></span></a>`; };
   const rounds = `<div class="rlog fill gbr"><span class="mono">раунды</span>${roundsStrip(G)}<a class="lnk mono" href="#${G.key}">разбор игры →</a></div>`;
   const top5 = `<div class="gtop"><div class="gth mono"><span>#</span><span>лучшие в игре</span><span>попал</span><span>получил</span><span>п / п</span><span>рейтинг</span></div>${gp.map((p, k) => `<a class="gtr" href="#${key(p.name)}"><span class="no">${k + 1}</span><span class="n">${p.teams.map(t => `<i style="--c:${tc(t)}"></i>`).join("")}${esc(p.name)}</span><span class="num">${p.dealt}</span><span class="num">${p.recv}</span><span class="num">${r2(p.ratio)}</span><span class="num v">${ru(p.mvp)}</span></a>`).join("")}</div>`;
   const bg = `<div class="bgimg" style="--img:url(${placeArt(G.loc, G.date)})"></div>`;
@@ -111,19 +120,16 @@ function lastGame(S, L, gS) {
   const rounds = `<div class="rlog fill A"><span class="mono">раунды</span>${roundsStrip(L)}<a class="lnk mono" href="#${L.key}">разбор игры →</a></div>`;
   const kv = [[ru(gS.hits), "попаданий"], [pct(gS.acc), "точность"], [ru(gS.deaths), "смертей"], [ru(gS.shots), "выстрелов"]].map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
   const nums = L.teams.map(t => `<div class="lgn num" style="--c:${tc(t.t)}">${ru(t.score)}</div>`), colon = `<i class="lgx"><b></b><b></b></i>`;
-  const tm = (t, cls = "") => `<a class="lgmv ${cls}" href="#${key(t.mvp)}" style="--c:${tc(t.t)}"><img src="${portrait(t.mvp)}" alt=""><span><small>MVP команды</small><b>${esc(t.mvp)}</b><em>рейтинг ${rt(t.mvp, t.t)}</em></span></a>`;
+  const duo = mvpDuo(L);
+  const tm = (d, cls = "") => `<a class="lgmv ${cls}${d.game ? " g" : ""}" href="#${key(d.name)}" style="--c:${tc(d.t)}"><img src="${portrait(d.name)}" alt=""><span><small>${mvpTitle(d)}</small><b>${esc(d.name)}</b><em>рейтинг ${ru(d.rating)} · ${d.dealt} поп.</em></span></a>`;
   let body;
   if (LV !== "d") {
-    // «Табло»: всё симметрично вокруг счёта, ниже одна строка цифр
-    body = `<div class="lb-m">${tm(L.teams[0])}<div class="lb-s">${nums.join(colon)}</div>${tm(L.teams[1], "r")}</div>
-      <div class="lb-k2"><a class="lb-g" href="#${key(L.top)}"><img src="${portrait(L.top)}" alt=""><span><small>MVP игры</small><b>${esc(L.top)}</b><em>рейтинг ${ru(L.m.mvp.mvp)} · ${L.m.mvp.dealt} поп.</em></span></a><div class="lb-a"><div class="mono">вся игра · обе команды</div><div class="lb-k">${kv}</div></div></div>`;
-  } else if (LV === "d") {
-    // «Герой»: слева большой портрет MVP игры, справа счёт и цифры
-    body = `<div class="ld"><a class="ld-h" href="#${key(L.top)}"><img src="${portrait(L.top)}" alt=""><span><small>MVP игры</small><b>${esc(L.top)}</b><em>рейтинг ${ru(L.m.mvp.mvp)} · ${L.m.mvp.dealt} поп.</em></span></a>
-      <div class="ld-r">${hd}<div class="ld-s"><div class="ld-n">${nums.join(colon)}</div>
-      <div class="ld-t">${L.teams.map(t => `<a href="#${key(t.mvp)}" style="--c:${tc(t.t)}"><i></i><span><small>MVP команды</small><b>${esc(t.mvp)}</b> <em>${rt(t.mvp, t.t)}</em></span></a>`).join("")}</div></div>
-      <div class="ld-k">${kv}</div></div></div>`;
-    return panel(`lastc lg2 lv-d A`, body + rounds, "div", `data-go="#${L.key}"`);
+    // «Табло»: счёт по центру, по бокам лучшие игроки команд, ниже строка цифр всей игры
+    body = `<div class="lb-m">${tm(duo[0])}<div class="lb-s">${nums.join(colon)}</div>${tm(duo[1], "r")}</div><div class="lb-k">${kv}</div>`;
+  } else {
+    // «Дуэль»: два портрета лучших игроков по краям, между ними счёт и цифры игры
+    const card = d => `<a class="le-c${d.game ? " g" : ""}" href="#${key(d.name)}" style="--c:${tc(d.t)}"><img src="${portrait(d.name)}" alt=""><span><small>${mvpTitle(d)}</small><b>${esc(d.name)}</b><em>рейтинг ${ru(d.rating)} · ${d.dealt} поп.</em></span></a>`;
+    body = `<div class="le">${card(duo[0])}<div class="le-m"><div class="le-s">${nums.join(colon)}</div><div class="le-k">${kv}</div></div>${card(duo[1])}</div>`;
   }
   return panel(`lastc lg2 lv-${LV} A`, hd + body + rounds, "div", `data-go="#${L.key}"`);
 }

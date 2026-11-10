@@ -699,3 +699,28 @@ a.lc-r:hover .n{color:var(--uv2)}
 .lb-a .lb-k{grid-template-columns:repeat(4,1fr);border-top:0;padding-top:0}
 .lb-a .lb-k>div{padding:0 12px}.lb-a .lb-k>div:first-child{padding-left:0}
 @media (max-width:760px){.lb-k2{grid-template-columns:1fr;gap:12px}.lb-a .lb-k{grid-template-columns:1fr 1fr}.lb-a .lb-k>div{padding:0}}
+
+/* два MVP: у MVP игры фиолетовый титул и второе кольцо вокруг портрета */
+.lgmv.g small,.gbm.g small,.le-c.g small{color:var(--uv2)}
+.lgmv.g img,.gbm.g img{box-shadow:0 0 0 2px var(--bg2),0 0 0 4px var(--uv),0 0 18px rgba(154,107,255,.45)}
+.lastc .lgmv em{white-space:nowrap}
+.lv-b .lb-k{grid-template-columns:repeat(4,1fr)}
+.lv-b .lb-k>div:first-child{padding-left:0;border-left:0}
+/* «Дуэль» */
+.le{display:grid;grid-template-columns:132px minmax(0,1fr) 132px;gap:18px;align-items:stretch}
+.le-c{position:relative;overflow:hidden;isolation:isolate;border:1px solid var(--line);border-top:2px solid var(--c);background:#0e0f12;min-height:176px;display:block}
+.le-c img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%;z-index:-1}
+.le-c::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(12,13,16,.96) 0,rgba(12,13,16,.78) 36%,transparent 68%)}
+.le-c span{position:absolute;left:10px;right:10px;bottom:8px;display:grid;line-height:1.15}
+.le-c small{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.le-c b{font-size:19px;font-weight:700}.le-c em{font-style:normal;font-size:11px;color:var(--mute);white-space:nowrap}a.le-c:hover b{color:var(--uv2)}
+.le-c.g{border-color:color-mix(in srgb,var(--uv) 70%,transparent);border-top-color:var(--c);box-shadow:0 0 22px rgba(154,107,255,.28)}
+.le-m{display:grid;align-content:space-between;justify-items:center;gap:10px;min-width:0}
+.le-s{display:flex;align-items:center;gap:14px}
+.lv-d .lgn{font-size:clamp(76px,6.2vw,96px)}
+.le-k{display:grid;grid-template-columns:1fr 1fr;gap:8px 22px;width:100%;border-top:1px solid var(--line);padding-top:10px}
+.le-k>div{display:grid;gap:3px;justify-items:center}
+@media (max-width:760px){.le{grid-template-columns:1fr 1fr;gap:10px}.le-m{grid-column:1/-1;order:-1}.le-c{min-height:150px}.le-k{grid-template-columns:repeat(4,auto);justify-content:space-between}.le-k>div b{font-size:18px}.lastc .lgmv em{white-space:normal}}
+.lv-b .lgmv,.lv-b .lgmv.r{flex-direction:column;text-align:center;justify-self:center;gap:6px}
+.lv-b .lgmv img{width:56px;height:56px}.lv-b .lgmv span{justify-items:center}
+.lv-b .lb-m{padding:2px 0 12px}
