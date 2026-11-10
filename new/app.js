@@ -77,12 +77,12 @@ function gameTile(g, k = 0) {
   const tt = (x, cls) => { const d = duo.find(z => z.t === x.t); return `<div class="${cls}"><div class="t${x.t === g.win ? " w" : ""}" style="--c:${tc(x.t)}">${pl(x.n)}</div><div class="mv"><img src="${portrait(d.name)}" alt=""><span><b>${esc(d.name)}</b><small>${mvpTitle(d)}</small><small class="sts">${st("star", ru(d.rating))}${st("hit", d.dealt)}</small></span></div></div>`; };
   return panel("gcard A", `<div class="d"><b>${d.day} ${d.monFull}</b><span class="mono">${esc(g.loc)}</span></div>${scoreHtml(g)}<div class="tt">${tt(g.teams[0], "")}${tt(g.teams[1], "r")}</div><div class="ft">${roundsStrip(g)}<span class="mono sts">${st("hit", ru(g.hits))}</span></div>`, "a", `href="#${g.key}" style="--k:${Math.min(k, 8)}" data-loc="${esc(g.loc)}"`);
 }
-// карточки ленты игр (варианты 1–4)
-let GM = (() => { try { const v = localStorage.getItem("lt-gm"); return ["1", "2", "3", "4"].includes(v) ? v : "1"; } catch (e) { return "1"; } })();
+// карточки ленты игр: 0 — исходная компоновка, 5–8 — варианты с артом площадки
+let GM = (() => { try { const v = localStorage.getItem("lt-gm"); return ["0", "5", "6", "7", "8"].includes(v) ? v : "0"; } catch (e) { return "0"; } })();
 function miniStrip(cards, cur) {
   let html = "", mk = "";
   cards.forEach((g, i) => { const d = dDay(g.date), rw = n => plural(n, ["раунд", "раунда", "раундов"]); if (monthKey(g.date) !== mk) { mk = monthKey(g.date); html += `<div class="gmon"><span>${monthName(g.date).split(" ")[0]}</span></div>`; }
-    html += `<a class="gmini${g.key === cur ? " cur" : ""}" href="#${g.key}" style="--k:${Math.min(i, 10)};--img:url(${placeArt(g.loc, g.date)})"><span class="dt"><b>${d.day}</b></span><span class="pl mono">${esc(g.loc)}</span><span class="s num"><span style="color:${tc(g.teams[0].t)}">${ru(g.teams[0].score)}</span><i>:</i><span style="color:${tc(g.teams[1].t)}">${ru(g.teams[1].score)}</span></span><span class="r mono">${vsHtml(g)}${g.kind === "попадания" ? " · по попаданиям" : ""}</span><span class="sb">${g.teams.map(t => `<i style="flex:${t.score};background:${tc(t.t)}"></i>`).join("")}</span></a>`; });
+    html += `<a class="gmini${g.key === cur ? " cur" : ""}" href="#${g.key}" style="--k:${Math.min(i, 10)};--img:url(${placeArt(g.loc, g.date)})"><span class="dt"><b>${dateShort(g.date).slice(0, 5)}</b></span><span class="pl mono">${esc(g.loc)}</span><span class="s num"><span style="color:${tc(g.teams[0].t)}">${ru(g.teams[0].score)}</span><i>:</i><span style="color:${tc(g.teams[1].t)}">${ru(g.teams[1].score)}</span></span><span class="r mono">${vsHtml(g)}${g.kind === "попадания" ? " · по попаданиям" : ""}</span><span class="sb">${g.teams.map(t => `<i style="flex:${t.score};background:${tc(t.t)}"></i>`).join("")}</span></a>`; });
   return html;
 }
 // два MVP на игру: лучший в каждой команде; тот из них, кто MVP игры, получает титул «MVP игры» вместо «MVP команды».
