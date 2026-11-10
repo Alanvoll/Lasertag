@@ -983,3 +983,15 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .z0{text-decoration:none;opacity:.32}
 .th i{display:inline-flex;align-items:center;padding:0 8px}.gm-5 .gmini .s .th i{padding:4px 7px 3px}
 .gm-5 .gmini .s .th span{min-width:calc(3ch + 18px);justify-content:flex-end}.gm-5 .gmini .s .th>b{min-width:calc(3ch + 18px);justify-content:flex-start}
+/* состав списком в карточке игры */
+.gz-b .gx-l{width:min(100%,250px);justify-self:end;gap:7px}.gz-b .gx-l.r{justify-self:start}.gz-b .gx-l a{font-size:17px;line-height:1.25}.gz-b .gx-l .st{font-size:15px}
+@media (max-width:760px){.gz-b .gx-l{width:100%;gap:4px}.gz-b .gx-l a{font-size:13px}.gz-b .gx-l .st{font-size:12px}}
+.gr-l.s{transform:translate(-50%,6px);justify-items:center}
+.gz-b .gx-l{width:min(100%,330px)}
+.gz-b .gx-l a,.gz-b .gx-h{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+.gz-b .gx-l.r a,.gz-b .gx-l.r .gx-h{grid-template-columns:auto minmax(0,1fr)}.gz-b .gx-l.r a>span:first-child,.gz-b .gx-l.r .gx-h>span:first-child{order:2;text-align:right}
+.rr{display:grid;grid-template-columns:52px 62px 44px;justify-items:end;align-items:center}.rr i{font-style:normal}
+.gx-h .rr i{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
+.rr .b0{color:var(--mute);font-size:15px}.rr .dl{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--mute)}.rr .dl.up{color:var(--green)}.rr .dl.dn{color:var(--red)}
+@media (max-width:760px){.gz-b .gx-l{grid-column:1/-1;width:100%;justify-self:stretch}.gz-b .gx-l.r{border-right:0;border-left:2px solid var(--c);padding:0 0 0 12px}.gz-b .gx-l.r a,.gz-b .gx-l.r .gx-h{grid-template-columns:minmax(0,1fr) auto}.gz-b .gx-l.r a>span:first-child,.gz-b .gx-l.r .gx-h>span:first-child{order:0;text-align:left}.rr .b0{font-size:13px}}
+.gz-b .gx-l{width:min(100%,390px)}.le-c .dl{font-style:normal;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--mute);margin:0 8px 0 -4px}.le-c .dl.up{color:var(--green)}.le-c .dl.dn{color:var(--red)}
