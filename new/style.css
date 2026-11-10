@@ -1069,3 +1069,7 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 @media (min-width:761px){.gx-l.eq.r a>.mts{grid-column:1;align-items:flex-start}}
 @media (max-width:760px){.gq .gx-l.eq a,.gq .gx-l.eq a.hb{height:50px}.gq .gx-l.eq a img,.gq .gx-l.eq a.hb img{height:48px}.gx-l.eq a>.mts{gap:3px}}
 @media (min-width:761px) and (max-width:1250px){.gx-l.eq .mt{font-size:0;letter-spacing:0;gap:0;padding:4px}.gx-l.eq .mt .ic{width:12px;height:12px}.gx-l.eq a>.mts{flex-direction:row}}
+/* «лучший в игре»: без золота и градиента — рамка в цвете команды, слева залитый цветом команды квадрат с иконкой, текст белый */
+.mt.g,.gx-l.eq .mt.g{background:none;-webkit-background-clip:border-box;background-clip:border-box;border:1px solid var(--c);border-image:none;color:var(--ink);padding-left:0;gap:5px;overflow:hidden}
+.mt.g .ic,.gx-l.eq .mt.g .ic{color:#0c0d10;background:var(--c);box-sizing:content-box;padding:3px;margin:-3px 0 -2px;stroke-width:2.4}
+@media (min-width:761px) and (max-width:1250px){.gx-l.eq .mt.g{padding:0;background:var(--c)}.gx-l.eq .mt.g .ic{padding:4px;margin:0}}
