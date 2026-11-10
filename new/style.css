@@ -873,7 +873,7 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .gx .gk-row b{font-size:19px}
 .gk-row span{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);display:inline-flex;align-items:center;gap:5px;min-width:15em;justify-content:center;white-space:nowrap}.gk-row .ic{width:13px;height:13px}
 .gk-row i{height:8px;background:linear-gradient(90deg,var(--c),var(--c)) left/var(--w) 100% no-repeat,var(--line2)}.gk-row i.l{background-position:right}
-.gx::before{background:linear-gradient(90deg,color-mix(in srgb,var(--c0) 9%,transparent),transparent 80%)}.gx::after{background:linear-gradient(270deg,color-mix(in srgb,var(--c1) 9%,transparent),transparent 80%)}
+.gx::before,.gx::after{display:none}.gx .le-c.g{box-shadow:0 0 10px rgba(154,107,255,.14)}
 .gx .le-c{min-height:300px}.gx .le-c b{font-size:26px}.gx .le-c em{font-size:12px}.gx .le-c small{font-size:10px}.gx .le-c span{left:14px;right:14px;bottom:12px}.gx .le-c .st{font-size:15px}
 .gx-m{display:grid;justify-items:center;align-content:space-between;gap:10px}
 .gx-t{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:22px;align-items:center;width:100%}.gx-c{display:grid;justify-items:center;gap:8px}
