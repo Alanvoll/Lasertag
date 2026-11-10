@@ -102,6 +102,8 @@ const vsHtml = g => `<b style="color:${tc(g.teams[0].t)}">${g.teams[0].n}</b> vs
 // ---------- блок «Игры» на главной: большая карточка последней игры (варианты G / H / I) + лента игр ----------
 let GV = (() => { try { const v = localStorage.getItem("lt-gv"); return ["z", "r"].includes(v) ? v : "z"; } catch (e) { return "z"; } })();
 const pw = (n, w) => plural(n, w).split(" ")[1];
+const teamStats = (S, G) => { const m = G.m; return G.teams.map(t => { const sg = m.P.flatMap(p => (p.segs || []).filter(x => x.team === t.t)), shots = sum(sg, x => x.shots || 0), deaths = sum(sg, x => x.deaths || 0); return { hits: t.hits, shots, deaths, acc: div(t.hits, shots), hd: div(t.hits, deaths), rt: sum(m.P.filter(p => p.teams.includes(t.t)), p => m.mvpT(p, t.t)),
+      rs: sum(m.P.filter(p => p.teams.includes(t.t)), p => { const r = S.rows.find(x => x.name === p.name); return r && r.games ? r.mvp / r.games * m.shareT(p, t.t) : 0; }) }; }); }; // rs — сумма средних рейтингов игроков за все игры
 function gameBig(S, G) {
   const m = G.m, dG = dDay(G.date), key = n => (S.rows.find(r => r.name === n) || {}).key || G.key, duo = mvpDuo(G);
   const tag = `<div class="mono"><span class="blink"></span>${G.last === false ? "" : "последняя игра · "}${esc(G.loc)}</div>`;
@@ -116,8 +118,7 @@ function gameBig(S, G) {
   let v = GV, body; if (v === "i" && (!G.winners.length || G.kind === "попадания")) v = "h";
   const head = `${tag}<h3>${dG.day} ${dG.monFull}</h3>`, c0 = tc(G.teams[0].t), c1 = tc(G.teams[1].t);
   if (v === "k" || v === "x" || v === "y" || v === "z" || v === "r") { // «Табло»: половины в цветах команд и сравнение команд по цифрам; «Дуэль + табло»: то же между двумя портретами MVP
-    const ts = G.teams.map(t => { const sg = m.P.flatMap(p => (p.segs || []).filter(x => x.team === t.t)), shots = sum(sg, x => x.shots || 0), deaths = sum(sg, x => x.deaths || 0); return { hits: t.hits, shots, deaths, acc: div(t.hits, shots), hd: div(t.hits, deaths), rt: sum(m.P.filter(p => p.teams.includes(t.t)), p => m.mvpT(p, t.t)),
-      rs: sum(m.P.filter(p => p.teams.includes(t.t)), p => { const r = S.rows.find(x => x.name === p.name); return r && r.games ? r.mvp / r.games * m.shareT(p, t.t) : 0; }) }; }); // rs — сумма средних рейтингов игроков за все игры
+    const ts = teamStats(S, G);
     const row = (k, l, f, i, low) => { const a = ts[0][k] || 0, b = ts[1][k] || 0, mx = Math.max(a, b) || 1, w = a === b || low === 0 ? -1 : (a > b) !== !!low ? 0 : 1;
       return `<div class="gk-row"><b${w === 1 ? ` class="lo"` : ""}>${f(a)}</b><i class="l" style="--w:${a / mx * 100}%;--c:${c0}"></i><span>${ic(i)}${l}</span><i style="--w:${b / mx * 100}%;--c:${c1}"></i><b${w === 0 ? ` class="lo"` : ""}>${f(b)}</b></div>`; };
     const rows = `<div class="gk-c">${row("rs", "в среднем за все игры", ru, "star")}${row("rt", "в этой игре", ru, "star")}${row("hits", "попаданий", ru, "hit")}${row("acc", "точность", pct, "acc")}${row("hd", "попаданий на смерть", one, "hit")}${row("deaths", "смертей", ru, "death", 1)}${row("shots", "выстрелов", ru, "shot", 0)}</div>`;
@@ -135,8 +136,11 @@ function gameBig(S, G) {
     const zr = [["rs", "в среднем за все игры", ru, "star"], ["rt", "в этой игре", ru, "star"], ["acc", "точность", pct, "acc"], ["hd", "попаданий на смерть", one, "hit"], ["deaths", "смертей", ru, "death", 1], ["shots", "выстрелов", ru, "shot", 0]];
     const zrows = () => `<div class="gz-c">${zr.map(([k, l, f, i, low]) => { const a = ts[0][k] || 0, b = ts[1][k] || 0, w = a === b || low === 0 ? -1 : (a > b) !== !!low ? 0 : 1; return `<div class="gz-row"><b${w === 1 ? ` class="lo"` : ""}>${f(a)}</b><span>${ic(i)}${l}</span><b${w === 0 ? ` class="lo"` : ""}>${f(b)}</b></div>`; }).join("")}</div>`;
     const radar = () => { const ax = [["hits", "попаданий", ru, "hit"], ...zr].map(d => d[0] === "rs" ? ["rs", "за все игры", ru, "star"] : d[0] === "hd" ? ["hd", "на смерть", one, "hit"] : d), n = ax.length, R = 100, pt = (k, r) => { const a = -Math.PI / 2 + k * 2 * Math.PI / n; return [Math.cos(a) * r, Math.sin(a) * r]; };
-      // ось идёт от половины лучшего значения до лучшего, иначе фигуры почти сливаются; у смертей лучше меньшее
-      const val = (t, [k, , , , low]) => { const a = ts[0][k] || 0, b = ts[1][k] || 0, x = ts[t][k] || 0, q = low ? (x ? Math.min(a, b) / x : 0) : x / (Math.max(a, b) || 1); return Math.max(.08, (q - .5) / .5); };
+      // шкала каждой оси: от худшего до лучшего значения команды среди всех игр (попадания, смерти и выстрелы в пересчёте на раунд), у смертей лучше меньшее.
+      // так фигура победителя не превращается в полный многоугольник, а показывает, насколько сильной была игра команды на фоне остальных
+      const nr = g => g.rounds || (g.m.P[0] || {}).gr || 1, per = { hits: 1, deaths: 1, shots: 1 }, q = (g, x, k) => (x[k] || 0) / (per[k] ? nr(g) : 1);
+      const all = S._ts || (S._ts = S.models.map(mm => { const g = gameCard(mm); return { g, ts: teamStats(S, g) }; }));
+      const val = (t, [k, , , , low]) => { const xs = all.flatMap(o => o.ts.map(x => q(o.g, x, k))), lo = Math.min(...xs), hi = Math.max(...xs), x = q(G, ts[t], k), p = hi > lo ? (x - lo) / (hi - lo) : 1; return .18 + .82 * (low ? 1 - p : p); };
       const poly = t => ax.map((d, k) => pt(k, R * val(t, d)).map(x => x.toFixed(1)).join(",")).join(" ");
       const ring = r => `<polygon points="${ax.map((_, k) => pt(k, R * r).map(x => x.toFixed(1)).join(",")).join(" ")}"/>`;
       return `<div class="gr"><svg viewBox="-104 -104 208 208" aria-hidden="true"><g class="gr-g">${[.25, .5, .75, 1].map(ring).join("")}${ax.map((_, k) => { const [x, y] = pt(k, R); return `<line x1="0" y1="0" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`; }).join("")}</g>
