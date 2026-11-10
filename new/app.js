@@ -103,7 +103,7 @@ function gameBig(S, G, gp) {
   return panel(`gbig gv-${GV} A`, bg + body, "div", `data-go="#${G.key}"`);
 }
 // ---------- главная: карточка последней игры (варианты компоновки 1–4) ----------
-let LV = (() => { try { return localStorage.getItem("lt-lv") || "b"; } catch (e) { return "b"; } })();
+let LV = (() => { try { return localStorage.getItem("lt-lv") === "d" ? "d" : "b"; } catch (e) { return "b"; } })();
 function lastGame(S, L, gS) {
   const dL = dDay(L.date), key = n => (S.rows.find(r => r.name === n) || {}).key || L.key, pw = (n, w) => plural(n, w).split(" ")[1];
   const rt = (n, t) => ru(L.m.mvpT(L.m.P.find(p => p.name === n), t));
@@ -112,17 +112,11 @@ function lastGame(S, L, gS) {
   const kv = [[ru(gS.hits), "попаданий"], [pct(gS.acc), "точность"], [ru(gS.deaths), "смертей"], [ru(gS.shots), "выстрелов"]].map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
   const nums = L.teams.map(t => `<div class="lgn num" style="--c:${tc(t.t)}">${ru(t.score)}</div>`), colon = `<i class="lgx"><b></b><b></b></i>`;
   const tm = (t, cls = "") => `<a class="lgmv ${cls}" href="#${key(t.mvp)}" style="--c:${tc(t.t)}"><img src="${portrait(t.mvp)}" alt=""><span><small>MVP команды</small><b>${esc(t.mvp)}</b><em>рейтинг ${rt(t.mvp, t.t)}</em></span></a>`;
-  const gm = `<a class="lgmvp" href="#${key(L.top)}"><img src="${portrait(L.top)}" alt=""><span><small>MVP игры</small><b>${esc(L.top)}</b><em>рейтинг ${ru(L.m.mvp.mvp)} · ${L.m.mvp.dealt} попаданий</em></span></a>`;
   let body;
-  if (LV === "b") {
+  if (LV !== "d") {
     // «Табло»: всё симметрично вокруг счёта, ниже одна строка цифр
     body = `<div class="lb-m">${tm(L.teams[0])}<div class="lb-s">${nums.join(colon)}</div>${tm(L.teams[1], "r")}</div>
-      <div class="lb-k"><a class="lb-g" href="#${key(L.top)}"><span>MVP игры</span><b>${esc(L.top)}</b><em>рейтинг ${ru(L.m.mvp.mvp)}</em></a>${kv}</div>`;
-  } else if (LV === "c") {
-    // «Команды»: у каждой команды своя половина — цифра счёта и три лучших
-    const half = t => { const mem = L.m.P.filter(p => p.teams.includes(t.t) && L.m.shareT(p, t.t) > .5).sort((a, b) => L.m.mvpT(b, t.t) - L.m.mvpT(a, t.t)).slice(0, 3);
-      return `<div class="lc-t" style="--c:${tc(t.t)}"><div class="lgn num">${ru(t.score)}</div><div class="lc-l"><div class="mono lc-h"><span>${ru(t.hits)} поп.</span><span>рейтинг</span></div>${mem.map(p => `<a class="lc-r" href="#${key(p.name)}"><span class="n">${esc(p.name)}${p === L.m.mvp ? '<em class="mono">MVP</em>' : ""}</span><span class="num">${ru(L.m.mvpT(p, t.t))}</span></a>`).join("")}</div></div>`; };
-    body = `<div class="lc-b">${half(L.teams[0])}${half(L.teams[1])}</div><div class="lc-k">${kv}</div>`;
+      <div class="lb-k2"><a class="lb-g" href="#${key(L.top)}"><img src="${portrait(L.top)}" alt=""><span><small>MVP игры</small><b>${esc(L.top)}</b><em>рейтинг ${ru(L.m.mvp.mvp)} · ${L.m.mvp.dealt} поп.</em></span></a><div class="lb-a"><div class="mono">вся игра · обе команды</div><div class="lb-k">${kv}</div></div></div>`;
   } else if (LV === "d") {
     // «Герой»: слева большой портрет MVP игры, справа счёт и цифры
     body = `<div class="ld"><a class="ld-h" href="#${key(L.top)}"><img src="${portrait(L.top)}" alt=""><span><small>MVP игры</small><b>${esc(L.top)}</b><em>рейтинг ${ru(L.m.mvp.mvp)} · ${L.m.mvp.dealt} поп.</em></span></a>
@@ -130,8 +124,6 @@ function lastGame(S, L, gS) {
       <div class="ld-t">${L.teams.map(t => `<a href="#${key(t.mvp)}" style="--c:${tc(t.t)}"><i></i><span><small>MVP команды</small><b>${esc(t.mvp)}</b> <em>${rt(t.mvp, t.t)}</em></span></a>`).join("")}</div></div>
       <div class="ld-k">${kv}</div></div></div>`;
     return panel(`lastc lg2 lv-d A`, body + rounds, "div", `data-go="#${L.key}"`);
-  } else {
-    body = `<div class="lgb"><div class="lgs">${nums.join(colon)}</div>${gm}<div class="lgt2">${L.teams.map(t => tm(t)).join("<i></i>")}</div><div class="gkv">${kv}</div></div>`;
   }
   return panel(`lastc lg2 lv-${LV} A`, hd + body + rounds, "div", `data-go="#${L.key}"`);
 }
