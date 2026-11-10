@@ -96,7 +96,7 @@ function mvpDuo(G) {
 const mvpTitle = d => d.game ? "MVP игры" : "MVP команды";
 const vsHtml = g => `<b style="color:${tc(g.teams[0].t)}">${g.teams[0].n}</b> vs <b style="color:${tc(g.teams[1].t)}">${g.teams[1].n}</b>`;
 // ---------- блок «Игры» на главной: большая карточка последней игры (варианты G / H / I) + лента игр ----------
-let GV = (() => { try { const v = localStorage.getItem("lt-gv"); return ["h", "k", "x", "i"].includes(v) ? v : "x"; } catch (e) { return "x"; } })();
+let GV = (() => { try { const v = localStorage.getItem("lt-gv"); return ["h", "k", "x", "y", "i"].includes(v) ? v : "x"; } catch (e) { return "x"; } })();
 const pw = (n, w) => plural(n, w).split(" ")[1];
 function gameBig(S, G) {
   const m = G.m, dG = dDay(G.date), key = n => (S.rows.find(r => r.name === n) || {}).key || G.key, duo = mvpDuo(G);
@@ -111,16 +111,18 @@ function gameBig(S, G) {
   const kv = [[ru(gs.hits), "попаданий", "hit"], [pct(div(gs.hits, gs.shots)), "точность", "acc"], [ru(gs.deaths), "смертей", "death"], [ru(gs.shots), "выстрелов", "shot"]].map(([v, l, i]) => `<div><b>${v}</b><span>${ic(i)}${l}</span></div>`).join("");
   let v = GV, body; if (v === "i" && (!G.winners.length || G.kind === "попадания")) v = "h";
   const head = `${tag}<h3>${dG.day} ${dG.monFull}</h3>`, c0 = tc(G.teams[0].t), c1 = tc(G.teams[1].t);
-  if (v === "k" || v === "x") { // «Табло»: половины в цветах команд и сравнение команд по цифрам; «Дуэль + табло»: то же между двумя портретами MVP
+  if (v === "k" || v === "x" || v === "y") { // «Табло»: половины в цветах команд и сравнение команд по цифрам; «Дуэль + табло»: то же между двумя портретами MVP
     const ts = G.teams.map(t => { const sg = m.P.flatMap(p => (p.segs || []).filter(x => x.team === t.t)), shots = sum(sg, x => x.shots || 0), deaths = sum(sg, x => x.deaths || 0); return { hits: t.hits, shots, deaths, acc: div(t.hits, shots), hd: div(t.hits, deaths), rt: sum(m.P.filter(p => p.teams.includes(t.t)), p => m.mvpT(p, t.t)) }; });
     const row = (k, l, f, i, low) => { const a = ts[0][k] || 0, b = ts[1][k] || 0, mx = Math.max(a, b) || 1, w = a === b || low === 0 ? -1 : (a > b) !== !!low ? 0 : 1;
       return `<div class="gk-row"><b${w === 1 ? ` class="lo"` : ""}>${f(a)}</b><i class="l" style="--w:${a / mx * 100}%;--c:${c0}"></i><span>${ic(i)}${l}</span><i style="--w:${b / mx * 100}%;--c:${c1}"></i><b${w === 0 ? ` class="lo"` : ""}>${f(b)}</b></div>`; };
     const rows = `<div class="gk-c">${row("rt", "в сумме", ru, "star")}${row("hits", "попаданий", ru, "hit")}${row("acc", "точность", pct, "acc")}${row("hd", "попаданий на смерть", one, "hit")}${row("deaths", "смертей", ru, "death", 1)}${row("shots", "выстрелов", ru, "shot", 0)}</div>`;
     // остальные игроки команды (без тех, кто на портретах) с рейтингом, лучшие сверху
     const rest = k => { const t = G.teams[k].t, L = m.P.filter(p => p.teams.includes(t) && m.shareT(p, t) > .5 && !duo.some(d => d.name === p.name)).sort((a, b) => m.mvpT(b, t) - m.mvpT(a, t));
-      return `<div class="gx-l${k ? " r" : ""}" style="--c:${tc(t)}">${L.map(p => `<a href="#${key(p.name)}"><span>${esc(p.name)}</span>${st("star", ru(m.mvpT(p, t)))}</a>`).join("")}</div>`; };
+      return v === "y" ? `<div class="gy-l${k ? " r" : ""}" style="--c:${tc(t)}">${L.map(p => `<a class="gy-c" href="#${key(p.name)}"><img src="${portrait(p.name)}" alt=""><span><b>${esc(p.name)}</b>${st("star", ru(m.mvpT(p, t)))}</span></a>`).join("")}</div>`
+        : `<div class="gx-l${k ? " r" : ""}" style="--c:${tc(t)}">${L.map(p => `<a href="#${key(p.name)}"><span>${esc(p.name)}</span>${st("star", ru(m.mvpT(p, t)))}</a>`).join("")}</div>`; };
     const side = (k, r) => `<div class="gk-t${r}"><div class="lgn num" style="--c:${tc(G.teams[k].t)}">${ru(G.teams[k].score)}</div>${chip(duo[k])}</div>`;
-    body = v === "x" ? `<div class="gx" style="--c0:${c0};--c1:${c1}">${card(duo[0])}<div class="gx-m"><div class="gx-t">${rest(0)}<div class="gx-c"><div class="gk-h">${head}</div>${score}</div>${rest(1)}</div>${rows}</div>${card(duo[1])}</div>${rounds}`
+    body = v === "y" ? `<div class="gx gy" style="--c0:${c0};--c1:${c1}">${card(duo[0])}<div class="gx-m"><div class="gx-c"><div class="gk-h">${head}</div>${score}</div>${rows}<div class="gy-r">${rest(0)}${rest(1)}</div></div>${card(duo[1])}</div>${rounds}`
+      : v === "x" ? `<div class="gx" style="--c0:${c0};--c1:${c1}">${card(duo[0])}<div class="gx-m"><div class="gx-t">${rest(0)}<div class="gx-c"><div class="gk-h">${head}</div>${score}</div>${rest(1)}</div>${rows}</div>${card(duo[1])}</div>${rounds}`
       : `<div class="gk" style="--c0:${c0};--c1:${c1}"><div class="gk-h">${head}<div class="mono gb-meta">${vsHtml(G)}${G.kind === "попадания" ? " · счёт по попаданиям" : ""}</div></div>${side(0, "")}${rows}${side(1, " r")}</div>${rounds}`;
   } else if (v === "i") { // «Ход игры»: протокол по раундам — у победителя раунда закрашена клетка с его новым счётом
     const W = G.winners, T = G.teams.map(t => t.t), c = [0, 0], cells = [[], []], ax = [];

@@ -858,7 +858,7 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 
 .gbig.swap{animation:gbswap .45s cubic-bezier(.2,.8,.2,1)}@keyframes gbswap{from{opacity:.25;filter:blur(5px)}}
 /* ---------- большая карточка игры: k «Табло», x «Дуэль + табло», i «Ход игры» ---------- */
-.gv-k,.gv-x,.gv-i{min-height:400px;grid-template-rows:1fr auto}
+.gv-k,.gv-x,.gv-y,.gv-i{min-height:400px;grid-template-rows:1fr auto}
 .gv-k .bgimg,.gv-x .bgimg{opacity:.3;-webkit-mask:none;mask:none}
 .gk,.gx{display:grid;gap:14px 30px;align-items:stretch;position:relative}
 .gk{grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto 1fr}.gx{grid-template-columns:220px minmax(0,1fr) 220px}
@@ -880,6 +880,14 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .gx-l{display:grid;gap:3px;align-content:center;border-left:2px solid var(--c);padding-left:12px}.gx-l.r{border-left:0;border-right:2px solid var(--c);padding:0 12px 0 0}
 .gx-l a{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px;line-height:1.3}.gx-l a span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gx-l a:hover span{color:var(--uv2)}
 .gx-l .st{font-size:13px;font-weight:700;flex:none}.gx-l.r a{flex-direction:row-reverse}.gx-m .gb-s .lgn{font-size:clamp(84px,7vw,112px)}
+.gv-y .bgimg{opacity:.3;-webkit-mask:none;mask:none}
+.gy-r{display:grid;grid-template-columns:1fr 1fr;gap:26px;width:100%;margin-top:4px}
+.gy-l{display:flex;gap:6px;justify-content:flex-end;min-width:0}.gy-l.r{justify-content:flex-start}
+.gy-c{position:relative;overflow:hidden;isolation:isolate;flex:1 1 0;min-width:0;max-width:88px;height:104px;border:1px solid var(--line);border-top:2px solid var(--c);background:#0e0f12;transition:border-color .2s}
+.gy-c img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 15%;z-index:-1}
+.gy-c::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(12,13,16,.96) 0,rgba(12,13,16,.8) 34%,transparent 66%)}
+.gy-c span{position:absolute;left:6px;right:4px;bottom:5px;display:grid;gap:1px;line-height:1.15}
+.gy-c b{font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gy-c .st{font-size:12px;font-weight:700}a.gy-c:hover{border-color:var(--uv2);border-top-color:var(--c)}
 .gv-i .bgimg{opacity:.4}
 .gi2{display:grid;gap:18px;align-content:space-between}
 .gi2-t{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px}.gi2-h{display:grid;gap:8px}.gi2-h h3{margin:0}
@@ -896,7 +904,7 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
   .gk{grid-template-columns:1fr 1fr;gap:12px}.gk::before,.gx::before{left:-14px}.gk::after,.gx::after{right:-14px}.gk .gk-c{grid-column:1/-1;order:3}.gk-c{gap:10px}
   .gk-t{min-width:0;gap:14px}.gk-t .lgn{font-size:84px}.gk-t .gbm img{width:44px;height:44px}.gk-t .gbm b{font-size:15px}.gk-t .gbm em{display:none}
   .gk-row{grid-template-columns:3.4em 1fr auto 1fr 3.4em;gap:6px}.gk-row b,.gx .gk-row b{font-size:15px}.gk-row span{min-width:0;font-size:8px;letter-spacing:.06em}.gk-row .ic{display:none}
-  .gx{grid-template-columns:1fr 1fr;gap:10px}.gx-m{grid-column:1/-1;order:-1}.gx-t{grid-template-columns:1fr 1fr;gap:12px}.gx-c{grid-column:1/-1;order:-1}.gx-l a{font-size:13px}.gx .le-c{min-height:170px}.gx .le-c b{font-size:19px}
+  .gx{grid-template-columns:1fr 1fr;gap:10px}.gx-m{grid-column:1/-1;order:-1}.gy-r{gap:10px}.gy-l{gap:3px}.gy-c{height:84px}.gy-c b{font-size:10px}.gy-c .st{font-size:10px}.gy-c span{left:3px;right:2px}.gx-t{grid-template-columns:1fr 1fr;gap:12px}.gx-c{grid-column:1/-1;order:-1}.gx-l a{font-size:13px}.gx .le-c{min-height:170px}.gx .le-c b{font-size:19px}
   .gi2-t{grid-template-columns:1fr;justify-items:center;text-align:center;gap:12px}.gi2-mv{justify-self:center;grid-template-columns:1fr 1fr}.gi2-mv .gbm em{display:none}
   .gi2-g{padding:8px 6px}.gi2-g>div{gap:1px}.gi2-g .rw i{height:30px;font-size:9px;font-weight:700}.gi2-g .ax i{font-size:6px}
 }
