@@ -47,15 +47,15 @@ function gameModel(g) {
   for (const p of P) {
     p.e = { dealt: P.some(v => estH(p, v)), recv: p.est.has("recv"), shots: p.est.has("shots"), deaths: p.est.has("deaths") };
     Object.assign(p.e, { acc: p.e.dealt || p.e.shots, ratio: p.e.dealt || p.e.recv, alive: p.e.deaths && !p.died });
-    p.e.mvp = p.e.dealt || p.e.ratio;
+    p.e.mvp = p.e.dealt;
   }
-  // рейтинг MVP (временная формула): 100 — средний игрок этой игры; половина — попадания, половина — коэффициент (не больше 3)
-  const rc = p => Math.min(isFinite(p.ratio) ? p.ratio : 3, 3), avgD = sum(P, p => p.dealt) / P.length || 1, avgR = sum(P, rc) / P.length || 1;
-  for (const p of P) p.mvp = 50 * p.dealt / avgD + 50 * rc(p) / avgR;
-  // рейтинг игрока за одну команду: та же формула, но только по тому, что он сделал за неё
+  // рейтинг: попадания игрока относительно среднего в этой игре; 100 — среднее число попаданий на игрока
+  const avgD = sum(P, p => p.dealt) / P.length || 1;
+  for (const p of P) p.mvp = 100 * p.dealt / avgD;
+  // рейтинг игрока за одну команду: только попадания, сделанные за неё
   const valT0 = (a, v, t) => HT[`${a.i}:${v.i}:${t}`] || 0;
   const mvpT = (p, t) => { if (!p.swap) return p.mvp; const d = sum(P, v => valT0(p, v, t)), r = sum(p.segs.filter(s => s.team === t), s => s.recv), x = div(d, r);
-    return 50 * d / avgD + 50 * Math.min(isFinite(x) ? x : 3, 3) / avgR; };
+    return 100 * d / avgD; };
   // доля игры за команду: по раундам, если они известны, иначе по выстрелам
   const shareT = (p, t) => { if (!p.swap) return 1;
     if (p.segRounds) { const n = q => sum(q, ([a, b]) => b - a + 1), all = n(p.segRounds); return div(n(p.segRounds.filter((_, k) => p.segs[k].team === t)), all); }
@@ -124,6 +124,7 @@ const addStat = (a, p) => { a.games = (a.games || 0) + 1; for (const k of ["deal
 const finStat = a => { a.acc = div(a.dealt, a.shots); a.ratio = div(a.dealt, a.recv); return a; };
 // ---------- номинации ----------
 const NOMS = [
+  ["MVP", "Лучший рейтинг", r => r.mvp, 1, fmt],
   ["Терминатор", "Больше всех попаданий", r => r.dealt, 1, fmt],
   ["Спонсор патронного завода", "Больше всех выстрелов", r => r.shots, 1, fmt],
   ["Бережливый", "Меньше всех выстрелов", r => r.shots, -1, fmt],
