@@ -951,19 +951,22 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 @media (max-width:760px){.gcard .sc{flex-wrap:wrap}.gcard .sc small.th{display:grid;flex-basis:100%;margin:2px 0 0;grid-template-columns:auto auto 1fr;font-size:12px}}
 .gcard .sc small.th{color:var(--ink);letter-spacing:.04em;text-transform:none}
 .lv-d .le-s .lgn{font-size:clamp(64px,5.2vw,80px)}.le-s{column-gap:12px}
-/* большая карточка игры: z «Без полос», r «Диаграмма» */
+/* большая карточка игры: z «Без полос», r «Диаграмма». Сверху небольшие портреты MVP по бокам от счёта, ниже на всю ширину составы и сравнение команд */
 .gv-z,.gv-r{min-height:400px;grid-template-rows:1fr auto}.gv-z .bgimg,.gv-r .bgimg{opacity:.3;-webkit-mask:none;mask:none}
-.gz .gx-m{align-content:start;gap:16px}
-.gz-b{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:18px;align-items:center;width:100%;border-top:1px solid var(--line);padding-top:16px}
-.gz-l{display:grid!important;gap:6px;justify-content:end;align-content:center}.gz-l.r{justify-content:start}
-.gz-l{min-width:0}.gz-l.c2{grid-template-columns:repeat(2,minmax(0,96px))}.gz-l.c3{grid-template-columns:repeat(3,minmax(0,78px))}.gz-l.c4{grid-template-columns:repeat(4,minmax(0,58px))}
-.gz-l .gy-c{max-width:none;height:118px;flex:none}.gz-l.c3 .gy-c{height:104px}.gz-l.c4 .gy-c{height:50px}
-.gz-l .gy-c b{font-size:13px}.gz-l .gy-c .st{font-size:13px}.gz-l.c3 .gy-c b{font-size:11px}.gz-l.c4 .gy-c b{font-size:9.5px}
-.gz-c{display:grid;gap:12px;align-content:center}
-.gz-row{display:grid;grid-template-columns:3.3em 1fr 3.3em;align-items:center;gap:10px}
-.gz-row b{font-family:var(--disp);font-size:19px;font-weight:700;line-height:1}.gz-row b:first-child{text-align:right}.gz-row b.lo{color:var(--mute);font-weight:500}
+.gz{grid-template-columns:168px minmax(0,1fr) 168px;gap:16px 24px;align-items:stretch}
+.gz .gx-c{align-content:center}
+.gz .le-c{min-height:206px}.gz .le-c b{font-size:21px}.gz .le-c span{left:12px;right:10px;bottom:10px}.gz .le-c .st{font-size:14px}
+.le-c.g,.gx .le-c.g,.gx.gz .le-c.g{border-color:var(--line);border-top-color:var(--c);box-shadow:none}
+.gz-b{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:24px;align-items:center;border-top:1px solid var(--line);padding-top:16px}
+.gz-l{display:grid!important;gap:8px;justify-content:end;align-content:center;min-width:0}.gz-l.r{justify-content:start}
+.gz-l.c2{grid-template-columns:repeat(2,minmax(0,128px))}.gz-l.c3{grid-template-columns:repeat(3,minmax(0,118px))}.gz-l.c4,.gz-l.c5{grid-template-columns:repeat(4,minmax(0,100px))}
+.gz-l .gy-c{max-width:none;height:112px;flex:none}.gz-r .gz-l .gy-c{height:126px}.gz-l.c5 .gy-c,.gz-r .gz-l.c5 .gy-c{height:80px}
+.gz-l .gy-c b{font-size:14px}.gz-l .gy-c .st{font-size:13px}.gz-l .gy-c span{left:8px;right:6px;bottom:7px}
+.gz-c{display:grid;gap:14px;align-content:center}
+.gz-row{display:grid;grid-template-columns:3.4em 1fr 3.4em;align-items:center;gap:12px}
+.gz-row b{font-family:var(--disp);font-size:21px;font-weight:700;line-height:1}.gz-row b:first-child{text-align:right}.gz-row b.lo{color:var(--mute);font-weight:500}
 .gz-row span{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap}.gz-row .ic{width:13px;height:13px;color:var(--uv2)}
-.gr{position:relative;width:200px;height:200px;margin:30px 64px 22px}
+.gr{position:relative;width:200px;height:200px;margin:30px 76px 30px}
 .gr svg{width:100%;height:100%;overflow:visible;display:block}
 .gr-g polygon{fill:none;stroke:var(--line2);stroke-width:1}.gr-g polygon:last-of-type{stroke:var(--line)}.gr-g line{stroke:var(--line2);stroke-width:1}
 .gr-p{fill:color-mix(in srgb,var(--c) 22%,transparent);stroke:var(--c);stroke-width:2;stroke-linejoin:round}
@@ -971,8 +974,9 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .gr-l.e{transform:translate(8px,-50%);justify-items:start}.gr-l.w{transform:translate(calc(-100% - 8px),-50%);justify-items:end}.gr-l.m{transform:translate(-50%,calc(-100% - 6px));justify-items:center}
 .gr-l small{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);display:inline-flex;align-items:center;gap:4px}.gr-l small .ic{width:11px;height:11px;color:var(--uv2)}
 .gr-l em{font-style:normal;display:inline-flex;gap:8px;font-family:var(--disp);font-size:16px;font-weight:700}
-@media (max-width:760px){.gv-z,.gv-r{min-height:0}.gz-b{grid-template-columns:1fr 1fr;gap:10px}.gz-c,.gr{grid-column:1/-1;order:-1;justify-self:center}.gz-l,.gz-l.r{justify-content:center}
-  .gz-l.c2{grid-template-columns:repeat(2,minmax(0,80px))}.gz-l.c3{grid-template-columns:repeat(3,minmax(0,1fr))}.gz-l.c4{grid-template-columns:repeat(4,minmax(0,1fr))}.gz-l .gy-c{height:92px}
-  .gz-row{gap:8px}.gz-row b{font-size:17px}.gz-row span{min-width:0;font-size:8px;letter-spacing:.06em}.gr{width:190px;height:190px;margin:24px 80px 16px}.gr-l small{font-size:7px;letter-spacing:.04em}.gr-l em{font-size:13px;gap:6px}}
-.gz-l.c3 .gy-c b{font-size:10px;letter-spacing:-.02em;text-overflow:clip}.gz-l.c3 .gy-c span{left:4px;right:1px}.gz-l.c3 .gy-c .st{font-size:11px}.gz-l.c3{gap:4px}
-.le-c.g{border-color:var(--line);border-top-color:var(--c)}.gx .le-c.g{box-shadow:0 0 20px rgba(154,107,255,.3)}
+.gr-l.e em,.gr-l.w em{display:grid;gap:2px;font-size:15px}.gr-l.w em{justify-items:end}
+@media (max-width:760px){.gv-z,.gv-r{min-height:0}.gz{grid-template-columns:1fr 1fr;gap:10px}.gz .gx-c{grid-column:1/-1;order:-1}.gz .le-c{min-height:170px}
+  .gz-b{grid-template-columns:1fr 1fr;gap:10px}.gz-c,.gr{grid-column:1/-1;order:-1;justify-self:center}.gz-l,.gz-l.r{justify-content:center;gap:4px}
+  .gz-l.c2{grid-template-columns:repeat(2,minmax(0,1fr))}.gz-l.c3{grid-template-columns:repeat(3,minmax(0,1fr))}.gz-l.c4,.gz-l.c5{grid-template-columns:repeat(4,minmax(0,1fr))}.gz-l .gy-c,.gz-r .gz-l .gy-c{height:92px}
+  .gz-l.c3 .gy-c b,.gz-l.c4 .gy-c b,.gz-l.c5 .gy-c b{font-size:9.5px;letter-spacing:-.02em;text-overflow:clip}.gz-l.c3 .gy-c span,.gz-l.c4 .gy-c span{left:3px;right:1px}.gz-l.c4 .gy-c .st,.gz-l.c3 .gy-c .st{font-size:10px}
+  .gz-row{gap:8px}.gz-row b{font-size:17px}.gz-row span{font-size:8px;letter-spacing:.06em}.gr{width:190px;height:190px;margin:24px 80px 24px}.gr-l small{font-size:7px;letter-spacing:.04em}.gr-l em,.gr-l.e em,.gr-l.w em{font-size:13px}}
