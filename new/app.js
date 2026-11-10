@@ -82,7 +82,7 @@ let GM = (() => { try { const v = localStorage.getItem("lt-gm"); return ["0", "5
 function miniStrip(cards, cur) {
   let html = "", mk = "";
   cards.forEach((g, i) => { const d = dDay(g.date), rw = n => plural(n, ["раунд", "раунда", "раундов"]); if (monthKey(g.date) !== mk) { mk = monthKey(g.date); html += `<div class="gmon"><span>${monthName(g.date).split(" ")[0]}</span></div>`; }
-    html += `<a class="gmini${g.key === cur ? " cur" : ""}" href="#${g.key}" style="--k:${Math.min(i, 10)};--img:url(${placeArt(g.loc, g.date)})"><span class="dt"><b>${dateShort(g.date).slice(0, 5)}</b></span><span class="pl mono">${esc(g.loc)}</span><span class="s num"><span style="color:${tc(g.teams[0].t)}">${ru(g.teams[0].score)}</span><i>:</i><span style="color:${tc(g.teams[1].t)}">${ru(g.teams[1].score)}</span></span><span class="r mono">${vsHtml(g)}${g.kind === "попадания" ? " · по попаданиям" : ""}</span><span class="sb">${g.teams.map(t => `<i style="flex:${t.score};background:${tc(t.t)}"></i>`).join("")}</span></a>`; });
+    html += `<a class="gmini${g.key === cur ? " cur" : ""}" href="#${g.key}" data-key="${g.key}" style="--k:${Math.min(i, 10)};--img:url(${placeArt(g.loc, g.date)})"><span class="dt"><b>${dateShort(g.date).slice(0, 5)}</b></span><span class="pl mono">${esc(g.loc)}</span><span class="s num"><span style="color:${tc(g.teams[0].t)}">${ru(g.teams[0].score)}</span><i>:</i><span style="color:${tc(g.teams[1].t)}">${ru(g.teams[1].score)}</span></span><span class="r mono">${vsHtml(g)}${g.kind === "попадания" ? " · по попаданиям" : ""}</span><span class="sb">${g.teams.map(t => `<i style="flex:${t.score};background:${tc(t.t)}"></i>`).join("")}</span></a>`; });
   return html;
 }
 // два MVP на игру: лучший в каждой команде; тот из них, кто MVP игры, получает титул «MVP игры» вместо «MVP команды».
@@ -110,7 +110,7 @@ function raceChart(G) {
 }
 function gameBig(S, G) {
   const m = G.m, dG = dDay(G.date), key = n => (S.rows.find(r => r.name === n) || {}).key || G.key, duo = mvpDuo(G);
-  const tag = `<div class="mono"><span class="blink"></span>последняя игра · ${esc(G.loc)}</div>`;
+  const tag = `<div class="mono"><span class="blink"></span>${G.last === false ? "" : "последняя игра · "}${esc(G.loc)}</div>`;
   const meta = `<div class="mono gb-meta">${G.kind === "попадания" ? "счёт по попаданиям · " : ""}${vsHtml(G)}${G.rounds ? ` · <b>${G.rounds}</b> ${pw(G.rounds, ["раунд", "раунда", "раундов"])}` : ""} · <b>${ru(G.hits)}</b> ${pw(G.hits, ["попадание", "попадания", "попаданий"])}</div>`;
   const score = `<div class="gb-s">${G.teams.map(t => `<div class="lgn num" style="--c:${tc(t.t)}">${ru(t.score)}</div>`).join(`<i class="lgx"><b></b><b></b></i>`)}</div>`;
   const chip = d => `<a class="gbm${d.game ? " g" : ""}" href="#${key(d.name)}" style="--c:${tc(d.t)}"><img src="${portrait(d.name)}" alt=""><span><small>${mvpTitle(d)}</small><b>${esc(d.name)}</b><em class="sts">${st("star", ru(d.rating))}${st("hit", d.dealt)}</em></span></a>`;
@@ -128,12 +128,23 @@ function gameBig(S, G) {
     body = `<div class="ga"><div class="ga-t">${tag}<h3>${dG.day} ${dG.monFull}</h3>${meta}</div><div class="ga-b">${score}<div class="ga-mv">${duo.map(chip).join("")}</div></div></div>${rounds}`;
   return panel(`gbig gv-${v} A`, bg + body, "div", `data-go="#${G.key}"`);
 }
+let gbCur = null, gbCtx = null; // какая игра сейчас в большой карточке (клик по ленте подставляет её туда)
 function gamesBlock(S, cards) {
-  const G = cards[0];
+  cards.forEach((c, i) => c.last = i === 0);
+  const G = cards.find(c => c.key === gbCur) || cards[0]; gbCtx = { S, cards };
   return `<div class="gblk">${gameBig(S, G)}
   <div class="gstripw A"><button class="garr l" data-dir="-1" aria-label="Назад">‹</button><div class="gstrip gm-${GM}" id="gstrip">${miniStrip(cards, G.key)}</div><button class="garr r" data-dir="1" aria-label="Вперёд">›</button></div></div>`;
 }
-function gblkInit(S) { stripInit(document.getElementById("gstrip")); }
+function gblkInit(S) {
+  const el = document.getElementById("gstrip"); stripInit(el); if (!el) return;
+  const cur = el.querySelector(".gmini.cur"); if (cur && gbCur) el.scrollLeft = Math.max(0, cur.offsetLeft - el.clientWidth / 2 + cur.offsetWidth / 2);
+  el.addEventListener("click", e => {
+    const a = e.target.closest(".gmini"); if (!a || e.defaultPrevented || e.ctrlKey || e.metaKey || e.shiftKey) return; e.preventDefault();
+    const G = gbCtx.cards.find(c => c.key === a.dataset.key), big = el.closest(".gblk").querySelector(".gbig"); if (!G || !big || gbCur === G.key || (!gbCur && G.last)) return;
+    gbCur = G.key; el.querySelectorAll(".gmini").forEach(x => x.classList.toggle("cur", x === a));
+    const t = document.createElement("div"); t.innerHTML = gameBig(gbCtx.S, G); const n = t.firstElementChild; n.classList.add("swap"); big.replaceWith(n);
+  });
+}
 // ---------- главная: карточка последней игры («Дуэль») ----------
 function lastGame(S, L, gS) {
   const dL = dDay(L.date), key = n => (S.rows.find(r => r.name === n) || {}).key || L.key, pw = (n, w) => plural(n, w).split(" ")[1];

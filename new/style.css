@@ -867,3 +867,5 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 ::-webkit-scrollbar-button,::-webkit-scrollbar-corner{display:none;width:0;height:0}
 @supports selector(::-webkit-scrollbar){*{scrollbar-width:auto;scrollbar-color:auto}}
 .gstrip{scrollbar-width:none}.gstrip::-webkit-scrollbar{display:none}
+
+.gbig.swap{animation:gbswap .45s cubic-bezier(.2,.8,.2,1)}@keyframes gbswap{from{opacity:.25;filter:blur(5px)}}
