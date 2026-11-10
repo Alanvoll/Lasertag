@@ -1110,3 +1110,4 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .gdt td.dk{font-weight:800;font-size:17px}.gdt td.dk.up{color:var(--green)}.gdt td.dk.dn{color:var(--red)}
 .gdt tr.sep td{border-top:2px solid var(--line)}.gdt th{cursor:default}
 .gdt td.dk,.gdt td.rt,.gdt td.num{text-align:center}.gdt td.dk{background:none;border-left:1px solid var(--line2)}
+td.cal{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);white-space:nowrap}

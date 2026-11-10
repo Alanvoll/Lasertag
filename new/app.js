@@ -569,14 +569,14 @@ function gameInit(S, key) {
     document.querySelectorAll("[data-gmode] button").forEach(b => b.setAttribute("aria-pressed", b.dataset.gmode === gameMode));
     const cols = [["name", "Игрок", p => p.name], ["dealt", "Попал", p => pr(p, p.dealt)], ["recv", "Получил", p => pr(p, p.recv)], ["ratio", "Попал / получил", p => p.ratio], ["deaths", "Смерти", p => pr(p, p.deaths)], ["dpd", "Попал на смерть", p => div(p.dealt, p.deaths)], ["shots", "Выстрелы", p => pr(p, p.shots)], ["acc", "Точность", p => p.acc]];
     const pd = v => isFinite(v) ? one(v) : "∞";
-    if (m.winners.length) cols.push(["alive", "Раундов без смерти", p => p.alive]);
+    cols.push(["rating", ic("star") + "Рейтинг", p => 0]); // рейтинг пока не считаем: у всех «калибруется»
     const bmax = Object.fromEntries(cols.slice(1).map(([k, , f]) => [k, Math.max(1e-9, ...m.P.map(f).filter(isFinite))]));
     const bar = (p, k, key) => { if (k !== key) return "";
       if (k === "dealt") return p.teams.map(t => { const n = sum(m.P, v => m.valT(p, v, t)); return `<span class="bar" style="--c:${tc(t)};--w:${Math.round(pr(p, n) / max * 80)}px;margin-right:${p.swap ? 1 : 8}px"></span>`; }).join("");
       const v = cols.find(c => c[0] === k)[2](p); return isFinite(v) ? `<span class="bar" style="--c:${tc(p.teams[p.teams.length - 1])};--w:${Math.round(v / bmax[k] * 80)}px;margin-right:8px"></span>` : ""; };
     sortable("gameTable", cols, m.P, (p, key) => `<tr><td class="l">${pLink(p.name, S)}<small>${esc(p.gun !== p.name ? p.gun : "")}${p.swap ? " · смена команды" : ""}</small></td>
       <td class="num">${bar(p, "dealt", key)}${A(p.e.dealt)}${nf(pr(p, p.dealt), fmt)}</td>
-      <td class="num">${bar(p, "recv", key)}${A(p.e.recv)}${nf(pr(p, p.recv), fmt)}</td><td class="num">${bar(p, "ratio", key)}${A(p.e.ratio)}${r2(p.ratio)}</td><td class="num">${bar(p, "deaths", key)}${A(p.e.deaths)}${nf(pr(p, p.deaths), fmt)}</td><td class="num">${bar(p, "dpd", key)}${pd(div(p.dealt, p.deaths))}</td><td class="num">${bar(p, "shots", key)}${A(p.e.shots)}${R ? one(pr(p, p.shots)) : fmt(p.shots)}</td><td class="num">${bar(p, "acc", key)}${A(p.e.acc)}${pct(p.acc)}</td>${m.winners.length ? `<td class="num">${bar(p, "alive", key)}${p.alive ?? "—"}${p.nR ? ` <span class="muted">/ ${p.nR}</span>` : ""}</td>` : ""}</tr>`, "dealt");
+      <td class="num">${bar(p, "recv", key)}${A(p.e.recv)}${nf(pr(p, p.recv), fmt)}</td><td class="num">${bar(p, "ratio", key)}${A(p.e.ratio)}${r2(p.ratio)}</td><td class="num">${bar(p, "deaths", key)}${A(p.e.deaths)}${nf(pr(p, p.deaths), fmt)}</td><td class="num">${bar(p, "dpd", key)}${pd(div(p.dealt, p.deaths))}</td><td class="num">${bar(p, "shots", key)}${A(p.e.shots)}${R ? one(pr(p, p.shots)) : fmt(p.shots)}</td><td class="num">${bar(p, "acc", key)}${A(p.e.acc)}${pct(p.acc)}</td><td class="num cal">калибруется</td></tr>`, "dealt");
   };
   document.querySelectorAll("[data-gmode] button").forEach(b => b.onclick = () => { gameMode = b.dataset.gmode; draw(); });
   draw(); tabsInit(document.getElementById("app"));
