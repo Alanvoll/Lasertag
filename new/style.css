@@ -1073,3 +1073,9 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .mt.g,.gx-l.eq .mt.g{background:none;-webkit-background-clip:border-box;background-clip:border-box;border:1px solid var(--c);border-image:none;color:var(--ink);padding-left:0;gap:5px;overflow:hidden}
 .mt.g .ic,.gx-l.eq .mt.g .ic{color:#0c0d10;background:var(--c);box-sizing:content-box;padding:3px;margin:-3px 0 -2px;stroke-width:2.4}
 @media (min-width:761px) and (max-width:1250px){.gx-l.eq .mt.g{padding:0;background:var(--c)}.gx-l.eq .mt.g .ic{padding:4px;margin:0}}
+@media (min-width:1251px){.gx-l.eq a>.mts{flex-wrap:wrap;max-height:calc(var(--h) - 6px);column-gap:4px;align-content:flex-end}.gx-l.eq.r a>.mts{flex-wrap:wrap-reverse;align-content:flex-end}}
+@media (max-width:760px){.gx-l.eq a>.mts{flex-wrap:wrap;max-height:46px;column-gap:3px;align-content:flex-end}}
+/* «лучший в игре»: снова градиент, но из цвета команды в белый (золото плохо читалось с красным и жёлтым) */
+.mt.g,.gx-l.eq .mt.g{border:1px solid;border-image:linear-gradient(90deg,var(--c),var(--gb,var(--ink))) 1;padding-left:5px;gap:4px;background:linear-gradient(90deg,var(--c) 10%,var(--gb,var(--ink)) 75%);-webkit-background-clip:text;background-clip:text;color:transparent;overflow:visible}
+.mt.g .ic,.gx-l.eq .mt.g .ic{color:var(--c);background:none;padding:0;margin:0;stroke-width:inherit}
+@media (min-width:761px) and (max-width:1250px){.gx-l.eq .mt.g{padding:4px;background:none;border-image:linear-gradient(135deg,var(--c),var(--gb,var(--ink))) 1}.gx-l.eq .mt.g .ic{padding:0;color:var(--gb,var(--ink))}}
