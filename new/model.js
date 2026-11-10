@@ -115,16 +115,6 @@ function season(games = DATA.games) {
   const avgOf = a => a.length ? sum(a, x => x) / a.length : 0;
   rows.forEach(s => Object.values(s.byCls || {}).forEach(c => { finStat(c); c.key = s.key; c.ratioPerGame = avgOf(c.gameRatios); c.accPerGame = avgOf(c.gameAcc); }));
   rows.forEach(s => s.gunList = Object.values(s.guns || {}).map(x => finStat({ ...x, gun: guns.find(g => g.gkey === x.gkey) })));
-  // личный рейтинг: рейтинг каждой игры умножается на силу её состава (средний личный рейтинг участников ÷ 100),
-  // сила игроков уточняется по кругу; в среднем по всем выступлениям остаётся 100. Рейтинг в самой игре (p.mvp) не меняется
-  const by = new Map(rows.map(s => [s.name, s])); rows.forEach(s => s.pr = s.mvp / s.games);
-  for (let it = 0; it < 40; it++) {
-    let tot = 0, n = 0;
-    models.forEach(m => { m.lineup = sum(m.P, p => by.get(p.name).pr) / m.P.length / 100; for (const p of m.P) { p.pr = p.mvp * m.lineup; tot += p.pr; n++; } });
-    const k = n && tot ? 100 * n / tot : 1; rows.forEach(s => s.pr = 0);
-    models.forEach(m => { m.lineup *= k; for (const p of m.P) { p.pr *= k; by.get(p.name).pr += p.pr; } });
-    rows.forEach(s => s.pr /= s.games);
-  }
   return { models, rows, guns };
 }
 // часть игры на одном тагере: у сменившего тагер по части на каждый, у остальных — весь игрок
