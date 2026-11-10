@@ -90,7 +90,7 @@ function viewHome(S) {
   </div>
   ${panel("sumx A", `<div class="hd"><span class="mono"><span class="blink"></span>сводка сезона</span><span class="mono">обновлено <b>${dateShort(L.date)}</b></span></div><div class="cells">${sumx.map(([v, l, s], k) => `<div class="cell A" style="--k:${k}"><div class="num" data-count>${typeof v === "number" ? ru(v) : v}</div><div class="lab">${l}</div><div class="sub">${s}</div></div>`).join("")}</div>`)}
   <div class="home2 h2b">
-    ${panel("lastc lg2 A", `<div class="hd"><h3>Последняя игра · ${dL.day} ${dL.monFull}</h3><span class="mono">${esc(L.loc)} · <b>${L.players}</b> игроков · <b>${L.rounds}</b> раунда</span></div>
+    ${panel("lastc lg2 A", `<div class="hd"><h3>${dL.day} ${dL.monFull}</h3><span class="mono">${esc(L.loc)} · <b>${L.players}</b> ${plural(L.players, ["игрок", "игрока", "игроков"]).split(" ")[1]}${L.rounds ? ` · <b>${L.rounds}</b> ${plural(L.rounds, ["раунд", "раунда", "раундов"]).split(" ")[1]}` : ""}</span></div>
       <div class="lgb"><div class="lgl A">
         <div class="lgt">${L.teams.map(t => `<span class="t${t.t === L.win ? " w" : ""}" style="--c:${tc(t.t)}">${t.n} чел.</span>`).join("")}</div>
         ${scoreHtml(L)}
