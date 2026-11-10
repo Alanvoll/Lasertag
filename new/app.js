@@ -72,6 +72,35 @@ function miniStrip(cards, cur) {
   return html;
 }
 
+// ---------- большая карточка последней игры (варианты компоновки A / B / C) ----------
+let GV = (() => { try { return localStorage.getItem("lt-gv") || "a"; } catch (e) { return "a"; } })();
+function gameBig(S, G, gp) {
+  const dG = dDay(G.date), key = n => (S.rows.find(r => r.name === n) || {}).key || G.key;
+  const pw = (n, w) => plural(n, w).split(" ")[1];
+  const meta = `<b>${G.players}</b> ${pw(G.players, ["игрок", "игрока", "игроков"])}${G.rounds ? ` · <b>${G.rounds}</b> ${pw(G.rounds, ["раунд", "раунда", "раундов"])}` : ""} · <b>${ru(G.hits)}</b> ${pw(G.hits, ["попадание", "попадания", "попаданий"])}`;
+  const mvpA = (t, cls = "") => `<a class="gbm ${cls}" href="#${key(t.mvp)}"><img src="${portrait(t.mvp)}" alt=""><span><small>MVP команды</small><b>${esc(t.mvp)}</b><em>рейтинг ${ru(G.m.mvpT(G.m.P.find(p => p.name === t.mvp), t.t))} · ${t.mvpDealt} поп.</em></span></a>`;
+  const rounds = `<div class="rlog fill gbr"><span class="mono">раунды</span>${roundsStrip(G)}<a class="lnk mono" href="#${G.key}">разбор игры →</a></div>`;
+  const top5 = `<div class="gtop"><div class="gth mono"><span>#</span><span>лучшие в игре</span><span>попал</span><span>получил</span><span>п / п</span><span>рейтинг</span></div>${gp.map((p, k) => `<a class="gtr" href="#${key(p.name)}"><span class="no">${k + 1}</span><span class="n">${p.teams.map(t => `<i style="--c:${tc(t)}"></i>`).join("")}${esc(p.name)}</span><span class="num">${p.dealt}</span><span class="num">${p.recv}</span><span class="num">${r2(p.ratio)}</span><span class="num v">${ru(p.mvp)}</span></a>`).join("")}</div>`;
+  const bg = `<div class="bgimg" style="--img:url(${placeArt(G.loc, G.date)})"></div>`;
+  const [t0, t1] = G.teams;
+  let body;
+  if (GV === "b") {
+    const side = (t, r) => `<div class="vb-t${r ? " r" : ""}" style="--c:${tc(t.t)}"><div class="mono vb-n">${t.t === G.win ? "▲ " : ""}${t.n} чел. · ${ru(t.hits)} поп.</div>${mvpA(t)}</div>`;
+    body = `<div class="vb-h"><div><div class="mono"><span class="blink"></span>последняя игра · ${esc(G.loc)}</div><h3>${dG.day} ${dG.monFull}</h3></div><div class="mono">${meta}</div></div>
+      <div class="vb-m">${side(t0)}${scoreHtml(G)}${side(t1, 1)}</div>
+      <div class="vb-top">${gp.map((p, k) => `<a class="vb-c" href="#${key(p.name)}"><span class="no mono">${k + 1}</span><span class="n">${p.teams.map(t => `<i style="--c:${tc(t)}"></i>`).join("")}${esc(p.name)}</span><span class="v num">${ru(p.mvp)}</span><span class="mono">${p.dealt} поп. · п/п ${r2(p.ratio)}</span></a>`).join("")}</div>${rounds}`;
+  } else if (GV === "c") {
+    const roster = t => { const mem = G.m.P.filter(p => p.teams.includes(t.t) && G.m.shareT(p, t.t) > .5).sort((a, b) => G.m.mvpT(b, t.t) - G.m.mvpT(a, t.t));
+      return `<div class="vc-t" style="--c:${tc(t.t)}"><div class="vc-th mono"><span>${t.t === G.win ? "▲ " : ""}${t.n} чел.</span><span>попал</span><span>получил</span><span>рейтинг</span></div>${mem.map((p, k) => `<a class="vc-r${k ? "" : " mvp"}" href="#${key(p.name)}"><span class="n">${esc(p.name)}${p === G.m.mvp ? '<em class="mono">MVP игры</em>' : k ? "" : '<em class="mono">MVP команды</em>'}</span><span class="num">${p.dealt}</span><span class="num">${p.recv}</span><span class="num v">${ru(G.m.mvpT(p, t.t))}</span></a>`).join("")}</div>`; };
+    body = `<div class="vc-h"><div><div class="mono"><span class="blink"></span>последняя игра · ${esc(G.loc)}</div><h3>${dG.day} ${dG.monFull}</h3><div class="mono">${meta}</div></div>${scoreHtml(G)}</div>
+      <div class="vc-b">${roster(t0)}${roster(t1)}</div>${rounds}`;
+  } else {
+    const side = t => `<div class="va-t" style="--c:${tc(t.t)}"><div class="mono va-m">${t.t === G.win ? "▲ " : ""}${t.n} чел. · ${ru(t.hits)} поп.</div>${mvpA(t)}</div>`;
+    body = `<div class="va"><div class="va-l"><div class="mono"><span class="blink"></span>последняя игра · ${esc(G.loc)}</div><h3>${dG.day} ${dG.monFull}</h3><div class="mono va-meta">${meta}</div>
+      <div class="va-s">${scoreHtml(G)}${side(t0)}${side(t1)}</div></div>${top5}</div>${rounds}`;
+  }
+  return panel(`gbig gv-${GV} A`, bg + body, "div", `data-go="#${G.key}"`);
+}
 // ---------- главная ----------
 function viewHome(S) {
   const H = homeData(S), L = gameCard(H.last), dL = dDay(L.date);
@@ -106,11 +135,7 @@ function viewHome(S) {
   const cards = H.models.map(gameCard), G = cards[0], dG = dDay(G.date), gp = [...G.m.P].sort((x, y) => y.mvp - x.mvp).slice(0, 5);
   const gTeam = (t, cls) => `<div class="gbt ${cls}" style="--c:${tc(t.t)}"><div class="t${t.t === G.win ? " w" : ""}">${t.n} чел.</div><a class="gbm" href="#${(S.rows.find(r => r.name === t.mvp) || {}).key || G.key}"><img src="${portrait(t.mvp)}" alt=""><span><small>MVP команды</small><b>${esc(t.mvp)}</b><em>${t.mvpDealt} попаданий</em></span></a></div>`;
   const b2 = `<div class="shead A"><h2>Игры · ${cards.length}</h2><a class="allg" href="#games">все игры <i>→</i></a></div>
-  ${panel("gbig A", `<div class="bgimg" style="--img:url(${placeArt(G.loc, G.date)})"></div>
-    <div class="gbh"><div><div class="mono"><span class="blink"></span>последняя игра · ${esc(G.loc)}</div><h3>${dG.day} ${dG.monFull}</h3></div><div class="mono">${G.players} игроков · ${G.rounds} раунда · ${ru(G.hits)} попаданий</div></div>
-    <div class="gbb"><div class="gbs">${gTeam(G.teams[0], "")}${scoreHtml(G)}${gTeam(G.teams[1], "r")}</div>
-      <div class="gtop"><div class="gth mono"><span>#</span><span>лучшие в игре</span><span>попал</span><span>получил</span><span>п / п</span><span>рейтинг</span></div>${gp.map((p, k) => `<a class="gtr" href="#${(S.rows.find(r => r.name === p.name) || {}).key || G.key}"><span class="no">${k + 1}</span><span class="n">${p.teams.map(t => `<i style="--c:${tc(t)}"></i>`).join("")}${esc(p.name)}</span><span class="num">${p.dealt}</span><span class="num">${p.recv}</span><span class="num">${r2(p.ratio)}</span><span class="num v">${ru(p.mvp)}</span></a>`).join("")}</div></div>
-    <div class="rlog fill gbr"><span class="mono">раунды</span>${roundsStrip(G)}<a class="lnk mono" href="#${G.key}">разбор игры →</a></div>`, "div", `data-go="#${G.key}"`)}
+  ${gameBig(S, G, gp)}
   <div class="gstripw A"><button class="garr l" data-dir="-1" aria-label="Назад">‹</button><div class="gstrip" id="gstrip">${miniStrip(cards, G.key)}</div><button class="garr r" data-dir="1" aria-label="Вперёд">›</button></div>`;
   // блок 3: игроки
   const D = H.duel;
