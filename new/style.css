@@ -1128,4 +1128,6 @@ td.cal{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transfor
 /* менявшие команду: рядом с общим счётом — попадания за эту команду цветом команды */
 .tp{margin-left:8px;font-weight:800}
 .gx-l.r .rr .tp{margin-left:8px}
-.le-c .sts .tp{font:inherit;font-weight:800;display:inline}
+.le-c .sts .tp{font-size:15px;font-weight:800;margin-left:0}
+/* менявшие команду не бледные: обычная яркость, как у остальных */
+.gq .gx-l a.sw img{opacity:1}.gx-l a.sw span{color:inherit}
