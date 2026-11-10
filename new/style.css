@@ -726,50 +726,41 @@ a.lc-r:hover .n{color:var(--uv2)}
 .lv-b .lb-m{padding:2px 0 12px}
 /* титул «MVP команды» — цветом команды; «MVP игры» остаётся фиолетовым */
 .lastc .lgmv:not(.g) small,.gbm:not(.g) small,.le-c:not(.g) small{color:var(--c)}
-/* ---------- блок «Игры»: матч целиком (составы по краям, счёт в центре) ---------- */
-.gd .bgimg{opacity:.4;-webkit-mask:none;mask:none}
-.gd-b{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:26px;align-items:stretch}
-.gd-m{display:grid;justify-items:center;align-content:center;gap:8px;text-align:center;padding:0 6px;min-width:250px}
-.gd-m h3{margin:0}
-.gd-s{display:flex;align-items:center;gap:14px;margin:6px 0 2px}
-.gd-s .lgn{font-family:var(--disp);font-weight:800;font-size:clamp(84px,7.4vw,116px);line-height:.82;color:var(--c)}
-.gd-s .lgx{display:grid;gap:14px}.gd-s .lgx b{width:8px;height:8px;background:var(--mute);opacity:.7}
-.gd-m .lnk{margin-top:6px;color:var(--ink)}
-.gd-t{background:rgba(12,13,16,.6);border:1px solid var(--line2);border-top:2px solid var(--c);padding:6px 14px;display:flex;flex-direction:column}
-.gd-th,.gd-r{display:grid;grid-template-columns:minmax(0,1fr) 52px 60px 62px;gap:8px;align-items:center}
-.gd-th{padding:5px 0}.gd-th span{text-align:right}.gd-th span:first-child{text-align:left;color:var(--c)}
-.gd-r{flex:1;min-height:34px;padding:4px 0;border-top:1px solid var(--line2);font-size:14.5px}
-.gd-r .n{display:grid;line-height:1.15;min-width:0}.gd-r .n b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gd-r .num{text-align:right;color:var(--mute)}.gd-r .v{color:var(--ink);font-weight:700;font-size:16px}
-.gd-r.mvp{grid-template-columns:48px minmax(0,1fr) 52px 60px 62px;min-height:60px;flex:1.7}
-.gd-r.mvp img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--c)}
-.gd-r.mvp .n b{font-size:18px;font-weight:700}.gd-r.mvp small{font-size:9px;color:var(--c)}.gd-r.mvp .v{font-size:20px}
-.gd-r.mvp.g small{color:var(--uv2)}.gd-r.mvp.g img{box-shadow:0 0 0 2px var(--bg2),0 0 0 4px var(--uv),0 0 18px rgba(154,107,255,.45)}
-a.gd-r:hover .n b{color:var(--uv2)}
-/* «Журнал»: все игры строками */
-.gj{padding:8px 18px 10px}
-.gj-h,.gj-r{display:grid;grid-template-columns:92px 84px 70px 124px minmax(120px,1fr) 190px 84px;gap:16px;align-items:center}
-.gj-h{padding:8px 0}.gj-h span:last-child,.gj-r .h{text-align:right}
-.gj-sc{max-height:min(62vh,560px);overflow:auto}
-.gj-r{padding:9px 0;border-top:1px solid var(--line2);transition:background .2s}
-.gj-r:hover{background:rgba(154,107,255,.08)}
-.gj-r .dt,.gf-i .dt{font-family:var(--disp);font-size:14px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}.gj-r .dt b,.gf-i .dt b{font-size:24px}
-.gj-r .s,.gf-i .s{font-family:var(--disp);font-size:32px;font-weight:800;line-height:1;display:flex;gap:5px;align-items:baseline}.gj-r .s i,.gf-i .s i{font-style:normal;color:var(--mute);font-size:15px;font-weight:400}
-.gj-r .rs .rounds{flex-wrap:nowrap;gap:2px}.gj-r .rs .rounds i{flex:1;width:auto;height:14px;max-width:22px}.gj-r .rs .rounds i.sw{flex:none;width:2px}.gj-r .rs em{font-style:normal}
-.gj-r .mv{display:flex;align-items:center;gap:8px;min-width:0}.gj-r .mv img{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid var(--uv)}
-.gj-r .mv b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gj-r .mv em{font-style:normal;color:var(--uv2);font-weight:700;margin-left:auto}
-.gj-r .h{font-weight:700;font-size:16px}
-/* «Список»: игры слева, выбранная справа */
-.gf{display:grid;grid-template-columns:204px minmax(0,1fr);gap:14px;align-items:stretch}
-.gf-l{display:flex;flex-direction:column;gap:6px;overflow:auto;contain:size;scrollbar-width:thin}
-.gf-i{flex:none;display:grid;grid-template-columns:1fr auto;gap:0 10px;align-items:baseline;text-align:left;padding:8px 12px;border:1px solid var(--line);background:rgba(19,21,26,.82);color:var(--ink);cursor:pointer;transition:border-color .2s}
-.gf-i .mono{grid-column:1/-1;font-size:9px}.gf-i .s{font-size:24px}.gf-i .dt b{font-size:20px}
-.gf-i:hover{border-color:var(--uv2)}.gf-i.cur{border-color:var(--uv);box-shadow:inset 3px 0 0 var(--uv);background:var(--uvd)}
-.gf-d{display:grid}.gf-d .gbig{align-content:space-between}
-.gf .gd-b{gap:16px}.gf .gd-m{min-width:216px}.gf .gd-t{padding:6px 12px}
-.gf .gd-th,.gf .gd-r{grid-template-columns:minmax(0,1fr) 44px 56px}.gf .gd-r.mvp{grid-template-columns:44px minmax(0,1fr) 44px 56px}.gf .gd-r.mvp img{width:44px;height:44px}
-.gf .gd-th span:nth-child(3),.gf .gd-r .num:nth-last-child(2){display:none}.gf .gd-th span:first-child{white-space:nowrap}
-.gf-d .gbig{min-height:404px;grid-template-rows:1fr auto}
+/* ---------- блок «Игры»: варианты большой карточки ---------- */
+.gb-s{display:flex;align-items:center;gap:16px}
+.gb-s .lgn{font-family:var(--disp);font-weight:800;font-size:clamp(96px,8.6vw,136px);line-height:.8;color:var(--c)}
+.gb-s .lgx{display:grid;gap:16px}.gb-s .lgx b{width:9px;height:9px;background:var(--mute);opacity:.7}
+.gbig .gbm{--c:var(--line)}.gbig .rlog .lnk{margin-left:auto}
+/* «Афиша» */
+.gv-g{min-height:400px;grid-template-rows:1fr auto}
+.gv-g .bgimg{opacity:.9;-webkit-mask:none;mask:none;background-position:center 35%}
+.gv-g .bgimg::after{background:linear-gradient(0deg,rgba(12,13,16,.96) 0,rgba(12,13,16,.55) 45%,rgba(12,13,16,.15) 100%),linear-gradient(90deg,rgba(12,13,16,.7),transparent 55%)}
+.ga{display:grid;align-content:space-between;gap:24px}
+.ga-t h3{font-size:clamp(44px,5vw,72px)!important;margin:6px 0 8px!important}
+.ga-b{display:flex;align-items:end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.ga-mv{display:flex;gap:28px}.ga-mv .gbm img{width:72px;height:72px}.ga-mv .gbm b{font-size:22px}
+/* «Дуэль» */
+.gv-h .bgimg{opacity:.35;-webkit-mask:none;mask:none}
+.gh{display:grid;grid-template-columns:220px minmax(0,1fr) 220px;gap:26px;align-items:stretch}
+.gh .le-c{min-height:300px}.gh .le-c b{font-size:26px}.gh .le-c em{font-size:12px}.gh .le-c small{font-size:10px}.gh .le-c span{left:14px;right:14px;bottom:12px}
+.gh-m{display:grid;justify-items:center;align-content:space-between;gap:10px;text-align:center}
+.gh-m h3{margin:0}
+.gh-k{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 20px;width:100%;border-top:1px solid var(--line);padding-top:12px}
+.gh-k>div{display:grid;gap:3px;justify-items:center}.gh-k b{font-family:var(--disp);font-size:24px;font-weight:700;line-height:1}.gh-k span{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+/* «Ход игры» */
+.gi{display:grid;grid-template-columns:auto minmax(0,1fr);gap:34px;align-items:stretch}
+.gi-l{display:grid;gap:10px;align-content:space-between;justify-items:start}.gi-l h3{margin:0}
+.gi-l .gb-s .lgn{font-size:clamp(84px,7vw,112px)}
+.gi-mv{display:grid;gap:12px;margin-top:6px}
+.gi-r{display:grid;gap:6px;align-content:start;background:rgba(12,13,16,.6);border:1px solid var(--line2);padding:12px 14px 8px}
+.race{width:100%;height:auto;display:block;overflow:visible}
+.race path{fill:none;stroke-width:3;stroke-linejoin:round}.race .gr{stroke:var(--line2);stroke-width:1}.race .gt{fill:var(--mute);font:10px var(--mono);text-anchor:start;opacity:.7}
+.race .end{font:800 20px var(--disp);text-anchor:start}.race rect.none{fill:none;stroke:var(--mute)}.race .sw{stroke:var(--ink);opacity:.35;stroke-dasharray:3 4}
+@media (max-width:980px){
+  .gb-s .lgn,.gi-l .gb-s .lgn{font-size:76px}.gv-g{min-height:0}.ga-t h3{font-size:36px!important}.ga-mv{gap:14px}.ga-mv .gbm img{width:44px;height:44px}.ga-mv .gbm b{font-size:15px}.ga-mv .gbm em{display:none}
+  .gh{grid-template-columns:1fr 1fr;gap:10px}.gh-m{grid-column:1/-1;order:-1}.gh .le-c{min-height:170px}.gh .le-c b{font-size:19px}.gh-k b{font-size:18px}
+  .gi{grid-template-columns:1fr;gap:14px}.gi-l{justify-items:center;text-align:center}.gi-mv{grid-template-columns:1fr 1fr}.gi-mv .gbm em{display:none}
+}
 /* блок игроков: таблица на всю ширину */
 .players{grid-template-columns:1fr}.players .tbl .sc{contain:none;max-height:min(60vh,540px)}
 .shead .r+.allg{margin-left:0}
@@ -811,16 +802,27 @@ a.gd-r:hover .n b{color:var(--uv2)}
 .dls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .dls .duel.main{border-color:var(--uv);box-shadow:0 0 22px rgba(154,107,255,.2)}
 @media (max-width:980px){
-  .gd-b{grid-template-columns:1fr 1fr;gap:10px}.gd-m{grid-column:1/-1;order:-1;min-width:0}
-  .gd-t{padding:4px 8px}.gd-th,.gd-r{grid-template-columns:minmax(0,1fr) 34px;gap:6px}.gd-th span:nth-child(2),.gd-th span:nth-child(3),.gd-r .num:not(.v){display:none}
-  .gd-r.mvp{grid-template-columns:32px minmax(0,1fr) 34px;min-height:46px}.gd-r.mvp img{width:32px;height:32px}.gd-r.mvp .n b{font-size:15px}.gd-r.mvp .v{font-size:16px}.gd-r{font-size:13px}.gd-r .v{font-size:14px}.gd-r.mvp small{font-size:8px;letter-spacing:.04em}
-  .gj{padding:4px 12px}.gj-h{display:none}.gj-r{grid-template-columns:auto 1fr auto;gap:2px 12px}.gj-r .rs,.gj-r .h{display:none}.gj-r .s{grid-row:1/3;grid-column:3;font-size:30px}.gj-r .dt{grid-column:1}.gj-r>.mono{grid-column:2}.gj-r>.mono+.mono{grid-column:1}.gj-r .mv{grid-column:2}.gj-r .mv img{width:20px;height:20px}.gj-sc{max-height:none}
-  .gf{grid-template-columns:1fr}.gf-l{flex-direction:row;contain:none;padding-bottom:4px}.gf-i{flex:0 0 150px}
   .players .tbl .sc{max-height:none}
   .ach{grid-template-columns:1fr}.ach-l{position:static}.achp{display:flex;flex-wrap:nowrap;overflow-x:auto;max-height:none;gap:6px}.achp .hd{display:none}.ach-p{flex:none;border-color:var(--line)}
   .dls{grid-template-columns:1fr}.nmcs,.nmcs.four{grid-template-columns:1fr}.rccs{grid-template-columns:1fr 1fr}.rcc .v{font-size:30px}
 }
-.gj-r .s.long{font-size:22px}
-@media (max-width:980px){.gf .gd-th,.gf .gd-r{grid-template-columns:minmax(0,1fr) 34px}.gf .gd-r.mvp{grid-template-columns:32px minmax(0,1fr) 34px}.gf .gd-r.mvp img{width:32px;height:32px}.gf .gd-th span:nth-child(2),.gf .gd-r .num:not(.v){display:none}.gf-d .gbig{min-height:0}}
-@media (max-width:980px){.gd-th span:last-child{display:none}.gd-th{grid-template-columns:1fr}.gd-th span:first-child{white-space:nowrap}.gf .gd-r.mvp .n b{font-size:14px}
+@media (max-width:980px){
   .tabs a{padding:6px 5px;font-size:9.5px;letter-spacing:.06em}.tabs a::after{left:5px;right:5px}.logo{letter-spacing:.08em}}
+/* ---------- карточки ленты игр: варианты ---------- */
+.gmini .sb{display:none}.gmini .r b{font-weight:600}
+/* 1 — всё по центру, счёт главный */
+.gm-1 .gmini{justify-items:center;text-align:center;gap:3px;padding:12px 14px}
+.gm-1 .gmini .s{font-size:38px;justify-content:center;order:-1}.gm-1 .gmini .dt{order:-2}.gm-1 .gmini .pl{display:none}
+/* 2 — дата и площадка в шапке, счёт крупно, снизу полоска счёта */
+.gm-2 .gmini{grid-template-columns:1fr auto;align-items:baseline;gap:2px 8px;padding:10px 14px 0;flex-basis:190px}
+.gm-2 .gmini .pl{text-align:right}.gm-2 .gmini .s{grid-column:1/-1;justify-content:center;font-size:44px;margin:4px 0 2px}.gm-2 .gmini .r{grid-column:1/-1;text-align:center}
+.gm-2 .gmini .sb{grid-column:1/-1;display:flex;gap:2px;height:4px;margin:8px -14px 0}
+/* 3 — площадка фоном */
+.gm-3 .gmini{position:relative;isolation:isolate;overflow:hidden;flex-basis:200px;min-height:118px;justify-items:center;align-content:end;text-align:center;gap:1px;padding:10px 12px}
+.gm-3 .gmini::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(12,13,16,.95) 10%,rgba(12,13,16,.45)),var(--img) center/cover}
+.gm-3 .gmini .dt{position:absolute;left:10px;top:6px}.gm-3 .gmini .pl{position:absolute;right:10px;top:12px}.gm-3 .gmini .s{font-size:40px;justify-content:center}
+/* 4 — дата слева столбиком, счёт справа */
+.gm-4 .gmini{grid-template-columns:auto 1fr;grid-template-rows:auto auto auto;gap:0 14px;align-items:center;flex-basis:210px;padding:10px 14px}
+.gm-4 .gmini .dt{grid-row:1/4;display:grid;justify-items:center;line-height:1;padding-right:14px;border-right:1px solid var(--line);align-self:stretch;align-content:center}.gm-4 .gmini .dt b{font-size:34px}
+.gm-4 .gmini{flex-basis:236px}.gmini .r{white-space:nowrap}.gm-4 .gmini .s{font-size:34px}.gm-4 .gmini .pl{order:-1}
+@media (max-width:760px){.gm-1 .gmini .s{font-size:30px}.gm-2 .gmini .s{font-size:34px}.gm-2 .gmini,.gm-3 .gmini{flex-basis:180px}.gm-4 .gmini{flex-basis:216px}}
