@@ -98,7 +98,7 @@ function viewHome(S) {
       </div><div class="lgr A">
                 <div class="gkv"><div><b>${ru(gS.hits)}</b><span>попаданий</span></div><div><b>${pct(gS.acc)}</b><span>точность</span></div><div><b>${ru(gS.deaths)}</b><span>смертей</span></div><div><b>${ru(gS.shots)}</b><span>выстрелов</span></div></div>
       </div></div>
-      <div class="rlog fill A"><span class="mono">раунды</span>${roundsStrip(L)}<a class="lnk mono" href="#${L.key}">разбор игры →</a></div>`, "div")}
+      <div class="rlog fill A"><span class="mono">раунды</span>${roundsStrip(L)}<a class="lnk mono" href="#${L.key}">разбор игры →</a></div>`, "div", `data-go="#${L.key}"`)}
     ${panel("topl top3 A", `<div class="hd"><span class="mono">Топ-3 по попаданиям за игру · от 3 игр</span><a class="lnk mono" href="#s3" style="color:var(--ink)">все игроки →</a></div><div class="tcards">${H.top.slice(0, 3).map((p, k) => `<a class="tcard A m${k + 1}" style="--k:${k}" href="#${p.r.key}"><img src="${portrait(p.name)}" alt=""><span class="no">${k + 1}</span><span class="info"><b>${esc(p.name)}</b><small>${plural(p.games, ["игра", "игры", "игр"])}</small><span class="v num">${one(p.perGame)}<em>попаданий за игру</em></span></span></a>`).join("")}</div>`)}
   </div>`;
   // блок 2: игры — большая последняя игра + лента всех игр
@@ -109,7 +109,7 @@ function viewHome(S) {
     <div class="gbh"><div><div class="mono"><span class="blink"></span>последняя игра · ${esc(G.loc)}</div><h3>${dG.day} ${dG.monFull}</h3></div><div class="mono">${G.players} игроков · ${G.rounds} раунда · ${ru(G.hits)} попаданий</div></div>
     <div class="gbb"><div class="gbs">${gTeam(G.teams[0], "")}${scoreHtml(G)}${gTeam(G.teams[1], "r")}</div>
       <div class="gtop"><div class="gth mono"><span>#</span><span>больше всех попаданий</span><span>попал</span><span>получил</span><span>п / п</span><span>точность</span></div>${gp.map((p, k) => `<a class="gtr" href="#${(S.rows.find(r => r.name === p.name) || {}).key || G.key}"><span class="no">${k + 1}</span><span class="n">${p.teams.map(t => `<i style="--c:${tc(t)}"></i>`).join("")}${esc(p.name)}</span><span class="num">${p.dealt}</span><span class="num">${p.recv}</span><span class="num">${r2(p.ratio)}</span><span class="num v">${pct(p.acc)}</span></a>`).join("")}</div></div>
-    <div class="rlog fill gbr"><span class="mono">раунды</span>${roundsStrip(G)}<a class="lnk mono" href="#${G.key}">разбор игры →</a></div>`)}
+    <div class="rlog fill gbr"><span class="mono">раунды</span>${roundsStrip(G)}<a class="lnk mono" href="#${G.key}">разбор игры →</a></div>`, "div", `data-go="#${G.key}"`)}
   <div class="gstripw A"><button class="garr l" data-dir="-1" aria-label="Назад">‹</button><div class="gstrip" id="gstrip">${miniStrip(cards, G.key)}</div><button class="garr r" data-dir="1" aria-label="Вперёд">›</button></div>`;
   // блок 3: игроки
   const D = H.duel;
@@ -462,6 +462,8 @@ app.addEventListener("click", e => {
   const rows = [...box.querySelectorAll(".drow:not(.hd)")].sort((x, y) => (desc ? -1 : 1) * (x.dataset[k] - y.dataset[k]) || (y.dataset.tot - x.dataset.tot));
   box.append(...rows);
 });
+// карточка последней игры целиком ведёт на разбор игры
+document.addEventListener("click", e => { if (e.target.closest("a, button")) return; const c = e.target.closest("[data-go]"); if (c && !getSelection().toString()) location.hash = c.dataset.go; });
 addEventListener("hashchange", render);
 
 // ---------- загрузка ----------

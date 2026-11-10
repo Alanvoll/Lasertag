@@ -556,3 +556,6 @@ footer{color:var(--mute);font-size:12px;display:flex;justify-content:space-betwe
   .frow{grid-template-columns:84px 1fr 84px}
   .tbl .sc{max-height:none}.players .tbl .sc{contain:none}
 }
+
+[data-go]{cursor:pointer}
+[data-go]:hover{border-color:rgba(201,179,255,.35)}
