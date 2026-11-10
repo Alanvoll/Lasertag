@@ -846,3 +846,5 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .st .ic{width:.95em;height:.95em}
 .segs{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
 @media (min-width:981px){.guncard .art{height:150px}}
+#ptable th{vertical-align:bottom}#ptable th button{display:inline-block;line-height:1.4;text-align:right}
+@media (min-width:981px){#ptable{table-layout:fixed;width:100%}#ptable th:first-child{width:15%}#ptable th:nth-child(2){width:6%}}
