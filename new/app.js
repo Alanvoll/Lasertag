@@ -177,7 +177,7 @@ function viewHome(S) {
   ${gamesBlock(S, cards)}`;
   // блок 3: игроки
   const b3 = `<div class="shead A"><h2>Игроки · ${S.rows.length}</h2><span class="r mono">${ic("star")} 100 = среднее число попаданий в игре</span><a class="allg" href="#itogi">итоги сезона <i>→</i></a></div>
-  <div class="players">${panel("tbl A", `<div class="hd"><span class="mono">все игроки · попал, получил и смерти в среднем за раунд</span><div class="segs"><div class="seg" data-pmin><button data-min="1">все</button><button data-min="3" aria-pressed="true">от 3 игр</button></div></div></div><div class="sc"><table id="ptable" class="sticky1"></table></div>`)}</div>`;
+  <div class="players">${panel("tbl A", `<div class="hd"><span class="mono">среднее за раунд</span><div class="segs"><div class="seg" data-pmin><button data-min="1">все</button><button data-min="3" aria-pressed="true">от 3 игр</button></div></div></div><div class="sc"><table id="ptable" class="sticky1"></table></div>`)}</div>`;
   // блок 4: пушки
   const guns = [...S.guns].sort((a, b) => b.dealt / b.games - a.dealt / a.games);
   const topGun = (f, filt = () => true) => { const l = S.guns.filter(g => filt(g) && isFinite(f(g))); return l.length ? l.reduce((a, b) => f(b) > f(a) ? b : a) : null; };
