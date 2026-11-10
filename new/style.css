@@ -812,12 +812,11 @@ a.lc-r:hover .n{color:var(--uv2)}
 .gmini .sb{display:none}.gmini .r b{font-weight:600}.gmini .r{white-space:nowrap}
 .gmini{position:relative;isolation:isolate;overflow:hidden}
 /* 5 «Постер»: сверху полоса с артом, под ней дата и счёт */
-.gm-5 .gmini{flex-basis:204px;padding:0;grid-template-columns:1fr auto;grid-template-rows:auto auto auto;gap:0;align-items:stretch}
+.gm-5 .gmini{flex-basis:214px;padding:0;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;gap:0;align-items:stretch}
 .gm-5 .gmini::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(rgba(12,13,16,.3),rgba(12,13,16,.3)),var(--img) center 40%/cover}
-.gm-5 .gmini .s{grid-column:1/-1;grid-row:1;justify-content:center;padding-top:12px;font-size:38px;-webkit-text-stroke:5px #0c0d10;paint-order:stroke fill;text-shadow:0 2px 10px rgba(0,0,0,.7)}.gm-5 .gmini .s i{-webkit-text-stroke:0;color:var(--ink);opacity:.75}
-.gm-5 .gmini .r{grid-column:1/-1;grid-row:2;justify-self:center;margin:4px 0 12px;padding:2px 8px;color:var(--ink);background:rgba(12,13,16,.86);border:1px solid var(--line)}.gm-5 .gmini .r b{color:inherit!important}
-.gm-5 .gmini .dt,.gm-5 .gmini .pl{grid-row:3;display:flex;align-items:center;margin:0;background:#0c0d10;border-top:1px solid var(--line)}
-.gm-5 .gmini .dt{grid-column:1;padding:6px 0 6px 12px}.gm-5 .gmini .dt b{font-size:15px}.gm-5 .gmini .pl{grid-column:2;padding:0 12px 0 8px}
+.gm-5 .gmini .s{grid-column:1/-1;grid-row:1;justify-content:center;align-items:center;padding:18px 0;font-size:42px;-webkit-text-stroke:2.5px #0c0d10;paint-order:stroke fill;text-shadow:0 2px 10px rgba(0,0,0,.75)}.gm-5 .gmini .s i{-webkit-text-stroke:0;color:var(--ink);opacity:.75}
+.gm-5 .gmini .dt,.gm-5 .gmini .pl,.gm-5 .gmini .r{grid-row:2;display:flex;align-items:center;margin:0;background:#0c0d10;border-top:1px solid var(--line)}
+.gm-5 .gmini .dt{grid-column:1;padding:7px 0 7px 12px}.gm-5 .gmini .dt b{font-size:15px}.gm-5 .gmini .pl{grid-column:2;padding:0 8px 0 10px}.gm-5 .gmini .r{grid-column:3;gap:.5em;padding:0 12px 0 0}
 @media (max-width:760px){.gm-5 .gmini{flex-basis:176px}}
 /* ---------- иконки показателей ---------- */
 .ic{width:1.15em;height:1.15em;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:square;stroke-linejoin:miter;vertical-align:-.2em}
