@@ -933,13 +933,21 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .dmx th.rt{color:var(--uv2);white-space:nowrap}.dmx th.rt svg{vertical-align:-2px}
 @media (max-width:760px){.du-f{gap:10px}.du-r input{width:140px}.dmx td{padding:6px 6px;font-size:13px}.dmx td em{font-size:13px}.dmx td.rt{font-size:19px}}
 
-/* попадания команд под счётом */
-.th{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.04em;line-height:1}
-.th .ic{width:13px;height:13px;color:var(--mute)}.th b{font-weight:600}.th i{font-style:normal;color:var(--mute)}
-.gm-5 .gmini .s{flex-wrap:wrap;align-content:center;row-gap:6px;padding:12px 0}
-.gm-5 .gmini .s .th{flex-basis:100%;justify-content:center;font-size:13px;text-shadow:0 1px 6px rgba(0,0,0,.9)}.gm-5 .gmini .s .th i{font-size:13px;opacity:1;color:var(--ink)}.gm-5 .gmini .s .th .ic{color:var(--ink)}
+/* попадания команд под счётом: и счёт, и попадания выровнены по двоеточию */
+.th{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.04em;line-height:1}
+.th span{justify-self:end;display:inline-flex;align-items:center;gap:5px}.th>b{justify-self:start}.th b{font-weight:600}
+.th i{font-style:normal;color:var(--mute);padding:0 6px;font-size:inherit!important;font-weight:400}.th .ic{width:13px;height:13px;color:var(--mute)}
 .gm-5 .gmini::before{background:linear-gradient(rgba(12,13,16,.3),rgba(12,13,16,.3) 45%,rgba(12,13,16,.78)),var(--img) center 40%/cover}
-.gm-5 .gmini .s .th{flex-basis:auto;margin:0 20%;padding:4px 10px 3px;background:rgba(12,13,16,.78);text-shadow:none}
-.gm-5 .gmini .s{column-gap:4px}.gm-5 .gmini .s::after{content:"";flex-basis:100%;order:1;height:0}.gm-5 .gmini .s .th{order:2}
-.gb-s,.le-s{flex-wrap:wrap;justify-content:center}.gb-s>.th,.le-s>.th{flex-basis:100%;justify-content:center;font-size:17px;gap:8px;margin-top:2px}.gb-s>.th .ic,.le-s>.th .ic{width:16px;height:16px}
-.gcard .sc .th{align-self:center;margin-left:auto;font-size:13px}.gcard .sc .th i{font-size:13px}
+.gm-5 .gmini .s{display:grid;grid-template-columns:1fr auto 1fr;column-gap:4px;row-gap:6px;align-content:center;align-items:center;padding:12px 0}
+.gm-5 .gmini .s>span:first-child{justify-self:end}.gm-5 .gmini .s>span:nth-child(3){justify-self:start}
+.gm-5 .gmini .s .th{grid-column:1/-1;font-size:13px;text-shadow:none}
+.gm-5 .gmini .s .th span,.gm-5 .gmini .s .th i,.gm-5 .gmini .s .th>b{background:rgba(12,13,16,.8);padding-top:4px;padding-bottom:3px;align-self:stretch;display:inline-flex;align-items:center}
+.gm-5 .gmini .s .th span{padding-left:10px}.gm-5 .gmini .s .th>b{padding-right:10px}.gm-5 .gmini .s .th i{opacity:1;color:var(--ink)}.gm-5 .gmini .s .th .ic{color:var(--ink)}
+.gb-s,.le-s{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+.gb-s>.lgn:first-child,.le-s>.lgn:first-child{justify-self:end}.gb-s>.lgn:nth-child(3),.le-s>.lgn:nth-child(3){justify-self:start}
+.gb-s>.th,.le-s>.th{grid-column:1/-1;font-size:17px;margin-top:2px}.gb-s>.th span,.le-s>.th span{gap:8px}.gb-s>.th .ic,.le-s>.th .ic{width:16px;height:16px}
+.gcard .sc .th{align-self:center;margin-left:auto;font-size:13px;grid-template-columns:auto auto auto}
+.le-s{width:max-content;max-width:none;justify-self:center;margin-inline:auto}
+@media (max-width:760px){.gcard .sc{flex-wrap:wrap}.gcard .sc small.th{display:grid;flex-basis:100%;margin:2px 0 0;grid-template-columns:auto auto 1fr;font-size:12px}}
+.gcard .sc small.th{color:var(--ink);letter-spacing:.04em;text-transform:none}
+.lv-d .le-s .lgn{font-size:clamp(64px,5.2vw,80px)}.le-s{column-gap:12px}

@@ -67,7 +67,7 @@ function gameCard(m) {
 }
 const roundsStrip = (g, big = false) => `<span class="rounds${big ? " big" : ""}">${g.winners.map((w, i) => (g.swaps.includes(i) ? `<i class="sw"></i>` : "") + (w == null ? `<i class="none">${big ? i + 1 : ""}</i>` : `<i style="--c:${tc(w)}" title="Раунд ${i + 1}">${big ? i + 1 : ""}</i>`)).join("")}</span>`;
 // попадания команд рядом со счётом: счёт по раундам часто перекошен сильнее, чем сама перестрелка
-const teamHits = g => g.kind === "попадания" ? "" : `<small class="th num">${ic("hit")}<b style="color:${tc(g.teams[0].t)}">${ru(g.teams[0].hits)}</b><i>:</i><b style="color:${tc(g.teams[1].t)}">${ru(g.teams[1].hits)}</b></small>`;
+const teamHits = g => g.kind === "попадания" ? "" : `<small class="th num"><span>${ic("hit")}<b style="color:${tc(g.teams[0].t)}">${ru(g.teams[0].hits)}</b></span><i>:</i><b style="color:${tc(g.teams[1].t)}">${ru(g.teams[1].hits)}</b></small>`;
 const scoreHtml = (g, cls = "sc", hits) => `<div class="${cls} num"><span style="color:${tc(g.teams[0].t)}">${ru(g.teams[0].score)}</span><i>:</i><span style="color:${tc(g.teams[1].t)}">${ru(g.teams[1].score)}</span>${g.kind === "попадания" ? `<small>попадания</small>` : ""}${cls === "sc" && hits ? teamHits(g) : ""}</div>`;
 
 
