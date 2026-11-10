@@ -938,3 +938,8 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .th .ic{width:13px;height:13px;color:var(--mute)}.th b{font-weight:600}.th i{font-style:normal;color:var(--mute)}
 .gm-5 .gmini .s{flex-wrap:wrap;align-content:center;row-gap:6px;padding:12px 0}
 .gm-5 .gmini .s .th{flex-basis:100%;justify-content:center;font-size:13px;text-shadow:0 1px 6px rgba(0,0,0,.9)}.gm-5 .gmini .s .th i{font-size:13px;opacity:1;color:var(--ink)}.gm-5 .gmini .s .th .ic{color:var(--ink)}
+.gm-5 .gmini::before{background:linear-gradient(rgba(12,13,16,.3),rgba(12,13,16,.3) 45%,rgba(12,13,16,.78)),var(--img) center 40%/cover}
+.gm-5 .gmini .s .th{flex-basis:auto;margin:0 20%;padding:4px 10px 3px;background:rgba(12,13,16,.78);text-shadow:none}
+.gm-5 .gmini .s{column-gap:4px}.gm-5 .gmini .s::after{content:"";flex-basis:100%;order:1;height:0}.gm-5 .gmini .s .th{order:2}
+.gb-s,.le-s{flex-wrap:wrap;justify-content:center}.gb-s>.th,.le-s>.th{flex-basis:100%;justify-content:center;font-size:17px;gap:8px;margin-top:2px}.gb-s>.th .ic,.le-s>.th .ic{width:16px;height:16px}
+.gcard .sc .th{align-self:center;margin-left:auto;font-size:13px}.gcard .sc .th i{font-size:13px}

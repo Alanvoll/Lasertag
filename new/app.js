@@ -68,7 +68,7 @@ function gameCard(m) {
 const roundsStrip = (g, big = false) => `<span class="rounds${big ? " big" : ""}">${g.winners.map((w, i) => (g.swaps.includes(i) ? `<i class="sw"></i>` : "") + (w == null ? `<i class="none">${big ? i + 1 : ""}</i>` : `<i style="--c:${tc(w)}" title="Раунд ${i + 1}">${big ? i + 1 : ""}</i>`)).join("")}</span>`;
 // попадания команд рядом со счётом: счёт по раундам часто перекошен сильнее, чем сама перестрелка
 const teamHits = g => g.kind === "попадания" ? "" : `<small class="th num">${ic("hit")}<b style="color:${tc(g.teams[0].t)}">${ru(g.teams[0].hits)}</b><i>:</i><b style="color:${tc(g.teams[1].t)}">${ru(g.teams[1].hits)}</b></small>`;
-const scoreHtml = (g, cls = "sc") => `<div class="${cls} num"><span style="color:${tc(g.teams[0].t)}">${ru(g.teams[0].score)}</span><i>:</i><span style="color:${tc(g.teams[1].t)}">${ru(g.teams[1].score)}</span>${g.kind === "попадания" ? `<small>попадания</small>` : ""}</div>`;
+const scoreHtml = (g, cls = "sc", hits) => `<div class="${cls} num"><span style="color:${tc(g.teams[0].t)}">${ru(g.teams[0].score)}</span><i>:</i><span style="color:${tc(g.teams[1].t)}">${ru(g.teams[1].score)}</span>${g.kind === "попадания" ? `<small>попадания</small>` : ""}${cls === "sc" && hits ? teamHits(g) : ""}</div>`;
 
 
 const MONTHS_NOM = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
@@ -77,7 +77,7 @@ function gameTile(g, k = 0) {
   const d = dDay(g.date);
   const duo = mvpDuo(g), pl = n => plural(n, ["игрок", "игрока", "игроков"]);
   const tt = (x, cls) => { const d = duo.find(z => z.t === x.t); return `<div class="${cls}"><div class="t${x.t === g.win ? " w" : ""}" style="--c:${tc(x.t)}">${pl(x.n)}</div><div class="mv"><img src="${portrait(d.name)}" alt=""><span><b>${esc(d.name)}</b><small>${mvpTitle(d)}</small><small class="sts">${st("star", ru(d.rating))}${st("hit", d.dealt)}</small></span></div></div>`; };
-  return panel("gcard A", `<div class="d"><b>${d.day} ${d.monFull}</b><span class="mono">${esc(g.loc)}</span></div>${scoreHtml(g)}<div class="tt">${tt(g.teams[0], "")}${tt(g.teams[1], "r")}</div><div class="ft">${roundsStrip(g)}${teamHits(g) || `<span class="mono sts">${st("hit", ru(g.hits))}</span>`}</div>`, "a", `href="#${g.key}" style="--k:${Math.min(k, 8)}" data-loc="${esc(g.loc)}"`);
+  return panel("gcard A", `<div class="d"><b>${d.day} ${d.monFull}</b><span class="mono">${esc(g.loc)}</span></div>${scoreHtml(g, "sc", true)}<div class="tt">${tt(g.teams[0], "")}${tt(g.teams[1], "r")}</div><div class="ft">${roundsStrip(g)}${teamHits(g) ? "" : `<span class="mono sts">${st("hit", ru(g.hits))}</span>`}</div>`, "a", `href="#${g.key}" style="--k:${Math.min(k, 8)}" data-loc="${esc(g.loc)}"`);
 }
 // карточки ленты игр: «Постер» — арт площадки сверху, под ним дата и счёт
 const GM = "5";
@@ -104,7 +104,7 @@ function gameBig(S, G) {
   const m = G.m, dG = dDay(G.date), key = n => (S.rows.find(r => r.name === n) || {}).key || G.key, duo = mvpDuo(G);
   const tag = `<div class="mono"><span class="blink"></span>${G.last === false ? "" : "последняя игра · "}${esc(G.loc)}</div>`;
   const meta = `<div class="mono gb-meta">${G.kind === "попадания" ? "счёт по попаданиям · " : ""}${vsHtml(G)}${G.rounds ? ` · <b>${G.rounds}</b> ${pw(G.rounds, ["раунд", "раунда", "раундов"])}` : ""} · <b>${ru(G.hits)}</b> ${pw(G.hits, ["попадание", "попадания", "попаданий"])}</div>`;
-  const score = `<div class="gb-s">${G.teams.map(t => `<div class="lgn num" style="--c:${tc(t.t)}">${ru(t.score)}</div>`).join(`<i class="lgx"><b></b><b></b></i>`)}</div>`;
+  const score = `<div class="gb-s">${G.teams.map(t => `<div class="lgn num" style="--c:${tc(t.t)}">${ru(t.score)}</div>`).join(`<i class="lgx"><b></b><b></b></i>`)}${teamHits(G)}</div>`;
   const chip = d => `<a class="gbm${d.game ? " g" : ""}" href="#${key(d.name)}" style="--c:${tc(d.t)}"><img src="${portrait(d.name)}" alt=""><span><small>${mvpTitle(d)}</small><b>${esc(d.name)}</b><em class="sts">${st("star", ru(d.rating))}${st("hit", d.dealt)}</em></span></a>`;
   const card = d => `<a class="le-c${d.game ? " g" : ""}" href="#${key(d.name)}" style="--c:${tc(d.t)}"><img src="${portrait(d.name)}" alt=""><span><small>${mvpTitle(d)}</small><b>${esc(d.name)}</b><em class="sts">${st("star", ru(d.rating))}${st("hit", d.dealt)}</em></span></a>`;
   const rounds = G.winners.length ? `<div class="rlog fill gbr"><span class="mono">раунды</span>${roundsStrip(G)}<a class="lnk mono" href="#${G.key}">разбор игры →</a></div>` : `<div class="rlog"><a class="lnk mono" href="#${G.key}">разбор игры →</a></div>`;
@@ -172,7 +172,7 @@ function lastGame(S, L, gS) {
   const tm = (d, cls = "") => `<a class="lgmv ${cls}${d.game ? " g" : ""}" href="#${key(d.name)}" style="--c:${tc(d.t)}"><img src="${portrait(d.name)}" alt=""><span><small>${mvpTitle(d)}</small><b>${esc(d.name)}</b><em class="sts">${st("star", ru(d.rating))}${st("hit", d.dealt)}</em></span></a>`;
   // «Дуэль»: два портрета лучших игроков по краям, между ними счёт и цифры игры
   const card = d => `<a class="le-c${d.game ? " g" : ""}" href="#${key(d.name)}" style="--c:${tc(d.t)}"><img src="${portrait(d.name)}" alt=""><span><small>${mvpTitle(d)}</small><b>${esc(d.name)}</b><em class="sts">${st("star", ru(d.rating))}${st("hit", d.dealt)}</em></span></a>`;
-  const body = `<div class="le">${card(duo[0])}<div class="le-m"><div class="le-s">${nums.join(colon)}</div><div class="le-k">${kv}</div></div>${card(duo[1])}</div>`;
+  const body = `<div class="le">${card(duo[0])}<div class="le-m"><div class="le-s">${nums.join(colon)}${teamHits(L)}</div><div class="le-k">${kv}</div></div>${card(duo[1])}</div>`;
   return panel(`lastc lg2 lv-d A`, hd + body + rounds, "div", `data-go="#${L.key}"`);
 }
 // ---------- главная ----------
