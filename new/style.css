@@ -1062,3 +1062,10 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .gx-l.eq a.hb{grid-template-rows:1fr 1fr;row-gap:0}.gx-l.eq a.hb>span{align-self:end;padding-bottom:5px}.gx-l.eq a.hb>.rr{padding-bottom:5px}
 @media (min-width:761px){.gx-l.eq.r a>img{grid-column:3;order:0}.gx-l.eq.r a>span:nth-child(2){grid-column:2;order:0}.gx-l.eq.r a>.rr{grid-column:1}.gx-l.eq.r a>.mts{grid-column:1/3}}
 @media (max-width:760px){.gq .gx-l.eq a.hb{height:56px}.gq .gx-l.eq a.hb img{height:54px}}
+/* «все равны», раскладка 2: под именем число попаданий, значки столбиком у внутреннего края плашки */
+.gx-l.eq a.hb{grid-template-rows:none}.gx-l.eq a.hb>span{align-self:center;padding-bottom:0}
+.gx-l.eq a>span:nth-child(2){gap:2px}.gx-l.eq .hn{font-style:normal;font-weight:600;font-size:.8em;color:var(--ink);opacity:.9;line-height:1}.gx-l.eq .hn .st{font-size:inherit}
+.gx-l.eq a>.mts{grid-column:3;grid-row:1;align-self:center;margin:0;flex-direction:column;align-items:flex-end;flex-wrap:nowrap;gap:4px}
+@media (min-width:761px){.gx-l.eq.r a>.mts{grid-column:1;align-items:flex-start}}
+@media (max-width:760px){.gq .gx-l.eq a,.gq .gx-l.eq a.hb{height:50px}.gq .gx-l.eq a img,.gq .gx-l.eq a.hb img{height:48px}.gx-l.eq a>.mts{gap:3px}}
+@media (min-width:761px) and (max-width:1250px){.gx-l.eq .mt{font-size:0;letter-spacing:0;gap:0;padding:4px}.gx-l.eq .mt .ic{width:12px;height:12px}.gx-l.eq a>.mts{flex-direction:row}}
