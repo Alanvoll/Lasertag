@@ -1016,3 +1016,9 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .gq .gz-c{width:100%;border-top:1px solid var(--line);padding-top:14px}.gq .gr{margin:34px 76px 34px}
 @media (max-width:760px){.gq{grid-template-columns:minmax(0,1fr);gap:12px}.gq-m{order:-1;min-width:0}.gq-s{grid-template-rows:150px auto}.gq-s.r .le-c span{text-align:left}.gq-s.r .le-c em{justify-content:flex-start}.gq-s.r .le-c .rb{left:0;right:auto}.gq .gr{margin:24px 80px 28px}}
 .gq .gr{margin-top:26px}
+/* высота карточки рассчитана на 8 на 8: MVP и семь строк состава помещаются без сжатия, при меньшем составе вырастает плашка MVP */
+.gq .gx-l a{height:44px;font-size:17px}.gq .gx-l a img{width:48px;height:42px}.gq .gx-l.d a{height:36px;font-size:15px}.gq .gx-l.d a img{height:34px}
+@media (min-width:761px){.gq{min-height:504px}.gq-s{grid-template-rows:minmax(132px,1fr) auto}}
+@media (max-width:760px){.gq .gx-l a{height:40px;font-size:15px}.gq .gx-l a img{width:40px;height:38px}}
+.gq .gx-l a small{display:block;margin:2px 0 0;line-height:1}.gq .gx-l a>span:nth-child(2){line-height:1.1}
+@media (min-width:761px){.gq .gr{width:240px;height:240px;margin:30px 76px 30px}.gq .gr-l em{font-size:17px}.gq .gr-l small{font-size:9px}.gq .gz-c{gap:20px}.gq .gz-row b{font-size:24px}}
