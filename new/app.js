@@ -72,12 +72,13 @@ function miniStrip(cards, cur) {
   return html;
 }
 
+const vsHtml = g => `<b style="color:${tc(g.teams[0].t)}">${g.teams[0].n}</b> vs <b style="color:${tc(g.teams[1].t)}">${g.teams[1].n}</b>`;
 // ---------- большая карточка последней игры (варианты компоновки A / B / C) ----------
 let GV = (() => { try { return localStorage.getItem("lt-gv") || "a"; } catch (e) { return "a"; } })();
 function gameBig(S, G, gp) {
   const dG = dDay(G.date), key = n => (S.rows.find(r => r.name === n) || {}).key || G.key;
   const pw = (n, w) => plural(n, w).split(" ")[1];
-  const meta = `<b>${G.players}</b> ${pw(G.players, ["игрок", "игрока", "игроков"])}${G.rounds ? ` · <b>${G.rounds}</b> ${pw(G.rounds, ["раунд", "раунда", "раундов"])}` : ""} · <b>${ru(G.hits)}</b> ${pw(G.hits, ["попадание", "попадания", "попаданий"])}`;
+  const meta = `${vsHtml(G)}${G.rounds ? ` · <b>${G.rounds}</b> ${pw(G.rounds, ["раунд", "раунда", "раундов"])}` : ""} · <b>${ru(G.hits)}</b> ${pw(G.hits, ["попадание", "попадания", "попаданий"])}`;
   const mvpA = (t, cls = "") => `<a class="gbm ${cls}" href="#${key(t.mvp)}"><img src="${portrait(t.mvp)}" alt=""><span><small>MVP команды</small><b>${esc(t.mvp)}</b><em>рейтинг ${ru(G.m.mvpT(G.m.P.find(p => p.name === t.mvp), t.t))} · ${t.mvpDealt} поп.</em></span></a>`;
   const rounds = `<div class="rlog fill gbr"><span class="mono">раунды</span>${roundsStrip(G)}<a class="lnk mono" href="#${G.key}">разбор игры →</a></div>`;
   const top5 = `<div class="gtop"><div class="gth mono"><span>#</span><span>лучшие в игре</span><span>попал</span><span>получил</span><span>п / п</span><span>рейтинг</span></div>${gp.map((p, k) => `<a class="gtr" href="#${key(p.name)}"><span class="no">${k + 1}</span><span class="n">${p.teams.map(t => `<i style="--c:${tc(t)}"></i>`).join("")}${esc(p.name)}</span><span class="num">${p.dealt}</span><span class="num">${p.recv}</span><span class="num">${r2(p.ratio)}</span><span class="num v">${ru(p.mvp)}</span></a>`).join("")}</div>`;
@@ -85,17 +86,17 @@ function gameBig(S, G, gp) {
   const [t0, t1] = G.teams;
   let body;
   if (GV === "b") {
-    const side = (t, r) => `<div class="vb-t${r ? " r" : ""}" style="--c:${tc(t.t)}"><div class="mono vb-n">${t.t === G.win ? "▲ " : ""}${t.n} чел. · ${ru(t.hits)} поп.</div>${mvpA(t)}</div>`;
+    const side = (t, r) => `<div class="vb-t${r ? " r" : ""}" style="--c:${tc(t.t)}"><div class="mono vb-n">${ru(t.hits)} попаданий</div>${mvpA(t)}</div>`;
     body = `<div class="vb-h"><div><div class="mono"><span class="blink"></span>последняя игра · ${esc(G.loc)}</div><h3>${dG.day} ${dG.monFull}</h3></div><div class="mono">${meta}</div></div>
       <div class="vb-m">${side(t0)}${scoreHtml(G)}${side(t1, 1)}</div>
       <div class="vb-top">${gp.map((p, k) => `<a class="vb-c" href="#${key(p.name)}"><span class="no mono">${k + 1}</span><span class="n">${p.teams.map(t => `<i style="--c:${tc(t)}"></i>`).join("")}${esc(p.name)}</span><span class="v num">${ru(p.mvp)}</span><span class="mono">${p.dealt} поп. · п/п ${r2(p.ratio)}</span></a>`).join("")}</div>${rounds}`;
   } else if (GV === "c") {
     const roster = t => { const mem = G.m.P.filter(p => p.teams.includes(t.t) && G.m.shareT(p, t.t) > .5).sort((a, b) => G.m.mvpT(b, t.t) - G.m.mvpT(a, t.t));
-      return `<div class="vc-t" style="--c:${tc(t.t)}"><div class="vc-th mono"><span>${t.t === G.win ? "▲ " : ""}${t.n} чел.</span><span>попал</span><span>получил</span><span>рейтинг</span></div>${mem.map((p, k) => `<a class="vc-r${k ? "" : " mvp"}" href="#${key(p.name)}"><span class="n">${esc(p.name)}${p === G.m.mvp ? '<em class="mono">MVP игры</em>' : k ? "" : '<em class="mono">MVP команды</em>'}</span><span class="num">${p.dealt}</span><span class="num">${p.recv}</span><span class="num v">${ru(G.m.mvpT(p, t.t))}</span></a>`).join("")}</div>`; };
+      return `<div class="vc-t" style="--c:${tc(t.t)}"><div class="vc-th mono"><span>${ru(t.hits)} попаданий</span><span>попал</span><span>получил</span><span>рейтинг</span></div>${mem.map((p, k) => `<a class="vc-r${k ? "" : " mvp"}" href="#${key(p.name)}"><span class="n">${esc(p.name)}${p === G.m.mvp ? '<em class="mono">MVP игры</em>' : k ? "" : '<em class="mono">MVP команды</em>'}</span><span class="num">${p.dealt}</span><span class="num">${p.recv}</span><span class="num v">${ru(G.m.mvpT(p, t.t))}</span></a>`).join("")}</div>`; };
     body = `<div class="vc-h"><div><div class="mono"><span class="blink"></span>последняя игра · ${esc(G.loc)}</div><h3>${dG.day} ${dG.monFull}</h3><div class="mono">${meta}</div></div>${scoreHtml(G)}</div>
       <div class="vc-b">${roster(t0)}${roster(t1)}</div>${rounds}`;
   } else {
-    const side = t => `<div class="va-t" style="--c:${tc(t.t)}"><div class="mono va-m">${t.t === G.win ? "▲ " : ""}${t.n} чел. · ${ru(t.hits)} поп.</div>${mvpA(t)}</div>`;
+    const side = t => `<div class="va-t" style="--c:${tc(t.t)}"><div class="mono va-m">${ru(t.hits)} попаданий</div>${mvpA(t)}</div>`;
     body = `<div class="va"><div class="va-l"><div class="mono"><span class="blink"></span>последняя игра · ${esc(G.loc)}</div><h3>${dG.day} ${dG.monFull}</h3><div class="mono va-meta">${meta}</div>
       <div class="va-s">${scoreHtml(G)}${side(t0)}${side(t1)}</div></div>${top5}</div>${rounds}`;
   }
@@ -119,9 +120,9 @@ function viewHome(S) {
   </div>
   ${panel("sumx A", `<div class="hd"><span class="mono"><span class="blink"></span>сводка сезона</span><span class="mono">обновлено <b>${dateShort(L.date)}</b></span></div><div class="cells">${sumx.map(([v, l, s], k) => `<div class="cell A" style="--k:${k}"><div class="num" data-count>${typeof v === "number" ? ru(v) : v}</div><div class="lab">${l}</div><div class="sub">${s}</div></div>`).join("")}</div>`)}
   <div class="home2 h2b">
-    ${panel("lastc lg2 A", `<div class="hd"><h3>${dL.day} ${dL.monFull}</h3><span class="mono">${esc(L.loc)} · <b>${L.players}</b> ${plural(L.players, ["игрок", "игрока", "игроков"]).split(" ")[1]}${L.rounds ? ` · <b>${L.rounds}</b> ${plural(L.rounds, ["раунд", "раунда", "раундов"]).split(" ")[1]}` : ""}</span></div>
+    ${panel("lastc lg2 A", `<div class="hd"><h3>${dL.day} ${dL.monFull}</h3><span class="mono">${esc(L.loc)} · ${vsHtml(L)}${L.rounds ? ` · <b>${L.rounds}</b> ${plural(L.rounds, ["раунд", "раунда", "раундов"]).split(" ")[1]}` : ""}</span></div>
       <div class="lgb"><div class="lgl A">
-        <div class="lgt">${L.teams.map(t => `<span class="t${t.t === L.win ? " w" : ""}" style="--c:${tc(t.t)}">${t.n} чел.</span>`).join("")}</div>
+        
         ${scoreHtml(L)}
         <div class="lgm">${L.teams.map((t, k) => `<a class="lgmv${k ? " r" : ""}" href="#${(S.rows.find(r => r.name === t.mvp) || {}).key || L.key}" style="--c:${tc(t.t)}"><img src="${portrait(t.mvp)}" alt=""><span><small>MVP команды</small><b>${esc(t.mvp)}</b><em>${t.mvpDealt} попаданий</em></span></a>`).join("")}</div>
       </div><div class="lgr A">
