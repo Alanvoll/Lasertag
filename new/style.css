@@ -1079,3 +1079,10 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .mt.g,.gx-l.eq .mt.g{border:1px solid;border-image:linear-gradient(90deg,var(--c),var(--gb,var(--ink))) 1;padding-left:5px;gap:4px;background:linear-gradient(90deg,var(--c) 10%,var(--gb,var(--ink)) 75%);-webkit-background-clip:text;background-clip:text;color:transparent;overflow:visible}
 .mt.g .ic,.gx-l.eq .mt.g .ic{color:var(--c);background:none;padding:0;margin:0;stroke-width:inherit}
 @media (min-width:761px) and (max-width:1250px){.gx-l.eq .mt.g{padding:4px;background:none;border-image:linear-gradient(135deg,var(--c),var(--gb,var(--ink))) 1}.gx-l.eq .mt.g .ic{padding:0;color:var(--gb,var(--ink))}}
+/* значки: у левой команды прижаты к правому краю плашки, у правой — к левому */
+@media (min-width:761px){.gx-l.eq a>.mts{align-items:flex-end;align-content:flex-end;justify-content:center}.gx-l.eq.r a>.mts{flex-wrap:wrap;align-items:flex-start;align-content:flex-start}}
+@media (min-width:761px) and (max-width:1250px){.gx-l.eq a>.mts,.gx-l.eq.r a>.mts{flex-wrap:nowrap;align-items:center;justify-content:flex-end}.gx-l.eq.r a>.mts{justify-content:flex-start}}
+@media (min-width:761px){.gx-l.eq a>.mts,.gx-l.eq.r a>.mts{align-self:start;justify-content:flex-start;margin-top:8px}}
+@media (min-width:761px) and (max-width:1250px){.gx-l.eq a>.mts{justify-content:flex-end}.gx-l.eq.r a>.mts{justify-content:flex-start}}
+@media (max-width:760px){.gx-l.eq a>.mts{align-self:start;margin-top:4px;justify-content:flex-start}}
+@media (min-width:1251px){.gx-l.eq a>.mts{max-height:calc(var(--h) - 16px)}}
