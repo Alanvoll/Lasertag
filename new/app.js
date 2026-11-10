@@ -135,7 +135,10 @@ function gameBig(S, G) {
       const dn = p => isFinite(p.deaths) ? p.deaths * (clsOf(p) === "pistol" ? 1.25 : 1) : Infinity, td = Math.min(...main.map(dn)), gd = Math.min(...m.P.filter(q => q.teams.some(x => m.shareT(q, x) > .5)).map(dn));
       // точность: только автоматы с известным числом выстрелов, как в номинациях
       const ao = p => p.shots > 0 && clsOf(p) === "auto" && !unknownOf(p).acc, fa = p => ao(p) ? p.acc : -1, ba = best(main.filter(ao), fa), ga = best(m.P.filter(ao), fa);
-      const tag = p => { const b = (on, g, i, l, tt) => on || g ? `<em class="mt${g ? " g" : ""}" title="${tt}${g ? " во всей игре" : " в команде"}">${ic(i)}${l}</em>` : ""; const h = b(p === bh, p === gh, "hit", "попадания", "Больше всех попаданий") + b(p === br, p === gr, "recv", "дуэлянт", "Лучшее «попал / получил»") + b(p === ba, p === ga, "acc", "снайпер", "Лучшая точность") + b(dn(p) === td, dn(p) === gd, "death", "меньше смертей", "Меньше всех умер"); return h ? `<i class="mts">${h}</i>` : ""; };
+      const tag = p => { const b = (on, g, i, l, tt, v = "") => on || g ? `<em class="mt${g ? " g" : ""}" data-tip="${esc(`${l[0].toUpperCase() + l.slice(1)}: ${tt}. ${g ? "Лучший результат во всей игре" : "Лучший результат в своей команде"}.`)}">${ic(i)}${l}${v ? `<b class="num">${v}</b>` : ""}</em>` : "";
+        const h = b(p === bh, p === gh, "hit", "попадания", `больше всех попаданий, ${ru(p.dealt)}`) + b(p === br, p === gr, "recv", "дуэлянт", `лучшее соотношение «попал / получил», ${isFinite(p.ratio) ? r2(p.ratio) : "∞"} (попал ${ru(p.dealt)}, получил ${ru(p.recv)})`, isFinite(p.ratio) ? r2(p.ratio) : "∞")
+          + b(p === ba, p === ga, "acc", "снайпер", `лучшая точность, ${pct(p.acc)} (${ru(p.dealt)} попаданий на ${ru(p.shots)} выстрелов). Считается среди автоматов`, pct(p.acc)) + b(dn(p) === td, dn(p) === gd, "death", "меньше смертей", `меньше всех умирал, ${ru(p.deaths)} ${pw(p.deaths, ["раз", "раза", "раз"])}${clsOf(p) === "pistol" ? " (у пистолета 5 жизней, поэтому смерти пересчитаны на 4 жизни)" : ""}`, ru(p.deaths));
+        return h ? `<i class="mts">${h}</i>` : ""; };
       return `<div class="gx-l eq${k ? " r" : ""}" style="--c:${tc(t)};--h:${h}px">${L.map(p => { const tg = tag(p); return `<a class="${m.shareT(p, t) <= .5 ? "sw" : ""}${tg ? " hb" : ""}" href="#${key(p.name)}"><img src="${portrait(p.name)}" alt=""><span><b>${esc(p.name)}</b>${rb(p, t)}<i class="hn num">${st("hit", ru(p.dealt))}</i></span>${tg}</a>`; }).join("")}</div>`; };
     const side = (k, r) => `<div class="gk-t${r}"><div class="lgn num" style="--c:${tc(G.teams[k].t)}">${sn(G.teams[k].score)}</div>${chip(duo[k])}</div>`;
     // «Без полос»: цифры команд вплотную к подписи, составы крупными портретами по бокам; «Диаграмма»: вместо цифр две фигуры команд одна на другой
@@ -816,3 +819,10 @@ async function loadGames() {
 })();
 app.innerHTML = `<div class="empty">Загружаю игры…</div>`;
 loadGames().then(() => { render(); countUp(); }, e => { app.innerHTML = `<div class="empty">Не получилось загрузить игры: ${esc(e.message)}</div>`; });
+
+// подсказка к значку: при наведении и по нажатию (нажатие на значок не открывает страницу игрока)
+(() => { const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; document.body.append(tip); let cur = null;
+  const show = el => { cur = el; tip.textContent = el.dataset.tip; tip.hidden = false; const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight; let x = r.left + r.width / 2 - w / 2, y = r.top - h - 8; x = Math.max(8, Math.min(innerWidth - w - 8, x)); if (y < 8) y = r.bottom + 8; tip.style.left = x + "px"; tip.style.top = y + "px"; }, hide = () => { cur = null; tip.hidden = true; };
+  document.addEventListener("mouseover", e => { const el = e.target.closest && e.target.closest("[data-tip]"); if (!matchMedia("(hover:hover)").matches) return; if (el) show(el); else if (cur) hide(); });
+  document.addEventListener("click", e => { const el = e.target.closest && e.target.closest("[data-tip]"); if (el) { e.preventDefault(); e.stopPropagation(); if (cur === el && !matchMedia("(hover:hover)").matches) hide(); else show(el); } else hide(); }, true);
+  addEventListener("scroll", hide, true); addEventListener("hashchange", hide); })();

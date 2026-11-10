@@ -1086,3 +1086,9 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 @media (min-width:761px) and (max-width:1250px){.gx-l.eq a>.mts{justify-content:flex-end}.gx-l.eq.r a>.mts{justify-content:flex-start}}
 @media (max-width:760px){.gx-l.eq a>.mts{align-self:start;margin-top:4px;justify-content:flex-start}}
 @media (min-width:1251px){.gx-l.eq a>.mts{max-height:calc(var(--h) - 16px)}}
+.tip{position:fixed;z-index:80;max-width:280px;padding:9px 12px;background:#0c0d10;border:1px solid var(--uv);box-shadow:0 8px 24px rgba(0,0,0,.6);font-size:13px;line-height:1.35;color:var(--ink);pointer-events:none}.tip[hidden]{display:none}
+.mt[data-tip]{cursor:help}
+.mt b{font-weight:700;margin-left:3px;letter-spacing:0;font-size:1.15em;color:var(--ink);-webkit-text-fill-color:var(--ink)}
+@media (min-width:761px) and (max-width:1250px){.gx-l.eq .mt b{display:none}}
+@media (max-width:760px){.gq .gx-l.eq a.hb{height:auto;min-height:50px;padding-bottom:6px;row-gap:4px;align-items:start}.gq .gx-l.eq a.hb>span{align-self:center}
+  .gx-l.eq a>.mts{grid-column:2/4;grid-row:2;flex-direction:row;flex-wrap:wrap;max-height:none;margin:0;align-self:start;justify-content:flex-start;align-content:flex-start;gap:3px}.gx-l.eq a.hb>img{grid-row:1}}
