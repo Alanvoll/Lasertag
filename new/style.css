@@ -826,3 +826,6 @@ a.lc-r:hover .n{color:var(--uv2)}
 .gm-4 .gmini .dt{grid-row:1/4;display:grid;justify-items:center;line-height:1;padding-right:14px;border-right:1px solid var(--line);align-self:stretch;align-content:center}.gm-4 .gmini .dt b{font-size:34px}
 .gm-4 .gmini{flex-basis:236px}.gmini .r{white-space:nowrap}.gm-4 .gmini .s{font-size:34px}.gm-4 .gmini .pl{order:-1}
 @media (max-width:760px){.gm-1 .gmini .s{font-size:30px}.gm-2 .gmini .s{font-size:34px}.gm-2 .gmini,.gm-3 .gmini{flex-basis:180px}.gm-4 .gmini{flex-basis:216px}}
+.gmini .dt b{font-size:26px}.gm-1 .gmini .dt b{font-size:22px}.gm-4 .gmini .dt b{font-size:44px}.gm-4 .gmini{flex-basis:200px}.gm-4 .gmini .dt{min-width:52px}
+.gm-3 .gmini .dt{top:2px}
+.gm-1 .gmini .pl{display:block}
