@@ -840,3 +840,7 @@ a.lc-r:hover .n{color:var(--uv2)}
 th .ic{width:15px;height:15px;color:var(--uv2);vertical-align:-3px}.tcard .v em .ic{width:16px;height:16px;color:var(--m)}
 .fact .k .ic{width:16px;height:16px;color:var(--uv2)}.shead .r .ic,.ft .ic,.eyebrow .ic,.rcc .l .ic,.mono .ic{color:var(--uv2)}
 th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:var(--mute)}th[aria-sort] button .ic,th button .ic:only-child{color:var(--uv2)}
+/* иконка перед значением, высотой с цифру */
+.tcard .v .ic,.fact .v .ic{width:.74em;height:.74em;vertical-align:baseline;margin-right:.22em;stroke-width:2}
+.tcard .v .ic{color:var(--m)}.fact .v .ic{color:var(--uv2)}.tcard .v{gap:0}
+.st .ic{width:.95em;height:.95em}
