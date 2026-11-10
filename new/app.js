@@ -102,6 +102,39 @@ function gameBig(S, G, gp) {
   }
   return panel(`gbig gv-${GV} A`, bg + body, "div", `data-go="#${G.key}"`);
 }
+// ---------- главная: карточка последней игры (варианты компоновки 1–4) ----------
+let LV = (() => { try { return localStorage.getItem("lt-lv") || "b"; } catch (e) { return "b"; } })();
+function lastGame(S, L, gS) {
+  const dL = dDay(L.date), key = n => (S.rows.find(r => r.name === n) || {}).key || L.key, pw = (n, w) => plural(n, w).split(" ")[1];
+  const rt = (n, t) => ru(L.m.mvpT(L.m.P.find(p => p.name === n), t));
+  const hd = `<div class="hd"><h3>${dL.day} ${dL.monFull}</h3><span class="mono">${esc(L.loc)} · ${vsHtml(L)}${L.rounds ? ` · <b>${L.rounds}</b> ${pw(L.rounds, ["раунд", "раунда", "раундов"])}` : ""}</span></div>`;
+  const rounds = `<div class="rlog fill A"><span class="mono">раунды</span>${roundsStrip(L)}<a class="lnk mono" href="#${L.key}">разбор игры →</a></div>`;
+  const kv = [[ru(gS.hits), "попаданий"], [pct(gS.acc), "точность"], [ru(gS.deaths), "смертей"], [ru(gS.shots), "выстрелов"]].map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
+  const nums = L.teams.map(t => `<div class="lgn num" style="--c:${tc(t.t)}">${ru(t.score)}</div>`), colon = `<i class="lgx"><b></b><b></b></i>`;
+  const tm = (t, cls = "") => `<a class="lgmv ${cls}" href="#${key(t.mvp)}" style="--c:${tc(t.t)}"><img src="${portrait(t.mvp)}" alt=""><span><small>MVP команды</small><b>${esc(t.mvp)}</b><em>рейтинг ${rt(t.mvp, t.t)}</em></span></a>`;
+  const gm = `<a class="lgmvp" href="#${key(L.top)}"><img src="${portrait(L.top)}" alt=""><span><small>MVP игры</small><b>${esc(L.top)}</b><em>рейтинг ${ru(L.m.mvp.mvp)} · ${L.m.mvp.dealt} попаданий</em></span></a>`;
+  let body;
+  if (LV === "b") {
+    // «Табло»: всё симметрично вокруг счёта, ниже одна строка цифр
+    body = `<div class="lb-m">${tm(L.teams[0])}<div class="lb-s">${nums.join(colon)}</div>${tm(L.teams[1], "r")}</div>
+      <div class="lb-k"><a class="lb-g" href="#${key(L.top)}"><span>MVP игры</span><b>${esc(L.top)}</b><em>рейтинг ${ru(L.m.mvp.mvp)}</em></a>${kv}</div>`;
+  } else if (LV === "c") {
+    // «Команды»: у каждой команды своя половина — цифра счёта и три лучших
+    const half = t => { const mem = L.m.P.filter(p => p.teams.includes(t.t) && L.m.shareT(p, t.t) > .5).sort((a, b) => L.m.mvpT(b, t.t) - L.m.mvpT(a, t.t)).slice(0, 3);
+      return `<div class="lc-t" style="--c:${tc(t.t)}"><div class="lgn num">${ru(t.score)}</div><div class="lc-l"><div class="mono lc-h"><span>${ru(t.hits)} поп.</span><span>рейтинг</span></div>${mem.map(p => `<a class="lc-r" href="#${key(p.name)}"><span class="n">${esc(p.name)}${p === L.m.mvp ? '<em class="mono">MVP</em>' : ""}</span><span class="num">${ru(L.m.mvpT(p, t.t))}</span></a>`).join("")}</div></div>`; };
+    body = `<div class="lc-b">${half(L.teams[0])}${half(L.teams[1])}</div><div class="lc-k">${kv}</div>`;
+  } else if (LV === "d") {
+    // «Герой»: слева большой портрет MVP игры, справа счёт и цифры
+    body = `<div class="ld"><a class="ld-h" href="#${key(L.top)}"><img src="${portrait(L.top)}" alt=""><span><small>MVP игры</small><b>${esc(L.top)}</b><em>рейтинг ${ru(L.m.mvp.mvp)} · ${L.m.mvp.dealt} поп.</em></span></a>
+      <div class="ld-r">${hd}<div class="ld-s"><div class="ld-n">${nums.join(colon)}</div>
+      <div class="ld-t">${L.teams.map(t => `<a href="#${key(t.mvp)}" style="--c:${tc(t.t)}"><i></i><span><small>MVP команды</small><b>${esc(t.mvp)}</b> <em>${rt(t.mvp, t.t)}</em></span></a>`).join("")}</div></div>
+      <div class="ld-k">${kv}</div></div></div>`;
+    return panel(`lastc lg2 lv-d A`, body + rounds, "div", `data-go="#${L.key}"`);
+  } else {
+    body = `<div class="lgb"><div class="lgs">${nums.join(colon)}</div>${gm}<div class="lgt2">${L.teams.map(t => tm(t)).join("<i></i>")}</div><div class="gkv">${kv}</div></div>`;
+  }
+  return panel(`lastc lg2 lv-${LV} A`, hd + body + rounds, "div", `data-go="#${L.key}"`);
+}
 // ---------- главная ----------
 function viewHome(S) {
   const H = homeData(S), L = gameCard(H.last), dL = dDay(L.date);
@@ -120,14 +153,7 @@ function viewHome(S) {
   </div>
   ${panel("sumx A", `<div class="hd"><span class="mono"><span class="blink"></span>сводка сезона</span><span class="mono">обновлено <b>${dateShort(L.date)}</b></span></div><div class="cells">${sumx.map(([v, l, s], k) => `<div class="cell A" style="--k:${k}"><div class="num" data-count>${typeof v === "number" ? ru(v) : v}</div><div class="lab">${l}</div><div class="sub">${s}</div></div>`).join("")}</div>`)}
   <div class="home2 h2b">
-    ${panel("lastc lg2 A", `<div class="hd"><h3>${dL.day} ${dL.monFull}</h3><span class="mono">${esc(L.loc)} · ${vsHtml(L)}${L.rounds ? ` · <b>${L.rounds}</b> ${plural(L.rounds, ["раунд", "раунда", "раундов"]).split(" ")[1]}` : ""}</span></div>
-      <div class="lgb">
-        <div class="lgs">${L.teams.map(t => `<div class="lgn num" style="--c:${tc(t.t)}">${ru(t.score)}</div>`).join(`<i class="lgx"><b></b><b></b></i>`)}</div>
-        <a class="lgmvp" href="#${(S.rows.find(r => r.name === L.top) || {}).key || L.key}"><img src="${portrait(L.top)}" alt=""><span><small>MVP игры</small><b>${esc(L.top)}</b><em>рейтинг ${ru(L.m.mvp.mvp)} · ${L.m.mvp.dealt} попаданий</em></span></a>
-        <div class="lgt2">${L.teams.map(t => `<a class="lgmv" href="#${(S.rows.find(r => r.name === t.mvp) || {}).key || L.key}" style="--c:${tc(t.t)}"><img src="${portrait(t.mvp)}" alt=""><span><small>MVP команды</small><b>${esc(t.mvp)}</b><em>рейтинг ${ru(L.m.mvpT(L.m.P.find(p => p.name === t.mvp), t.t))}</em></span></a>`).join("<i></i>")}</div>
-        <div class="gkv"><div><b>${ru(gS.hits)}</b><span>попаданий</span></div><div><b>${pct(gS.acc)}</b><span>точность</span></div><div><b>${ru(gS.deaths)}</b><span>смертей</span></div><div><b>${ru(gS.shots)}</b><span>выстрелов</span></div></div>
-      </div>
-      <div class="rlog fill A"><span class="mono">раунды</span>${roundsStrip(L)}<a class="lnk mono" href="#${L.key}">разбор игры →</a></div>`, "div", `data-go="#${L.key}"`)}
+    ${lastGame(S, L, gS)}
     ${panel("topl top3 A", `<div class="hd"><span class="mono">Топ-3 сезона · от 3 игр</span><a class="lnk mono" href="#s3" style="color:var(--ink)">все игроки →</a></div><div class="tcards">${H.top.slice(0, 3).map((p, k) => `<a class="tcard A m${k + 1}" style="--k:${k}" href="#${p.r.key}"><img src="${portrait(p.name)}" alt=""><span class="no">${k + 1}</span><span class="info"><b>${esc(p.name)}</b><small>${plural(p.games, ["игра", "игры", "игр"])}</small><span class="v num">${ru(p.rating)}<em>рейтинг</em></span></span></a>`).join("")}</div>`)}
   </div>`;
   // блок 2: игры — большая последняя игра + лента всех игр
