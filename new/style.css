@@ -1,7 +1,7 @@
 /* Лазертаг · «Брифинг». Карта арены как фон, фонарь за курсором, блоки вместо страниц.
    Палитра: графит и тёплый белый, ультрафиолет как акцент. Цвета команд только там, где есть команды. */
 :root{
-  --bg:#0c0d10; --bg2:#13151a; --ink:#f3efe6; --mute:#8b8a86; --line:rgba(243,239,230,.14); --line2:rgba(243,239,230,.06);
+  --bg:#0c0d10; --bg2:#0f1115; --ink:#f3efe6; --mute:#8b8a86; --line:rgba(243,239,230,.14); --line2:rgba(243,239,230,.06);
   --uv:#9a6bff; --uv2:#c9b3ff; --uvd:rgba(154,107,255,.14);
   --red:#ff5a5a; --blue:#4b94ff; --yellow:#ffd34d; --green:#3fd98a;
   --disp:"Jost",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace; --body:"Jost",system-ui,sans-serif;
@@ -87,7 +87,7 @@ main.snap{scroll-snap-type:y mandatory}
 .dots[hidden]{display:none}
 
 /* панели с уголками */
-.panel{position:relative;border:1px solid var(--line);background:rgba(19,21,26,.86)}
+.panel{position:relative;border:1px solid var(--line);background:rgba(15,17,21,.86)}
 .panel::before,.panel::after,.panel>.c::before,.panel>.c::after{content:"";position:absolute;width:10px;height:10px;border:2px solid var(--ink);opacity:.9}
 .panel::before{left:-1px;top:-1px;border-right:0;border-bottom:0}
 .panel::after{right:-1px;top:-1px;border-left:0;border-bottom:0}
@@ -130,7 +130,7 @@ a.pl:hover{color:var(--uv2)}
 .tbl .ft{padding:8px 16px;font-size:12px;color:var(--mute)}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{padding:7px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line2)}
-th{position:sticky;top:0;z-index:1;background:rgba(19,21,26,.98);font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:400;cursor:pointer;user-select:none}
+th{position:sticky;top:0;z-index:1;background:rgba(15,17,21,.98);font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:400;cursor:pointer;user-select:none}
 th button{all:unset;cursor:pointer}
 th.l,td.l{text-align:left;padding-left:16px}
 th[aria-sort]{color:var(--uv2)}
@@ -140,7 +140,7 @@ td.l a{font-weight:600}
 td.l small{color:var(--mute);font-weight:400;margin-left:6px;font-size:11px}
 td .bar{display:inline-block;height:6px;background:var(--c,var(--uv));opacity:.6;vertical-align:middle;margin-right:8px;width:var(--w)}
 tbody tr:hover td{background:rgba(154,107,255,.06)}
-.sticky1 th.l,.sticky1 td.l{position:sticky;left:0;background:rgba(19,21,26,.98);z-index:2}
+.sticky1 th.l,.sticky1 td.l{position:sticky;left:0;background:rgba(15,17,21,.98);z-index:2}
 .sticky1 th.l{z-index:3}
 
 /* блок 1: главная */
@@ -230,7 +230,7 @@ a.gtr:hover .n{color:var(--uv2)}
 .shead .allg i{font-style:normal;transition:transform .25s}.shead .allg:hover{background:rgba(154,107,255,.28)}.shead .allg:hover i{transform:translateX(4px)}
 .gbig{position:relative;overflow:hidden;isolation:isolate;padding:18px 24px;display:grid;gap:14px}
 .gbig .bgimg{position:absolute;inset:0;z-index:-1;background:var(--img) center 40%/cover no-repeat;opacity:.62;-webkit-mask:linear-gradient(90deg,rgba(0,0,0,.25) 0,#000 60%);mask:linear-gradient(90deg,rgba(0,0,0,.25) 0,#000 60%)}
-.gbig .bgimg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(19,21,26,.9),rgba(19,21,26,.2) 70%)}
+.gbig .bgimg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(15,17,21,.9),rgba(15,17,21,.2) 70%)}
 .gbh{display:flex;justify-content:space-between;align-items:end;gap:16px}
 .gbh h3{font-size:clamp(28px,3vw,40px);font-weight:800;text-transform:uppercase;line-height:1;margin-top:4px}
 .gbb{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:center}
@@ -252,7 +252,7 @@ a.gtr:hover .n{color:var(--uv2)}
 .gstripw.at-end .gstrip{-webkit-mask:linear-gradient(90deg,transparent,#000 40px);mask:linear-gradient(90deg,transparent,#000 40px)}
 .gstripw.at-start.at-end .gstrip{-webkit-mask:none;mask:none}
 .gstrip::-webkit-scrollbar{display:none}.gstrip.drag{cursor:grabbing;scroll-snap-type:none}.gstrip.drag a{pointer-events:none}
-.gmini{flex:0 0 176px;scroll-snap-align:start;display:grid;gap:2px;padding:10px 14px;border:1px solid var(--line);background:rgba(19,21,26,.82);transition:border-color .2s,transform .2s}
+.gmini{flex:0 0 176px;scroll-snap-align:start;display:grid;gap:2px;padding:10px 14px;border:1px solid var(--line);background:rgba(15,17,21,.82);transition:border-color .2s,transform .2s}
 .gmini:hover{border-color:var(--uv2);transform:translateY(-2px)}
 .gmini.cur{border-color:var(--uv);box-shadow:inset 0 2px 0 var(--uv)}
 .gmini .dt{font-family:var(--disp);font-size:13px;text-transform:uppercase;letter-spacing:.04em}.gmini .dt b{font-size:20px}
@@ -261,7 +261,7 @@ a.gtr:hover .n{color:var(--uv2)}
 .gmini .r{font-size:9px}
 .gmon{flex:0 0 26px;scroll-snap-align:start;display:grid;place-items:center;border-left:1px solid var(--line)}
 .gmon span{writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--uv2)}
-.garr{position:absolute;top:50%;z-index:2;width:34px;height:34px;margin-top:-17px;border:1px solid var(--line);background:#13151a;color:var(--ink);font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center;transition:opacity .2s,border-color .2s}
+.garr{position:absolute;top:50%;z-index:2;width:34px;height:34px;margin-top:-17px;border:1px solid var(--line);background:#0f1115;color:var(--ink);font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center;transition:opacity .2s,border-color .2s}
 .garr:hover{border-color:var(--uv2)}.garr.l{left:-14px}.garr.r{right:-14px}
 .gstripw.at-start .garr.l,.gstripw.at-end .garr.r{opacity:0;pointer-events:none}
 .slide .gbig.A{--d:.1s}.slide .gstripw.A{--d:.45s}
@@ -408,7 +408,7 @@ a.lgmv:hover b,a.lgmvp:hover b{color:var(--uv2)}
 /* страницы разборов */
 .phero{position:relative;display:grid;grid-template-columns:1fr auto;gap:30px;align-items:end;padding:28px 32px;min-height:260px;overflow:hidden;isolation:isolate}
 .phero .bgimg{position:absolute;inset:0;z-index:-1;background:var(--img) center 45%/cover no-repeat;opacity:.6;-webkit-mask:linear-gradient(90deg,transparent,#000 40%);mask:linear-gradient(90deg,transparent,#000 40%)}
-.phero .bgimg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(19,21,26,.95),rgba(19,21,26,.2))}
+.phero .bgimg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(15,17,21,.95),rgba(15,17,21,.2))}
 .phero h1{font-size:clamp(34px,5vw,64px);font-weight:800;line-height:1;text-transform:uppercase;letter-spacing:-.01em}
 .phero .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--uv2);margin-bottom:10px}
 .facts{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:18px}
@@ -768,7 +768,7 @@ a.lc-r:hover .n{color:var(--uv2)}
 .itogi .A{transition:opacity .5s ease,transform .7s cubic-bezier(.2,.8,.2,1);transition-delay:calc(.1s + var(--k,0) * 40ms)}
 .itogi:not(.in) .A{opacity:0;transform:translateY(20px)}
 .itc{display:flex;gap:10px;flex-wrap:wrap}
-.itc-c{display:flex;align-items:center;gap:10px;padding:8px 14px 8px 8px;border:1px solid var(--line);background:rgba(19,21,26,.82)}
+.itc-c{display:flex;align-items:center;gap:10px;padding:8px 14px 8px 8px;border:1px solid var(--line);background:rgba(15,17,21,.82)}
 .itc-c:first-child{border-color:var(--uv);background:var(--uvd)}
 .itc-c img{width:40px;height:40px;border-radius:50%;object-fit:cover}.itc-c span{display:grid;line-height:1.15}.itc-c b{font-size:16px}.itc-c small{font-size:9px;color:var(--uv2)}
 .itc-c:hover{border-color:var(--uv2)}
@@ -815,7 +815,7 @@ a.lc-r:hover .n{color:var(--uv2)}
 .gm-5 .gmini{flex-basis:214px;padding:0;grid-template-columns:auto 1fr auto;grid-template-rows:1fr 36px;gap:0;align-items:stretch}
 .gm-5 .gmini::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(rgba(12,13,16,.3),rgba(12,13,16,.3)),var(--img) center 40%/cover}
 .gm-5 .gmini .s{grid-column:1/-1;grid-row:1;justify-content:center;align-items:center;padding:18px 0;font-size:42px;text-shadow:0 2px 10px rgba(0,0,0,.75)}.gm-5 .gmini .s i{color:var(--ink);opacity:.75}
-.gm-5 .gmini .dt,.gm-5 .gmini .pl,.gm-5 .gmini .r{grid-row:2;display:flex;align-items:center;margin:0;background:#15171c;border-top:1px solid var(--line)}
+.gm-5 .gmini .dt,.gm-5 .gmini .pl,.gm-5 .gmini .r{grid-row:2;display:flex;align-items:center;margin:0;background:#0f1115;border-top:1px solid var(--line)}
 .gm-5 .gmini .dt{grid-column:1;padding:0 0 0 12px;line-height:1}.gm-5 .gmini .dt b{font-size:15px;line-height:1;}.gm-5 .gmini .pl,.gm-5 .gmini .r{line-height:1}.gm-5 .gmini .pl{grid-column:2;padding:0 8px 0 10px}.gm-5 .gmini .r{grid-column:3;gap:.5em;padding:0 12px 0 0}.gm-5 .gmini .dt,.gm-5 .gmini .pl,.gm-5 .gmini .r{padding-top:2px}
 @media (max-width:760px){.gm-5 .gmini{flex-basis:176px}}
 /* ---------- иконки показателей ---------- */
