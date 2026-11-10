@@ -197,7 +197,7 @@ function viewHome(S) {
 }
 let pmin = 3;
 function homeInit(S) {
-  const cols = [["name", "Игрок", r => r.name, null], ["games", "Игр", r => r.games, String], ["rating", ic("star"), r => r.mvp / r.games, ru, 1], ["dealt", "Попал", r => r.dealt / r.games, one, 1], ["recv", "Получил", r => r.recv / r.games, one], ["ratio", "Попал / получил", r => r.ratio, r2, 1], ["acc", "Точность", r => r.acc, pct, 1], ["deaths", "Смерти", r => r.deaths / r.games, one], ["alive", "Дожил до конца", r => r.rounds ? r.alive / r.rounds : NaN, pct, 1], ["mvps", "MVP игры", r => r.mvps, String]];
+  const cols = [["name", "Игрок", r => r.name, null], ["games", "Игр", r => r.games, String], ["rating", ic("star") + "Рейтинг", r => r.mvp / r.games, ru, 1], ["dealt", ic("hit") + "Попал", r => r.dealt / r.games, one, 1], ["recv", ic("recv") + "Получил", r => r.recv / r.games, one], ["ratio", "Попал / получил", r => r.ratio, r2, 1], ["acc", ic("acc") + "Точность", r => r.acc, pct, 1], ["deaths", ic("death") + "Смерти", r => r.deaths / r.games, one], ["alive", "Дожил до конца", r => r.rounds ? r.alive / r.rounds : NaN, pct, 1], ["mvps", "MVP игры", r => r.mvps, String]];
   const draw = () => { const rows = S.rows.filter(r => r.games >= pmin); const max = Object.fromEntries(cols.slice(1).map(c => [c[0], Math.max(...rows.map(c[2]).filter(isFinite))]));
     sortable("ptable", cols, rows, (r, key) => `<tr class="${r.games < 3 ? "dim" : ""}"><td class="l"><a class="pl" href="#${r.key}">${esc(r.name)}</a></td>${cols.slice(1).map(c => `<td class="num">${c[0] === key && c[0] !== "games" && isFinite(c[2](r)) ? `<span class="bar" style="--w:${Math.round(c[2](r) / max[c[0]] * 48)}px"></span>` : ""}${isFinite(c[2](r)) || typeof c[2](r) === "string" ? c[3](c[2](r)) : "—"}</td>`).join("")}</tr>`, "rating"); };
   document.querySelectorAll("[data-pmin] button").forEach(b => b.onclick = () => { pmin = +b.dataset.min; document.querySelectorAll("[data-pmin] button").forEach(x => x.setAttribute("aria-pressed", x === b)); draw(); });
@@ -472,7 +472,7 @@ function gameInit(S, key) {
     const cols = [["name", "Игрок", p => p.name], ["dealt", "Попал", p => pr(p, p.dealt)], ["recv", "Получил", p => pr(p, p.recv)], ["ratio", "Попал / получил", p => p.ratio], ["deaths", "Смерти", p => pr(p, p.deaths)], ["dpd", "Попал на смерть", p => div(p.dealt, p.deaths)], ["shots", "Выстрелы", p => pr(p, p.shots)], ["acc", "Точность", p => p.acc]];
     const pd = v => isFinite(v) ? one(v) : "∞";
     if (m.winners.length) cols.push(["alive", "Раундов без смерти", p => p.alive]);
-    cols.push(["mvp", ic("star"), p => p.mvp]);
+    cols.push(["mvp", ic("star") + "Рейтинг", p => p.mvp]);
     const bmax = Object.fromEntries(cols.slice(1).map(([k, , f]) => [k, Math.max(1e-9, ...m.P.map(f).filter(isFinite))]));
     const bar = (p, k, key) => { if (k !== key) return "";
       if (k === "dealt") return p.teams.map(t => { const n = sum(m.P, v => m.valT(p, v, t)); return `<span class="bar" style="--c:${tc(t)};--w:${Math.round(pr(p, n) / max * 80)}px;margin-right:${p.swap ? 1 : 8}px"></span>`; }).join("");
