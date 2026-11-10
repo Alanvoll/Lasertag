@@ -808,28 +808,17 @@ a.lc-r:hover .n{color:var(--uv2)}
 }
 @media (max-width:980px){
   .tabs a{padding:6px 5px;font-size:9.5px;letter-spacing:.06em}.tabs a::after{left:5px;right:5px}.logo{letter-spacing:.08em}}
-/* ---------- карточки ленты игр: 0 — исходная, 5–8 — с артом площадки ---------- */
+/* ---------- карточки ленты игр: «Постер» ---------- */
 .gmini .sb{display:none}.gmini .r b{font-weight:600}.gmini .r{white-space:nowrap}
 .gmini{position:relative;isolation:isolate;overflow:hidden}
 /* 5 «Постер»: сверху полоса с артом, под ней дата и счёт */
-.gm-5 .gmini{flex-basis:204px;padding:0;grid-template-columns:1fr auto;gap:0 10px}
-.gm-5 .gmini::before{content:"";grid-column:1/-1;height:62px;background:var(--img) center 40%/cover;border-bottom:1px solid var(--line)}
-.gm-5 .gmini .dt{grid-column:1;padding:8px 0 0 12px}.gm-5 .gmini .pl{grid-column:1;padding:0 0 9px 12px}
+.gm-5 .gmini{flex-basis:204px;padding:0;grid-template-columns:1fr auto;grid-template-rows:62px auto auto;gap:0 10px}
+.gm-5 .gmini::before{content:"";position:absolute;inset:0;z-index:-2;background:var(--img) center/cover}
+.gm-5 .gmini::after{content:"";grid-column:1/-1;grid-row:2/4;z-index:-1;background:rgba(12,13,16,.72);border-top:1px solid var(--line);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.gm-5 .gmini .dt{grid-column:1;grid-row:2;padding:8px 0 0 12px}.gm-5 .gmini .r{grid-column:1;grid-row:3;padding:0 0 9px 12px}
 .gm-5 .gmini .s{grid-column:2;grid-row:2/4;align-self:center;padding-right:12px;font-size:32px}
-.gm-5 .gmini .r{position:absolute;right:6px;top:6px;padding:2px 6px;background:rgba(12,13,16,.82)}
-/* 6 «Баннер»: арт слева уходит в тень, справа счёт */
-.gm-6 .gmini{flex-basis:248px;grid-template-columns:1fr auto;gap:1px 12px;padding:12px 14px 12px 96px;align-items:center}
-.gm-6 .gmini::before{content:"";position:absolute;left:0;top:0;bottom:0;width:120px;z-index:-1;background:var(--img) center/cover;-webkit-mask:linear-gradient(90deg,#000 45%,transparent);mask:linear-gradient(90deg,#000 45%,transparent)}
-.gm-6 .gmini .dt,.gm-6 .gmini .pl,.gm-6 .gmini .r{grid-column:1}.gm-6 .gmini .s{grid-column:2;grid-row:1/4;font-size:36px}
-/* 7 «Плитка»: арт на весь фон, всё по центру */
-.gm-7 .gmini{flex-basis:190px;min-height:124px;justify-items:center;align-content:center;text-align:center;gap:2px;padding:10px 12px}
-.gm-7 .gmini::before,.gm-8 .gmini::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(12,13,16,.92),rgba(12,13,16,.55)),var(--img) center/cover}
-.gm-7 .gmini .s{font-size:42px;justify-content:center;margin:2px 0}
-/* 8 «Полоса»: арт на фон, дата и площадка в шапке, снизу полоска счёта в цветах команд */
-.gm-8 .gmini{flex-basis:200px;grid-template-columns:1fr auto;align-items:baseline;gap:2px 8px;padding:9px 14px 0}
-.gm-8 .gmini .pl{text-align:right}.gm-8 .gmini .s{grid-column:1/-1;justify-content:center;font-size:42px;margin:4px 0 0}.gm-8 .gmini .r{grid-column:1/-1;text-align:center}
-.gm-8 .gmini .sb{grid-column:1/-1;display:flex;gap:2px;height:4px;margin:9px -14px 0}
-@media (max-width:760px){.gm-5 .gmini,.gm-7 .gmini,.gm-8 .gmini{flex-basis:176px}.gm-6 .gmini{flex-basis:226px}.gm-7 .gmini .s,.gm-8 .gmini .s{font-size:34px}}
+.gm-5 .gmini .pl{position:absolute;right:6px;top:6px;margin:0;padding:2px 6px;background:rgba(12,13,16,.82)}
+@media (max-width:760px){.gm-5 .gmini{flex-basis:176px}}
 /* ---------- иконки показателей ---------- */
 .ic{width:1.15em;height:1.15em;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:square;stroke-linejoin:miter;vertical-align:-.2em}
 .sts{display:flex!important;gap:12px;align-items:center;font-style:normal;white-space:nowrap}

@@ -77,8 +77,8 @@ function gameTile(g, k = 0) {
   const tt = (x, cls) => { const d = duo.find(z => z.t === x.t); return `<div class="${cls}"><div class="t${x.t === g.win ? " w" : ""}" style="--c:${tc(x.t)}">${pl(x.n)}</div><div class="mv"><img src="${portrait(d.name)}" alt=""><span><b>${esc(d.name)}</b><small>${mvpTitle(d)}</small><small class="sts">${st("star", ru(d.rating))}${st("hit", d.dealt)}</small></span></div></div>`; };
   return panel("gcard A", `<div class="d"><b>${d.day} ${d.monFull}</b><span class="mono">${esc(g.loc)}</span></div>${scoreHtml(g)}<div class="tt">${tt(g.teams[0], "")}${tt(g.teams[1], "r")}</div><div class="ft">${roundsStrip(g)}<span class="mono sts">${st("hit", ru(g.hits))}</span></div>`, "a", `href="#${g.key}" style="--k:${Math.min(k, 8)}" data-loc="${esc(g.loc)}"`);
 }
-// карточки ленты игр: 0 — исходная компоновка, 5–8 — варианты с артом площадки
-let GM = (() => { try { const v = localStorage.getItem("lt-gm"); return ["0", "5", "6", "7", "8"].includes(v) ? v : "0"; } catch (e) { return "0"; } })();
+// карточки ленты игр: «Постер» — арт площадки сверху, под ним дата и счёт
+const GM = "5";
 function miniStrip(cards, cur) {
   let html = "", mk = "";
   cards.forEach((g, i) => { const d = dDay(g.date), rw = n => plural(n, ["раунд", "раунда", "раундов"]); if (monthKey(g.date) !== mk) { mk = monthKey(g.date); html += `<div class="gmon"><span>${monthName(g.date).split(" ")[0]}</span></div>`; }
