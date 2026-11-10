@@ -1028,3 +1028,21 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 @media (max-width:760px){.rr{grid-template-columns:42px 56px 26px}.rr .dl{font-size:10px;margin-left:4px}}
 .rr{grid-template-columns:50px 30px 62px}.gx-h .rr i:first-child{grid-column:1/3;justify-self:center}.gx-h .rr i:nth-child(2){display:none}
 @media (max-width:760px){.rr{grid-template-columns:42px 26px 56px}}
+
+/* рейтинг убран: в составе у игрока только попадания; топ сезона — заглушки «Калибруется» */
+.rr{display:block}.gx-l .rr .st{font-size:16px}
+.tcard.cal img{object-fit:cover;object-position:50% 10%;filter:blur(3px) saturate(.4) brightness(.7);transform:scale(1.15)}.tcard.cal:hover img{transform:scale(1.15)}
+.tcard.cal .info b{font-size:17px;letter-spacing:.02em}.tcard.cal .info small{text-transform:uppercase;margin-top:3px}
+.calb{display:block;height:3px;margin-top:9px;background:rgba(255,255,255,.12)}.calb i{display:block;height:100%;background:var(--m)}
+@media (max-width:760px){.tcard.cal .info b{font-size:12px}.tcard.cal .info small{font-size:8px}}
+
+/* состав «все равны»: одинаковые строки с портретом, по попаданиям; MVP — значком-плашкой */
+.gq-s.eq{grid-template-rows:1fr;align-content:center}.gq .gx-l.eq{align-self:center;gap:6px}
+.gx-l.eq a>span:nth-child(2){display:flex;flex-direction:column;gap:3px;align-items:flex-start;white-space:normal}.gx-l.eq a>span b{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gx-l.eq.r a>span:nth-child(2){align-items:flex-end}
+.mt{font-style:normal;font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;line-height:1;padding:4px 6px 3px;border:1px solid var(--c);color:var(--c);white-space:nowrap}
+.mt.g{background:var(--ink);border-color:var(--ink);color:#0c0d10}
+@media (min-width:761px){.gq .gx-l.eq a{height:var(--h);grid-template-columns:calc(var(--h) + 2px) minmax(0,1fr) auto;font-size:clamp(17px,calc(var(--h)*.2 + 6px),24px)}
+  .gq .gx-l.eq.r a{grid-template-columns:auto minmax(0,1fr) calc(var(--h) + 2px)}.gq .gx-l.eq a img{width:calc(var(--h) + 2px);height:calc(var(--h) - 2px)}
+  .gx-l.eq .rr .st{font-size:clamp(16px,calc(var(--h)*.18 + 6px),22px)}}
+@media (max-width:760px){.gq .gx-l.eq a{height:46px}.gq .gx-l.eq a img{height:44px}.mt{font-size:8px;padding:3px 5px 2px}.gx-l.eq a>span:nth-child(2){gap:2px}}
