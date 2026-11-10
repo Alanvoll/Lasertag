@@ -96,7 +96,7 @@ function mvpDuo(G) {
 const mvpTitle = d => d.game ? "MVP игры" : "MVP команды";
 const vsHtml = g => `<b style="color:${tc(g.teams[0].t)}">${g.teams[0].n}</b> vs <b style="color:${tc(g.teams[1].t)}">${g.teams[1].n}</b>`;
 // ---------- блок «Игры» на главной: большая карточка последней игры (варианты G / H / I) + лента игр ----------
-let GV = (() => { try { const v = localStorage.getItem("lt-gv"); return ["g", "h", "i"].includes(v) ? v : "g"; } catch (e) { return "g"; } })();
+let GV = (() => { try { const v = localStorage.getItem("lt-gv"); return ["g", "h", "i", "j", "k", "l", "m", "n"].includes(v) ? v : "g"; } catch (e) { return "g"; } })();
 const pw = (n, w) => plural(n, w).split(" ")[1];
 // ход игры: как рос счёт по раундам
 function raceChart(G) {
@@ -119,7 +119,36 @@ function gameBig(S, G) {
   const bg = `<div class="bgimg" style="--img:url(${placeArt(G.loc, G.date)})"></div>`;
   const gs = { hits: sum(m.P, p => p.dealt), shots: sum(m.P, p => p.shots), deaths: sum(m.P, p => p.deaths) };
   const kv = [[ru(gs.hits), "попаданий", "hit"], [pct(div(gs.hits, gs.shots)), "точность", "acc"], [ru(gs.deaths), "смертей", "death"], [ru(gs.shots), "выстрелов", "shot"]].map(([v, l, i]) => `<div><b>${v}</b><span>${ic(i)}${l}</span></div>`).join("");
-  let v = GV, body; if (v === "i" && !G.winners.length) v = "h";
+  let v = GV, body; if ((v === "i" || v === "m") && !G.winners.length) v = "h";
+  const noCol = a => !/красн|син(?:и|е|я)|зел[её]н|ж[её]лт/i.test(a[0] + " " + a[2]), aw = (G.awards || []).filter(a => a && a[0] && noCol(a)).slice(0, 4);
+  if (v === "l" && aw.length < 2) v = "h";
+  const lnk = `<a class="lnk mono" href="#${G.key}">разбор игры →</a>`, head = `${tag}<h3>${dG.day} ${dG.monFull}</h3>`;
+  if (v === "j") // «Постер»: как карточка в ленте, только крупно — счёт на арте, внизу тёмная полоса со всем остальным
+    body = `<div class="gj-a">${tag}${score}</div>${G.winners.length ? `<div class="gj-r">${roundsStrip(G)}</div>` : ""}<div class="gj-b"><h3>${dG.day} ${dG.monFull}</h3><div class="mono gb-meta">${esc(G.loc)} · ${vsHtml(G)}${G.kind === "попадания" ? " · счёт по попаданиям" : ""}</div><div class="gj-mv">${duo.map(chip).join("")}</div>${lnk}</div>`;
+  else if (v === "k") { // «Табло»: две половины в цветах команд и сравнение команд по цифрам посередине
+    const ts = G.teams.map(t => { const sg = m.P.flatMap(p => (p.segs || []).filter(x => x.team === t.t)), shots = sum(sg, x => x.shots || 0), deaths = sum(sg, x => x.deaths || 0); return { hits: t.hits, shots, deaths, acc: div(t.hits, shots) }; });
+    const row = (k, l, f, i) => { const a = ts[0][k] || 0, b = ts[1][k] || 0, mx = Math.max(a, b) || 1; return `<div class="gk-row"><b>${f(a)}</b><i class="l" style="--w:${a / mx * 100}%;--c:${tc(G.teams[0].t)}"></i><span>${ic(i)}${l}</span><i style="--w:${b / mx * 100}%;--c:${tc(G.teams[1].t)}"></i><b>${f(b)}</b></div>`; };
+    body = `<div class="gk" style="--c0:${tc(G.teams[0].t)};--c1:${tc(G.teams[1].t)}"><div class="gk-h">${head}</div>
+      <div class="gk-t"><div class="lgn num" style="--c:${tc(G.teams[0].t)}">${ru(G.teams[0].score)}</div>${chip(duo[0])}</div>
+      <div class="gk-c">${row("hits", "попаданий", ru, "hit")}${row("acc", "точность", pct, "acc")}${row("deaths", "смертей", ru, "death")}${row("shots", "выстрелов", ru, "shot")}</div>
+      <div class="gk-t r"><div class="lgn num" style="--c:${tc(G.teams[1].t)}">${ru(G.teams[1].score)}</div>${chip(duo[1])}</div></div>${rounds}`;
+  } else if (v === "l") // «Награды»: слева итог, справа кто чем отличился в этой игре
+    body = `<div class="gl"><div class="gl-l">${head}${score}${meta}</div><div class="gl-r"><div class="mono">награды игры</div><div class="gl-g">${aw.map(([t, names, stat]) => { const n = String(names || "").split(",")[0].trim(); return `<a class="gl-a" href="#${key(n)}"><img src="${portrait(n)}" alt=""><span><small>${esc(t)}</small><b>${esc(n)}</b><em>${esc(stat || "")}</em></span></a>`; }).join("")}</div></div></div>${rounds}`;
+  else if (v === "m") { // «Хроника»: слева итог, справа четыре факта о том, как шла игра
+    const W = G.winners, T = G.teams.map(t => t.t), c = [0, 0]; let run = 0, runT = null, best = [0, null], lead = [0, null], ch = 0, prev = null, half = null;
+    W.forEach((w, i) => { if (w != null) { const k = T.indexOf(w); if (k >= 0) c[k]++; if (w === runT) run++; else { runT = w; run = 1; } if (run > best[0]) best = [run, w];
+        const d = c[0] - c[1], ld = d > 0 ? T[0] : d < 0 ? T[1] : null; if (Math.abs(d) > lead[0]) lead = [Math.abs(d), ld]; if (ld != null && prev != null && ld !== prev) ch++; if (ld != null) prev = ld; }
+      if (i === Math.ceil(W.length / 2) - 1) half = [...c]; });
+    const fact = (v, l, col) => `<div class="gm-f"${col != null ? ` style="--c:${tc(col)}"` : ""}><b class="num">${v}</b><span>${l}</span></div>`;
+    body = `<div class="gl"><div class="gl-l">${head}${score}${meta}</div><div class="gl-r"><div class="mono">как шла игра</div><div class="gl-g">
+      ${fact(best[0], `${pw(best[0], ["раунд", "раунда", "раундов"])} подряд`, best[1])}${fact("+" + lead[0], "самый большой отрыв", lead[1])}
+      ${fact(ch, plural(ch, ["смена лидера", "смены лидера", "смен лидера"]).replace(/^\S+\s/, ""))}${fact(half ? `<i style="color:${tc(T[0])}">${half[0]}</i>:<i style="color:${tc(T[1])}">${half[1]}</i>` : "—", "счёт к середине")}</div></div></div>${rounds}`;
+  } else if (v === "n") { // «Герой»: главный в карточке — MVP игры в полный рост и его цифры
+    const hero = duo.find(d => d.game) || duo[0], other = duo.find(d => d !== hero), hp = m.P.find(p => p.name === hero.name) || {};
+    body = `<div class="gn"><div class="gn-l">${head}${score}${meta}${other ? chip(other) : ""}</div>
+      <a class="gn-h" href="#${key(hero.name)}" style="--c:${tc(hero.t)}"><div class="gn-f"><img src="${figure(hero.name)}" alt=""></div><div class="gn-t"><small class="mono">${mvpTitle(hero)}</small><b>${esc(hero.name)}</b>
+      <div class="gn-k">${[["star", ru(hero.rating), "рейтинг"], ["hit", ru(hp.dealt || hero.dealt), "попал"], ["acc", pct(hp.acc), "точность"], ["death", ru(hp.deaths || 0), "смертей"]].map(([i, x, l]) => `<div><b>${x}</b><span>${ic(i)}${i === "star" ? "" : l}</span></div>`).join("")}</div></div></a></div>${rounds}`;
+  } else
   if (v === "h") // «Дуэль»: как на главной, только крупно — два портрета лучших по краям, счёт и цифры игры между ними
     body = `<div class="gh">${card(duo[0])}<div class="gh-m">${tag}<h3>${dG.day} ${dG.monFull}</h3>${score}<div class="mono gb-meta">${vsHtml(G)}${G.rounds ? ` · <b>${G.rounds}</b> ${pw(G.rounds, ["раунд", "раунда", "раундов"])}` : ""}</div><div class="gh-k">${kv}</div></div>${card(duo[1])}</div>${rounds}`;
   else if (v === "i") // «Ход игры»: слева итог, справа как рос счёт по раундам
