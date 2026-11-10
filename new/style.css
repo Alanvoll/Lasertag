@@ -1094,3 +1094,4 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
   .gx-l.eq a>.mts{grid-column:2/4;grid-row:2;flex-direction:row;flex-wrap:wrap;max-height:none;margin:0;align-self:start;justify-content:flex-start;align-content:flex-start;gap:3px}.gx-l.eq a.hb>img{grid-row:1}}
 /* число в значке: у лучшего в команде в цвете команды, у лучшего в игре белое */
 .mt:not(.g) b{color:var(--c);-webkit-text-fill-color:var(--c)}.mt.g b{color:var(--gb,var(--ink));-webkit-text-fill-color:var(--gb,var(--ink))}
+.mt.n{border-color:var(--mute);color:var(--ink)}.mt.n .ic{color:var(--uv2)}
