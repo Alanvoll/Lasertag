@@ -87,10 +87,10 @@ function miniStrip(cards, cur) {
 }
 // два MVP на игру: лучший в каждой команде; тот из них, кто MVP игры, получает титул «MVP игры» вместо «MVP команды».
 // если MVP игры менял команду и не лучший ни в одной, он занимает место в команде, за которую сыграл больше
-function mvpDuo(G) {
+function mvpDuo(G, pure) { // pure — только MVP команд, без подстановки MVP игры на место MVP команды
   const m = G.m, top = m.mvp;
   const duo = G.teams.map(t => { const p = m.P.find(x => x.name === t.mvp); return { t: t.t, name: t.mvp, rating: p ? p.mvp : 0, dealt: p ? p.dealt : t.mvpDealt, game: p === top }; }); // цифры игрока — за всю игру, даже если он менял команду
-  if (top && !duo.some(d => d.game)) { const tt = [...top.teams].sort((a, b) => m.shareT(top, b) - m.shareT(top, a))[0], d = duo.find(x => x.t === tt) || duo[0]; Object.assign(d, { name: top.name, rating: top.mvp, dealt: top.dealt, game: true }); }
+  if (!pure && top && !duo.some(d => d.game)) { const tt = [...top.teams].sort((a, b) => m.shareT(top, b) - m.shareT(top, a))[0], d = duo.find(x => x.t === tt) || duo[0]; Object.assign(d, { name: top.name, rating: top.mvp, dealt: top.dealt, game: true }); }
   return duo;
 }
 const mvpTitle = d => d.game ? "MVP игры" : "MVP команды";
@@ -117,14 +117,15 @@ function gameBig(S, G) {
     const row = (k, l, f, i, low) => { const a = ts[0][k] || 0, b = ts[1][k] || 0, mx = Math.max(a, b) || 1, w = a === b || low === 0 ? -1 : (a > b) !== !!low ? 0 : 1;
       return `<div class="gk-row"><b${w === 1 ? ` class="lo"` : ""}>${f(a)}</b><i class="l" style="--w:${a / mx * 100}%;--c:${c0}"></i><span>${ic(i)}${l}</span><i style="--w:${b / mx * 100}%;--c:${c1}"></i><b${w === 0 ? ` class="lo"` : ""}>${f(b)}</b></div>`; };
     const rows = `<div class="gk-c">${row("rs", "в среднем за все игры", ru, "star")}${row("rt", "в этой игре", ru, "star")}${row("hits", "попаданий", ru, "hit")}${row("acc", "точность", pct, "acc")}${row("hd", "попаданий на смерть", one, "hit")}${row("deaths", "смертей", ru, "death", 1)}${row("shots", "выстрелов", ru, "shot", 0)}</div>`;
+    const dq = v === "k" ? duo : mvpDuo(G, true), gm = p => p === m.mvp && !dq.some(d => d.game); // в x/y портреты всегда у MVP команд; MVP игры, если он не один из них, отмечен в составе
     // сколько раундов игрок, менявший команду, сыграл за эту команду
     const rn = (p, t) => { if (!p.swap || !p.segRounds) return null; const n = q => sum(q, ([a, b]) => b - a + 1); return [n(p.segRounds.filter((_, k) => p.segs[k].team === t)), n(p.segRounds)]; };
     const rb = (p, t) => { const r = rn(p, t); if (!r && p.swap) return `<i class="rb" title="За эту команду сыграл примерно ${pct(m.shareT(p, t))} игры (по выстрелам, раунды не записаны)">${ic("round")}≈${Math.round(m.shareT(p, t) * 100)}%</i>`; return r ? `<i class="rb" title="За эту команду сыграл ${plural(r[0], ["раунд", "раунда", "раундов"])} из ${r[1]}">${ic("round")}${r[0]}/${r[1]}</i>` : ""; };
-    const cardR = k => { const d = duo[k], p = m.P.find(x => x.name === d.name); return card(d).replace("<span>", (p ? rb(p, d.t) : "") + "<span>"); };
+    const cardR = k => { const d = dq[k], p = m.P.find(x => x.name === d.name); return card(d).replace("<span>", (p ? rb(p, d.t) : "") + "<span>"); };
     // остальные игроки команды (без тех, кто на портретах) с рейтингом, лучшие сверху
-    const rest = k => { const t = G.teams[k].t, L = m.P.filter(p => p.teams.includes(t) && p.name !== duo[k].name).sort((a, b) => (m.shareT(b, t) > .5) - (m.shareT(a, t) > .5) || b.mvp - a.mvp), g = p => m.shareT(p, t) <= .5 ? " sw" : ""; // sw — менял команду и за эту сыграл меньшую часть игры
-      return v === "y" ? `<div class="gy-l${k ? " r" : ""}${L.length > 6 ? " many" : L.length > 4 ? " tight" : ""}" style="--c:${tc(t)}">${L.map(p => `<a class="gy-c${g(p)}" href="#${key(p.name)}">${rb(p, t)}<img src="${portrait(p.name)}" alt=""><span><b>${esc(p.name)}</b>${st("star", ru(p.mvp))}</span></a>`).join("")}</div>`
-        : `<div class="gx-l${k ? " r" : ""}" style="--c:${tc(t)}">${L.map(p => `<a class="${g(p).trim()}" href="#${key(p.name)}"><span>${esc(p.name)}${rb(p, t)}</span>${st("star", ru(p.mvp))}</a>`).join("")}</div>`; };
+    const rest = k => { const t = G.teams[k].t, L = m.P.filter(p => p.teams.includes(t) && p.name !== dq[k].name).sort((a, b) => (m.shareT(b, t) > .5) - (m.shareT(a, t) > .5) || b.mvp - a.mvp), g = p => m.shareT(p, t) <= .5 ? " sw" : ""; // sw — менял команду и за эту сыграл меньшую часть игры
+      return v === "y" ? `<div class="gy-l${k ? " r" : ""}${L.length > 6 ? " many" : L.length > 4 ? " tight" : ""}" style="--c:${tc(t)}">${L.map(p => `<a class="gy-c${g(p)}${gm(p) ? " g" : ""}" href="#${key(p.name)}">${rb(p, t)}<img src="${portrait(p.name)}" alt=""><span>${gm(p) ? `<small>MVP игры</small>` : ""}<b>${esc(p.name)}</b>${st("star", ru(p.mvp))}</span></a>`).join("")}</div>`
+        : `<div class="gx-l${k ? " r" : ""}" style="--c:${tc(t)}">${L.map(p => `<a class="${g(p).trim()}" href="#${key(p.name)}"><span>${esc(p.name)}${rb(p, t)}${gm(p) ? `<small>MVP игры</small>` : ""}</span>${st("star", ru(p.mvp))}</a>`).join("")}</div>`; };
     const side = (k, r) => `<div class="gk-t${r}"><div class="lgn num" style="--c:${tc(G.teams[k].t)}">${ru(G.teams[k].score)}</div>${chip(duo[k])}</div>`;
     body = v === "y" ? `<div class="gx gy" style="--c0:${c0};--c1:${c1}">${cardR(0)}<div class="gx-m"><div class="gx-c"><div class="gk-h">${head}</div>${score}</div>${rows}<div class="gy-r">${rest(0)}${rest(1)}</div></div>${cardR(1)}</div>${rounds}`
       : v === "x" ? `<div class="gx" style="--c0:${c0};--c1:${c1}">${cardR(0)}<div class="gx-m"><div class="gx-t">${rest(0)}<div class="gx-c"><div class="gk-h">${head}</div>${score}</div>${rest(1)}</div>${rows}</div>${cardR(1)}</div>${rounds}`
