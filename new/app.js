@@ -122,9 +122,8 @@ function viewHome(S) {
   <div class="home2 h2b">
     ${panel("lastc lg2 A", `<div class="hd"><h3>${dL.day} ${dL.monFull}</h3><span class="mono">${esc(L.loc)} · ${vsHtml(L)}${L.rounds ? ` · <b>${L.rounds}</b> ${plural(L.rounds, ["раунд", "раунда", "раундов"]).split(" ")[1]}` : ""}</span></div>
       <div class="lgb"><div class="lgl A">
-        
-        ${scoreHtml(L)}
-        <div class="lgm">${L.teams.map((t, k) => `<a class="lgmv${k ? " r" : ""}" href="#${(S.rows.find(r => r.name === t.mvp) || {}).key || L.key}" style="--c:${tc(t.t)}"><img src="${portrait(t.mvp)}" alt=""><span><small>MVP команды</small><b>${esc(t.mvp)}</b><em>${t.mvpDealt} попаданий</em></span></a>`).join("")}</div>
+        ${L.teams.map((t, k) => `<div class="lgn num" style="--c:${tc(t.t)};grid-column:${k ? 3 : 1}">${ru(t.score)}</div>`).join(`<i class="lgx"><b></b><b></b></i>`)}
+        ${L.teams.map((t, k) => `<a class="lgmv" href="#${(S.rows.find(r => r.name === t.mvp) || {}).key || L.key}" style="--c:${tc(t.t)};grid-column:${k ? 3 : 1}"><img src="${portrait(t.mvp)}" alt=""><small>MVP команды</small><b>${esc(t.mvp)}</b><em>рейтинг ${ru(L.m.mvpT(L.m.P.find(p => p.name === t.mvp), t.t))} · ${t.mvpDealt} поп.</em></a>`).join("")}
       </div><div class="lgr A">
         <a class="lgmvp" href="#${(S.rows.find(r => r.name === L.top) || {}).key || L.key}"><img src="${portrait(L.top)}" alt=""><span><small>MVP игры</small><b>${esc(L.top)}</b><em>рейтинг ${ru(L.m.mvp.mvp)} · ${L.m.mvp.dealt} попаданий</em></span></a>
         <div class="gkv"><div><b>${ru(gS.hits)}</b><span>попаданий</span></div><div><b>${pct(gS.acc)}</b><span>точность</span></div><div><b>${ru(gS.deaths)}</b><span>смертей</span></div><div><b>${ru(gS.shots)}</b><span>выстрелов</span></div></div>
