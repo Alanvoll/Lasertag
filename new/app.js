@@ -18,11 +18,9 @@ function avaOf(name) {
 const portrait = n => `art/av/unknown.jpg`, figure = n => `art/body/unknown.webp`;
 const TEAM_HEX = { 0: "var(--red)", 1: "var(--blue)", 2: "var(--yellow)", 3: "var(--green)" };
 const tc = t => TEAM_HEX[t];
-const GUN_ART = [["p90", "p90"], ["винторез", "vintorez"], ["пистолет", "pistol"], ["феникс", "phoenix"], ["ar15", "ar15"], ["скорпион", "scorpion"], ["комар", "komar"], ["гадюка", "gadyuka"], ["хищник", "predator"]];
-// старый арт пушек (GUN_ART) Антон забраковал 06.11 — пока у всех пушек заглушка «неизвестная пушка»: автомат или пистолет, вариант по имени
-const GUN_OWN = false;
-const gunArt = g => { const n = (g.name || "").toLowerCase(); const f = GUN_OWN && GUN_ART.find(([k]) => n.includes(k)); if (f) return `art/gun/${f[1]}.webp`;
-  let h = 0; for (const ch of n) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return `art/gun/unknown-${/пистолет/.test(n) ? "pistol" : "rifle"}-${1 + h % 2}.webp`; };
+// арт пушек (10.11): у каждой модели свой рисунок; все «фениксы» — одна модель, «акашка» — прежнее имя Хищника
+const GUN_ART = [["p90", "p90"], ["винторез", "vintorez"], ["пистолет", "pistol"], ["феникс", "phoenix"], ["ar15", "ar15"], ["скорпион", "scorpion"], ["комар", "komar"], ["гадюка", "gadyuka"], ["хищник", "predator"], ["акашка", "predator"], ["аксу", "aksu"]];
+const gunArt = g => { const n = (g.name || "").toLowerCase(), f = GUN_ART.find(([k]) => n.includes(k)); return `art/gun/${f ? f[1] : g.cls === "pistol" ? "unknown-pistol" : "unknown-rifle"}.webp`; };
 const PLACE_ART = { "Склады": ["art/place/sklady-1.webp", "art/place/sklady-2.webp"], "Зубр": ["art/place/zubr-1.webp", "art/place/zubr-2.webp"] };
 // у каждой площадки несколько картинок: игра берёт свою по дате, чтобы соседние игры отличались
 const placeArt = (l, key = "") => { const a = PLACE_ART[l]; if (!a) return "art/place/empty.webp"; let h = 0; for (const ch of String(key)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return a[h % a.length]; };
