@@ -528,13 +528,14 @@ function viewGame(S, key) {
   // кто в кого
   const maxT = Math.max(1, ...g.hits.map(h => h[3]));
   // общая таблица дуэлей игры: все игроки по строкам и столбцам, сначала одна команда, потом другая, внутри по рейтингу дуэлей
-  const dT = (() => { const D = duelData({ models: [m] }, ""), ix = n => D.N.indexOf(n), tm = p => [...p.teams].sort((a, b) => m.shareT(p, b) - m.shareT(p, a))[0];
-    const O = [...P].sort((a, b) => teamIds.indexOf(tm(a)) - teamIds.indexOf(tm(b)) || D.bt[ix(b.name)] - D.bt[ix(a.name)]), w = p => (D.bt[ix(p.name)] / 100).toFixed(1).replace(".", ","), cl = (g, t) => g > t ? "up" : g < t ? "dn" : "";
+  const dTb = split => { const D = duelData({ models: [m] }, ""), ix = n => D.N.indexOf(n), tm = p => [...p.teams].sort((a, b) => m.shareT(p, b) - m.shareT(p, a))[0];
+    const O = [...P].sort((a, b) => (split ? teamIds.indexOf(tm(a)) - teamIds.indexOf(tm(b)) : 0) || D.bt[ix(b.name)] - D.bt[ix(a.name)]), w = p => (D.bt[ix(p.name)] / 100).toFixed(1).replace(".", ","), cl = (g, t) => g > t ? "up" : g < t ? "dn" : "";
     const mx = Math.max(1, ...O.flatMap(a => O.map(b => D.G[ix(a.name)][ix(b.name)] + D.G[ix(b.name)][ix(a.name)])));
-    return panel("tbl", `<div class="sc" style="--h:none"><table class="mx dmx gdt sticky1"><thead><tr><th class="l wl">вес попадания<br>по сопернику</th>${O.map(b => `<th class="t" style="--c:${tc(tm(b))}">${esc(b.name)}<small class="num">×${w(b)}</small></th>`).join("")}<th>Всего</th><th>Попал /<br>получил</th><th class="rt">Рейтинг<br>дуэлей</th></tr></thead>
-      <tbody>${O.map((a, k) => { const i = ix(a.name); return `<tr class="${k && tm(O[k - 1]) !== tm(a) ? "sep" : ""}"><td class="l" style="--c:${tc(tm(a))}">${who(a)}</td>${O.map(b => { const j = ix(b.name); if (a === b) return `<td class="tot">—</td>`; const g = D.G[i][j], t = D.G[j][i]; if (!g && !t) return `<td class="tot"></td>`;
-        return `<td class="cell num" style="--a:${Math.round((g + t) / mx * 42)}%"><b class="${cl(g, t)}">${g} : ${t}</b></td>`; }).join("")}<td class="num"><b>${ru(a.dealt)} : ${ru(a.recv)}</b></td><td class="num dk ${cl(a.dealt, a.recv)}">${r2(a.ratio)}</td><td class="rt num">${D.bt[i]}</td></tr>`; }).join("")}</tbody></table></div>
-      <div class="ft">В клетке всё с точки зрения игрока из строки: попал : получил, зелёным, если перестрелял соперника, красным, если проиграл. Под именами в шапке вес одного попадания по этому сопернику: по сильному стоит больше одного, по слабому меньше. Рейтинг дуэлей это тот же вес, умноженный на 100, он считается только по этой игре, 100 это средний игрок. Пустые клетки: игроки были в одной команде.</div>`); })();
+    return `<div class="sc" data-dsplit="${split ? 1 : 0}" style="--h:none"><table class="mx dmx gdt sticky1"><thead><tr><th class="l wl">вес попадания<br>по сопернику</th>${O.map(b => `<th class="t" style="--c:${tc(tm(b))}">${esc(b.name)}<small class="num">×${w(b)}</small></th>`).join("")}<th>Попал /<br>получил</th><th class="rt">Рейтинг<br>дуэлей</th></tr></thead>
+      <tbody>${O.map((a, k) => { const i = ix(a.name); return `<tr class="${split && k && tm(O[k - 1]) !== tm(a) ? "sep" : ""}"><td class="l" style="--c:${tc(tm(a))}">${who(a)}</td>${O.map(b => { const j = ix(b.name); if (a === b) return `<td class="tot">—</td>`; const g = D.G[i][j], t = D.G[j][i]; if (!g && !t) return `<td class="tot"></td>`;
+        return `<td class="cell num" style="--a:${Math.round((g + t) / mx * 42)}%"><b class="${cl(g, t)}">${g} : ${t}</b></td>`; }).join("")}<td class="num dk ${cl(a.dealt, a.recv)}">${r2(a.ratio)}<small>${ru(a.dealt)} : ${ru(a.recv)}</small></td><td class="rt num">${D.bt[i]}</td></tr>`; }).join("")}</tbody></table></div>`; };
+  const dT = panel("tbl", `<label class="dsp"><input type="checkbox" data-dsplit-t><span>Делить на команды</span></label>${dTb(true)}${dTb(false)}
+      <div class="ft">В клетке всё с точки зрения игрока из строки: попал : получил, зелёным, если перестрелял соперника, красным, если проиграл. Под именами в шапке вес одного попадания по этому сопернику: по сильному стоит больше одного, по слабому меньше. Рейтинг дуэлей это тот же вес, умноженный на 100, он считается только по этой игре, 100 это средний игрок. В последних колонках итог игрока: попал / получил и под ним сами числа. Пустые клетки: игроки были в одной команде.</div>`);
   const grids = teamIds.map(t => {
     const att = inTeam(t).sort((a, b) => sum(P, v => valT(b, v, t)) - sum(P, v => valT(a, v, t)));
     const vic = P.filter(p => p.teams.some(z => z !== t)).sort((a, b) => sum(P, k => valT(k, b, t)) - sum(P, k => valT(k, a, t)));
@@ -580,6 +581,10 @@ function gameInit(S, key) {
   };
   document.querySelectorAll("[data-gmode] button").forEach(b => b.onclick = () => { gameMode = b.dataset.gmode; draw(); });
   draw(); tabsInit(document.getElementById("app"));
+  const dc = document.querySelector("[data-dsplit-t]");
+  if (dc) { const ap = () => document.querySelectorAll("[data-dsplit]").forEach(e => e.hidden = (e.dataset.dsplit === "1") !== dc.checked);
+    let v = "1"; try { v = localStorage.getItem("lt-dsplit") || "1"; } catch (e) {}
+    dc.checked = v === "1"; ap(); dc.onchange = () => { try { localStorage.setItem("lt-dsplit", dc.checked ? "1" : "0"); } catch (e) {} ap(); }; }
 }
 
 // ---------- игрок ----------

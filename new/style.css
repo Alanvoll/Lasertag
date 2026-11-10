@@ -1111,3 +1111,9 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .gdt tr.sep td{border-top:2px solid var(--line)}.gdt th{cursor:default}
 .gdt td.dk,.gdt td.rt,.gdt td.num{text-align:center}.gdt td.dk{background:none;border-left:1px solid var(--line2)}
 td.cal{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
+
+/* таблица дуэлей игры: общий итог одной колонкой и галочка деления на команды */
+.gdt td.dk small{display:block;font-size:11px;font-weight:600;color:var(--mute);margin-top:2px;white-space:nowrap}
+.dsp{display:flex;align-items:center;gap:8px;padding:12px 16px;font-size:13px;cursor:pointer;width:max-content;user-select:none}
+.dsp input{width:16px;height:16px;accent-color:var(--ink);cursor:pointer}
+.sc[hidden]{display:none}
