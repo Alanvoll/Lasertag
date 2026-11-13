@@ -1153,3 +1153,8 @@ td.rtc small.up{color:var(--green)}td.rtc small.dn{color:var(--red)}
 .le-c .sts .rgm{margin-left:12px}.le-c .sts .rgm b{font-size:15px;font-weight:800}.le-c .sts .rgm .ic{width:13px;height:13px}.rgm u{font-size:11px}
 .le-c .sts{white-space:nowrap}.lg2 .le-c .sts .rgm{margin-left:8px;gap:2px}.lg2 .le-c .sts .rgm u{margin-left:2px}
 td.grt small.rd{font-family:var(--mono);font-size:10px;font-weight:400;margin-left:6px;color:var(--mute);display:inline-block;min-width:30px;text-align:left}td.grt small.up{color:var(--green)}td.grt small.dn{color:var(--red)}
+
+/* 13.11 составы: цифры по колонкам */
+.gx-l .rr{display:grid;grid-template-columns:50px 28px auto;align-items:baseline;justify-items:start;column-gap:0}
+.gx-l .rr .st{justify-self:stretch;justify-content:space-between;gap:4px}.gx-l .rr .tp{margin-left:6px;min-width:22px;text-align:right}
+.gx-l .rr .rgm{margin-left:14px}.gx-l .rr .rgm b{min-width:32px}.gx-l .rr .rgm u{min-width:36px}
