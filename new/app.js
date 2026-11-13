@@ -325,12 +325,12 @@ function stripInit(el) {
 // ---------- экран «Дуэли»: кто в кого сколько попал + рейтинг по дуэлям ----------
 // Рейтинг по дуэлям: каждому подбирается сила так, чтобы она лучше всего объясняла все личные перестрелки сразу
 // (модель Брэдли–Терри по попаданиям, 3 условных обмена со средним игроком как страховка, 100 = средний игрок).
-const DU = { loc: "", min: 3 }, PIST_W = 0.9;
+const DU = { loc: "", min: 3 }, PIST_W = 1; // поправка на пистолет выключена (13.11); если включать, договорились о 0,9
 function duelData(S, loc) {
   const ms = S.models.filter(m => !loc || m.g.location === loc), N = [], ix = {}, games = [];
   ms.forEach(m => m.P.forEach(p => { if (!(p.name in ix)) { ix[p.name] = N.length; N.push(p.name); games.push(0); } games[ix[p.name]]++; }));
   const n = N.length, G = N.map(() => N.map(() => 0)), W = N.map(() => N.map(() => 0)), MT = N.map(() => N.map(() => 0));
-  // попадание по пистолету (5 жизней) в рейтинге весит 0,9 обычного (середина между «без поправки» и 4/5, решение 13.11); если игрок был на пистолете часть игры, вес по доле полученного на нём
+  // попадание по пистолету (5 жизней) в рейтинге может весить меньше обычного (PIST_W; сейчас 1 = без поправки, кандидат 0,9); если игрок был на пистолете часть игры, вес по доле полученного на нём
   const pw = c => { if (c.parts) { const us = gunUnits(c), all = sum(us, u => u.recv), pi = sum(us.filter(u => clsOf(u) === "pistol"), u => u.recv); return all ? 1 - (1 - PIST_W) * pi / all : 1; } return clsOf(c) === "pistol" ? PIST_W : 1; };
   ms.forEach(m => m.P.forEach(a => m.P.forEach(c => { if (a === c) return; const v = m.val(a, c); G[ix[a.name]][ix[c.name]] += v; W[ix[a.name]][ix[c.name]] += v * pw(c); if (v + m.val(c, a) > 0) MT[ix[a.name]][ix[c.name]]++; })));
   let s = N.map(() => 1); const prior = 3;
@@ -345,7 +345,7 @@ function viewDuels(S) {
     <div class="agf du-f"><div class="seg" data-dloc><button data-loc="">все игры</button>${locs.map(l => `<button data-loc="${esc(l)}">${esc(l)} · ${S.models.filter(m => m.g.location === l).length}</button>`).join("")}</div>
       <label class="du-r"><span class="mono">сыграл от <b id="duN"></b></span><input type="range" id="duMin" min="1" step="1"></label></div></div>
   ${panel("tbl", `<div class="sc" style="--h:none"><table class="mx dmx sticky1" id="duT"></table></div>
-    <div class="ft">В клетке: попал : получил, под счётом коэффициент (попал, делённое на получил) и сколько игр встречались. Чем ярче фон, тем больше встреч и тем надёжнее счёт. ${ic("star")} по дуэлям: сила, которая лучше всего объясняет все личные перестрелки сразу. Перестрелять сильного стоит дороже, чем слабого, 100 это средний игрок. Попадание по пистолету в рейтинге весит 0,9 обычного: у него 5 жизней. Считается по всем, кто играл, бегунок только прячет строки.</div>`)}
+    <div class="ft">В клетке: попал : получил, под счётом коэффициент (попал, делённое на получил) и сколько игр встречались. Чем ярче фон, тем больше встреч и тем надёжнее счёт. ${ic("star")} по дуэлям: сила, которая лучше всего объясняет все личные перестрелки сразу. Перестрелять сильного стоит дороже, чем слабого, 100 это средний игрок. Считается по всем, кто играл, бегунок только прячет строки.</div>`)}
   </div>`;
 }
 function duelsInit(S) {
