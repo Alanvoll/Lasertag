@@ -929,7 +929,7 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .dmx td.l{font-weight:700;white-space:nowrap}.dmx td.l small{font-family:var(--mono);font-weight:400;letter-spacing:.08em;text-transform:uppercase}
 .dmx td b{display:block;font-weight:600;white-space:nowrap}
 .dmx td em{display:block;font-style:normal;font-weight:700;font-size:15px;color:var(--mute)}.dmx em.up{color:var(--green)}.dmx em.dn{color:var(--red)}
-.dmx td.rt{font-family:var(--disp);font-size:24px;font-weight:800;color:var(--uv2);border-left:0;border-right:1px solid var(--line)}
+.dmx td.rt{font-family:var(--disp);font-size:24px;font-weight:800;color:var(--uv2);border-left:1px solid var(--line);border-right:0}
 .dmx th.rt{color:var(--uv2);white-space:nowrap}.dmx th.rt svg{vertical-align:-2px}
 @media (max-width:760px){.du-f{gap:10px}.du-r input{width:140px}.dmx td{padding:6px 6px;font-size:13px}.dmx td em{font-size:13px}.dmx td.rt{font-size:19px}}
 

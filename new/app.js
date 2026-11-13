@@ -352,9 +352,9 @@ function duelsInit(S) {
     root.querySelector("#duN").textContent = plural(DU.min, ["игры", "игр", "игр"]);
     root.querySelectorAll("[data-dloc] button").forEach(b => b.setAttribute("aria-pressed", b.dataset.loc === DU.loc));
     const I = D.N.map((_, i) => i).filter(i => D.games[i] >= DU.min).sort((a, b) => D.bt[b] - D.bt[a] || D.games[b] - D.games[a]);
-    T.innerHTML = `<thead><tr><th class="l">игрок \\ соперник</th><th class="rt">${ic("star")} по дуэлям</th>${I.map(j => `<th>${esc(D.N[j])}</th>`).join("")}</tr></thead>
-    <tbody>${I.map(i => `<tr><td class="l"><a class="pl" href="#${key(D.N[i])}">${esc(D.N[i])}</a><small>${plural(D.games[i], ["игра", "игры", "игр"])}</small></td><td class="rt num">${D.bt[i]}</td>${I.map(j => { if (i === j) return `<td class="tot">—</td>`; const m = D.MT[i][j]; if (!m) return `<td class="tot" title="не встречались">·</td>`; const g = D.G[i][j], t = D.G[j][i];
-      return `<td class="cell num" style="--a:${Math.min(46, 7 * m)}%"><b>${g} : ${t}</b><em class="${g > t ? "up" : g < t ? "dn" : ""}">${t ? r2(g / t) : "∞"}</em><small>${plural(m, ["игра", "игры", "игр"])}</small></td>`; }).join("")}</tr>`).join("")}</tbody>`; };
+    T.innerHTML = `<thead><tr><th class="l">игрок \\ соперник</th>${I.map(j => `<th>${esc(D.N[j])}</th>`).join("")}<th class="rt">${ic("star")} по дуэлям</th></tr></thead>
+    <tbody>${I.map(i => `<tr><td class="l"><a class="pl" href="#${key(D.N[i])}">${esc(D.N[i])}</a><small>${plural(D.games[i], ["игра", "игры", "игр"])}</small></td>${I.map(j => { if (i === j) return `<td class="tot">—</td>`; const m = D.MT[i][j]; if (!m) return `<td class="tot" title="не встречались">·</td>`; const g = D.G[i][j], t = D.G[j][i];
+      return `<td class="cell num" style="--a:${Math.min(46, 7 * m)}%"><b>${g} : ${t}</b><em class="${g > t ? "up" : g < t ? "dn" : ""}">${t ? r2(g / t) : "∞"}</em><small>${plural(m, ["игра", "игры", "игр"])}</small></td>`; }).join("")}<td class="rt num">${D.bt[i]}</td></tr>`).join("")}</tbody>`; };
   R.oninput = () => { DU.min = +R.value; draw(); };
   root.querySelectorAll("[data-dloc] button").forEach(b => b.onclick = () => { DU.loc = b.dataset.loc; draw(); });
   draw();
