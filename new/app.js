@@ -88,8 +88,8 @@ function mvpDuo(G, pure) { // pure — только MVP команд, без п�
   if (!pure && top && !duo.some(d => d.game)) { const tt = [...top.teams].sort((a, b) => m.shareT(top, b) - m.shareT(top, a))[0], d = duo.find(x => x.t === tt) || duo[0]; Object.assign(d, { name: top.name, rating: top.mvp, dealt: top.dealt, game: true }); }
   return duo;
 }
-// лучший по рейтингу после игры в каждой команде (среди сыгравших за неё большую часть игры)
-function rtDuo(S, G) { const m = G.m, rec = stepRating(S).by.get(m) || {}, rv = p => (rec[p.name] || {}).r || 0;
+// лучший по рейтингу за эту игру в каждой команде (среди сыгравших за неё большую часть игры)
+function rtDuo(S, G) { const m = G.m, rec = stepRating(S).by.get(m) || {}, rv = p => (rec[p.name] || {}).g || 0; // g — на какой рейтинг игрок отыграл именно эту игру
   return G.teams.map(t => { const L = m.P.filter(p => p.teams.includes(t.t) && m.shareT(p, t.t) > .5), p = L.length ? L.reduce((a, b) => rv(b) > rv(a) ? b : a) : null; return p ? { t: t.t, name: p.name, dealt: p.dealt, game: false } : mvpDuo(G, true).find(d => d.t === t.t); }); }
 const mvpTitle = d => d.game ? "MVP игры" : "MVP команды";
 const vsHtml = g => `<b style="color:${tc(g.teams[0].t)}">${g.teams[0].n}</b> vs <b style="color:${tc(g.teams[1].t)}">${g.teams[1].n}</b>`;
@@ -119,7 +119,7 @@ function gameBig(S, G) {
     const row = (k, l, f, i, low) => { const a = ts[0][k] || 0, b = ts[1][k] || 0, mx = Math.max(a, b) || 1, w = a === b || low === 0 ? -1 : (a > b) !== !!low ? 0 : 1;
       return `<div class="gk-row"><b${w === 1 ? ` class="lo"` : ""}>${f(a)}</b><i class="l" style="--w:${a / mx * 100}%;--c:${c0}"></i><span>${ic(i)}${l}</span><i style="--w:${b / mx * 100}%;--c:${c1}"></i><b${w === 0 ? ` class="lo"` : ""}>${f(b)}</b></div>`; };
     const rows = `<div class="gk-c">${row("rs", "в среднем за все игры", ru, "star")}${row("rt", "в этой игре", ru, "star")}${row("hits", "попаданий", ru, "hit")}${row("acc", "точность", pct, "acc")}${row("hd", "попаданий на смерть", one, "hit")}${row("deaths", "смертей", ru, "death", 1)}${row("shots", "выстрелов", ru, "shot", 0)}</div>`;
-    const dq = v === "k" ? duo : rtDuo(S, G), rvr = p => ((stepRating(S).by.get(m) || {})[p.name] || {}).r || 0, gm = p => p === m.mvp && !dq.some(d => d.game); // в x/y портреты всегда у MVP команд; MVP игры, если он не один из них, отмечен в составе
+    const dq = v === "k" ? duo : rtDuo(S, G), rvr = p => ((stepRating(S).by.get(m) || {})[p.name] || {}).g || 0, gm = p => p === m.mvp && !dq.some(d => d.game); // в x/y портреты всегда у MVP команд; MVP игры, если он не один из них, отмечен в составе
     // сколько раундов игрок, менявший команду, сыграл за эту команду
     const rn = (p, t) => { if (!p.swap || !p.segRounds) return null; const n = q => sum(q, ([a, b]) => b - a + 1); return [n(p.segRounds.filter((_, k) => p.segs[k].team === t)), n(p.segRounds)]; };
     const rb = (p, t) => { const r = rn(p, t); if (!r && p.swap) return `<i class="rb" title="За эту команду сыграл примерно ${pct(m.shareT(p, t))} игры (по выстрелам, раунды не записаны)">${ic("round")}≈${Math.round(m.shareT(p, t) * 100)}%</i>`; return r ? `<i class="rb" title="За эту команду сыграл ${plural(r[0], ["раунд", "раунда", "раундов"])} из ${r[1]}">${ic("round")}${r[0]}/${r[1]}</i>` : ""; };
