@@ -1142,3 +1142,6 @@ td.rtc small{font-family:var(--mono);font-size:10px;margin-left:8px;color:var(--
 .le-c .sts .rmv b{font:inherit;font-weight:700;color:var(--uv2);margin:0}.gx-l .rr .rmv{margin-right:8px;font-size:11px}.gx-l.r .rr .rmv{margin-right:8px}
 .rmv u{opacity:1;font-weight:700;font-size:1.15em;line-height:1;color:var(--ink)}.rmv u.up{color:var(--green)}.rmv u.dn{color:var(--red)}
 td.rtc small.up{color:var(--green)}td.rtc small.dn{color:var(--red)}
+.gx-l.r .rb{margin:0 7px 0 0}
+@media (min-width:761px){.gq{gap:16px}.gq .gx-l a{gap:8px;font-size:16px}.gx-l .rr .rmv{margin-right:6px;gap:2px}.gx-l .rb{margin-left:5px}.gx-l.r .rb{margin:0 5px 0 0}}
+.gq .gx-l a[style*="--cb"] img{border-image:var(--cb) 1;border-left-width:3px}.gq .gx-l.r a[style*="--cb"] img{border-left-width:0;border-right-width:3px}
