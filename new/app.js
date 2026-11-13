@@ -279,11 +279,18 @@ function homeInit(S) {
 // ПК: один жест колеса или тачпада = один блок; на телефоне скролл свободный (см. style.css)
 (() => {
   const main = document.getElementById("main"), wide = matchMedia("(min-width:981px)");
-  let locked = false, lockAt = 0, quiet = 0, tgt = -1, animEnd = 0;
+  let locked = false, lockAt = 0, quiet = 0, tgt = -1, animEnd = 0, lastW = 0, hopAt = 0;
+  const CHAIN = ["s4", "itogi", "duels"];
   const scrollable = (t, dy) => { for (let n = t; n && n !== main; n = n.parentElement) { if (n.nodeType !== 1) continue; const oy = getComputedStyle(n).overflowY;
       if ((oy === "auto" || oy === "scroll") && n.scrollHeight > n.clientHeight + 1) { if (dy > 0 ? n.scrollTop + n.clientHeight < n.scrollHeight - 1 : n.scrollTop > 1) return true; } } return false; };
   main.addEventListener("wheel", e => {
-    if (!wide.matches || !main.classList.contains("snap") || e.ctrlKey || e.defaultPrevented) return;
+    if (!wide.matches || e.ctrlKey || e.defaultPrevented) return;
+    if (!main.classList.contains("snap")) { // «Итоги» и «Дуэли» продолжают ленту: пушки → итоги → дуэли
+      const h = location.hash.slice(1), k = CHAIN.indexOf(h), t0 = lastW; lastW = performance.now(); if (k < 1 || Math.abs(e.deltaX) > Math.abs(e.deltaY) || scrollable(e.target, e.deltaY)) return;
+      const d = Math.sign(e.deltaY), edge = d > 0 ? main.scrollTop + main.clientHeight >= main.scrollHeight - 2 : main.scrollTop <= 1;
+      if (!edge || !CHAIN[k + d] || Math.abs(e.deltaY) < 3) return;
+      e.preventDefault(); if (lastW - t0 < 250 || lastW < hopAt + 900) return; // только новым жестом, уже стоя у края
+      hopAt = lastW; location.hash = "#" + CHAIN[k + d]; return; }
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; // боковая прокрутка — ленте игр
     if (scrollable(e.target, e.deltaY)) return; // таблица со своим скроллом крутится сама
     const slides = [...main.querySelectorAll(".slide")]; if (!slides.length) return;
@@ -297,7 +304,7 @@ function homeInit(S) {
     // пока идут события (инерция тачпада) — блок не меняем; разблокируем после паузы 200 мс, но не раньше 650 мс
     if (locked) { clearTimeout(quiet); quiet = setTimeout(() => { locked = false; }, Math.max(200, lockAt + 650 - now)); return; }
     if (Math.abs(e.deltaY) < 3) return;
-    const nx = slides[i + dir]; if (!nx) return;
+    const nx = slides[i + dir]; if (!nx) { if (dir > 0 && now > hopAt + 900) { hopAt = lastW = now; location.hash = "#" + CHAIN[1]; } return; }
     locked = true; lockAt = now; clearTimeout(quiet); quiet = setTimeout(() => { locked = false; }, 650);
     tgt = i + dir; animEnd = now + 700; main.scrollTo({ top: nx.offsetTop, behavior: "smooth" });
   }, { passive: false });
