@@ -88,6 +88,9 @@ function mvpDuo(G, pure) { // pure — только MVP команд, без п�
   if (!pure && top && !duo.some(d => d.game)) { const tt = [...top.teams].sort((a, b) => m.shareT(top, b) - m.shareT(top, a))[0], d = duo.find(x => x.t === tt) || duo[0]; Object.assign(d, { name: top.name, rating: top.mvp, dealt: top.dealt, game: true }); }
   return duo;
 }
+// лучший по рейтингу после игры в каждой команде (среди сыгравших за неё большую часть игры)
+function rtDuo(S, G) { const m = G.m, rec = stepRating(S).by.get(m) || {}, rv = p => (rec[p.name] || {}).r || 0;
+  return G.teams.map(t => { const L = m.P.filter(p => p.teams.includes(t.t) && m.shareT(p, t.t) > .5), p = L.length ? L.reduce((a, b) => rv(b) > rv(a) ? b : a) : null; return p ? { t: t.t, name: p.name, dealt: p.dealt, game: false } : mvpDuo(G, true).find(d => d.t === t.t); }); }
 const mvpTitle = d => d.game ? "MVP игры" : "MVP команды";
 const vsHtml = g => `<b style="color:${tc(g.teams[0].t)}">${g.teams[0].n}</b> vs <b style="color:${tc(g.teams[1].t)}">${g.teams[1].n}</b>`;
 // ---------- блок «Игры» на главной: большая карточка последней игры (варианты G / H / I) + лента игр ----------
@@ -116,7 +119,7 @@ function gameBig(S, G) {
     const row = (k, l, f, i, low) => { const a = ts[0][k] || 0, b = ts[1][k] || 0, mx = Math.max(a, b) || 1, w = a === b || low === 0 ? -1 : (a > b) !== !!low ? 0 : 1;
       return `<div class="gk-row"><b${w === 1 ? ` class="lo"` : ""}>${f(a)}</b><i class="l" style="--w:${a / mx * 100}%;--c:${c0}"></i><span>${ic(i)}${l}</span><i style="--w:${b / mx * 100}%;--c:${c1}"></i><b${w === 0 ? ` class="lo"` : ""}>${f(b)}</b></div>`; };
     const rows = `<div class="gk-c">${row("rs", "в среднем за все игры", ru, "star")}${row("rt", "в этой игре", ru, "star")}${row("hits", "попаданий", ru, "hit")}${row("acc", "точность", pct, "acc")}${row("hd", "попаданий на смерть", one, "hit")}${row("deaths", "смертей", ru, "death", 1)}${row("shots", "выстрелов", ru, "shot", 0)}</div>`;
-    const dq = v === "k" ? duo : mvpDuo(G, true), gm = p => p === m.mvp && !dq.some(d => d.game); // в x/y портреты всегда у MVP команд; MVP игры, если он не один из них, отмечен в составе
+    const dq = v === "k" ? duo : rtDuo(S, G), rvr = p => ((stepRating(S).by.get(m) || {})[p.name] || {}).r || 0, gm = p => p === m.mvp && !dq.some(d => d.game); // в x/y портреты всегда у MVP команд; MVP игры, если он не один из них, отмечен в составе
     // сколько раундов игрок, менявший команду, сыграл за эту команду
     const rn = (p, t) => { if (!p.swap || !p.segRounds) return null; const n = q => sum(q, ([a, b]) => b - a + 1); return [n(p.segRounds.filter((_, k) => p.segs[k].team === t)), n(p.segRounds)]; };
     const rb = (p, t) => { const r = rn(p, t); if (!r && p.swap) return `<i class="rb" title="За эту команду сыграл примерно ${pct(m.shareT(p, t))} игры (по выстрелам, раунды не записаны)">${ic("round")}≈${Math.round(m.shareT(p, t) * 100)}%</i>`; return r ? `<i class="rb" title="За эту команду сыграл ${plural(r[0], ["раунд", "раунда", "раундов"])} из ${r[1]}">${ic("round")}${r[0]}/${r[1]}</i>` : ""; };
@@ -125,7 +128,7 @@ function gameBig(S, G) {
     const cardR = k => { const d = dq[k], p = m.P.find(x => x.name === d.name), sh = p && shift(p); let h = card(d).replace("<span>", (p ? rb(p, d.t) : "") + "<span>");
       return h; };
     // остальные игроки команды (без тех, кто на портретах) с рейтингом, лучшие сверху
-    const rest = k => { const t = G.teams[k].t, L = m.P.filter(p => p.teams.includes(t) && p.name !== dq[k].name).sort((a, b) => (m.shareT(b, t) > .5) - (m.shareT(a, t) > .5) || (b.swap ? sum(m.P, v => m.valT(b, v, t)) : b.dealt) - (a.swap ? sum(m.P, v => m.valT(a, v, t)) : a.dealt)), g = p => m.shareT(p, t) <= .5 ? " sw" : ""; // sw — менял команду и за эту сыграл меньшую часть игры
+    const rest = k => { const t = G.teams[k].t, L = m.P.filter(p => p.teams.includes(t) && p.name !== dq[k].name).sort((a, b) => (m.shareT(b, t) > .5) - (m.shareT(a, t) > .5) || rvr(b) - rvr(a)), g = p => m.shareT(p, t) <= .5 ? " sw" : ""; // sw — менял команду и за эту сыграл меньшую часть игры
       return v !== "x" && !(GR === "l" && (v === "z" || v === "r")) ? `<div class="gy-l${k ? " r" : ""}${v === "y" ? (L.length > 6 ? " many" : L.length > 4 ? " tight" : "") : ` gz-l c${L.length > 8 ? 5 : L.length > 6 ? 4 : L.length > 4 ? 3 : 2}`}" style="--c:${tc(t)}">${L.map(p => `<a class="gy-c${g(p)}${gm(p) ? " g" : ""}" href="#${key(p.name)}">${rb(p, t)}<img src="${portrait(p.name)}" alt=""><span>${gm(p) ? `<small>MVP игры</small>` : ""}<b>${esc(p.name)}</b>${st("star", ru(p.mvp))}</span></a>`).join("")}</div>`
         : `<div class="gx-l${k ? " r" : ""}${L.length > 7 ? " d" : ""}" style="--c:${tc(t)}">${L.map(p => { return `<a class="${g(p).trim()}" href="#${key(p.name)}"><img src="${portrait(p.name)}" alt=""><span>${esc(p.name)}${rb(p, t)}</span><span class="rr num">${rtMove(S, m, p.name)}${hs(p, t)}</span></a>`; }).join("")}</div>`; };
     // третий вариант состава: все игроки одинаковыми строками по попаданиям, MVP — значками
@@ -200,7 +203,7 @@ function lastGame(S, L, gS) {
   const rounds = `<div class="rlog fill A"><span class="mono">раунды</span>${roundsStrip(L)}<a class="lnk mono" href="#${L.key}">разбор игры →</a></div>`;
   const kv = [[ru(gS.hits), "попаданий", "hit"], [pct(gS.acc), "точность", "acc"], [ru(gS.deaths), "смертей", "death"], [ru(gS.shots), "выстрелов", "shot"]].map(([v, l, i]) => `<div><b>${v}</b><span>${ic(i)}${l}</span></div>`).join("");
   const nums = L.teams.map(t => `<div class="lgn num" style="--c:${tc(t.t)}">${sn(t.score)}</div>`), colon = `<i class="lgx"><b></b><b></b></i>`;
-  const duo = mvpDuo(L);
+  const duo = rtDuo(S, L);
   const tm = (d, cls = "") => `<a class="lgmv ${cls}${d.game ? " g" : ""}" href="#${key(d.name)}" style="--c:${tc(d.t)}"><img src="${portrait(d.name)}" alt=""><span><small>${mvpTitle(d)}</small><b>${esc(d.name)}</b><em class="sts">${st("hit", d.dealt)}</em></span></a>`;
   // «Дуэль»: два портрета лучших игроков по краям, между ними счёт и цифры игры
   const rh = n => (stepRating(S).by.get(L.m) || {})[n];
