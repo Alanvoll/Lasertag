@@ -476,10 +476,8 @@ function seasonTableInit(S) {
   const draw = () => {
     const cols = [...COLS[seasonMode]];
     const M = r => main[r.name] || r;
-    if (seasonMode === "avg" || seasonMode === "tot") {
-      // порядок: игрок, попал / получил, остальное
-      const ri = cols.findIndex(c => /^ratio/.test(c[0])); cols.splice(1, 0, cols.splice(ri, 1)[0]);
-    }
+    // порядок: игрок, попал, получил, попал / получил, остальное
+    cols.splice(4, 0, cols.splice(1, 1)[0]);
     document.querySelectorAll("[data-mode]").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === seasonMode));
     document.querySelectorAll("[data-cls]").forEach(b => b.setAttribute("aria-pressed", b.dataset.cls === seasonCls));
     document.querySelectorAll("[data-loc]").forEach(b => b.setAttribute("aria-pressed", b.dataset.loc === seasonLoc));
@@ -823,9 +821,7 @@ function gameTableInit(S, key) {
       ["deaths", "Смерти", p => pr(p, p.deaths)], ["dpd", "Попал на смерть", p => div(p.dealt, p.deaths)], ["rpd", "Получил на смерть", p => div(p.recv, p.deaths)],
       ["shots", "Выстрелы", p => pr(p, p.shots)], ["acc", "Точность", p => p.acc]];
     const pd = x => isFinite(x) ? one(x) : "∞";
-    if (m.winners.length) cols.push(["alive", "Раундов без смерти", p => p.alive]);
-    // порядок: игрок, попал / получил, остальное
-    for (const k of ["ratio"]) cols.splice(1, 0, cols.splice(cols.findIndex(c => c[0] === k), 1)[0]);
+    // порядок: игрок, попал, получил, попал / получил, остальное
     // полоска рисуется в колонке, по которой сейчас сортировка (в «Попал» у сменивших команду — по командам)
     const cell = (k, p) => ({ dealt: `${approx(p.e.dealt)}${nf(pr(p, p.dealt), fmt)}`, recv: `${approx(p.e.recv)}${nf(pr(p, p.recv), fmt)}`, ratio: `${approx(p.e.ratio)}${r2(p.ratio)}`,
       deaths: `${approx(p.e.deaths)}${nf(pr(p, p.deaths), fmt)}`, dpd: `${approx(p.e.dealt || p.e.deaths)}${pd(div(p.dealt, p.deaths))}`, rpd: `${approx(p.e.recv || p.e.deaths)}${pd(div(p.recv, p.deaths))}`,
