@@ -1,7 +1,7 @@
 /* Лазертаг · «Брифинг». Карта арены как фон, фонарь за курсором, блоки вместо страниц.
    Палитра: графит и тёплый белый, ультрафиолет как акцент. Цвета команд только там, где есть команды. */
 :root{
-  --bg:#0c0d10; --bg2:#13151a; --ink:#f3efe6; --mute:#8b8a86; --line:rgba(243,239,230,.14); --line2:rgba(243,239,230,.06);
+  --bg:#0c0d10; --bg2:#0f1115; --ink:#f3efe6; --mute:#8b8a86; --line:rgba(243,239,230,.14); --line2:rgba(243,239,230,.06);
   --uv:#9a6bff; --uv2:#c9b3ff; --uvd:rgba(154,107,255,.14);
   --red:#ff5a5a; --blue:#4b94ff; --yellow:#ffd34d; --green:#3fd98a;
   --disp:"Jost",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace; --body:"Jost",system-ui,sans-serif;
@@ -87,7 +87,7 @@ main.snap{scroll-snap-type:y mandatory}
 .dots[hidden]{display:none}
 
 /* панели с уголками */
-.panel{position:relative;border:1px solid var(--line);background:rgba(19,21,26,.86)}
+.panel{position:relative;border:1px solid var(--line);background:rgba(15,17,21,.86)}
 .panel::before,.panel::after,.panel>.c::before,.panel>.c::after{content:"";position:absolute;width:10px;height:10px;border:2px solid var(--ink);opacity:.9}
 .panel::before{left:-1px;top:-1px;border-right:0;border-bottom:0}
 .panel::after{right:-1px;top:-1px;border-left:0;border-bottom:0}
@@ -130,7 +130,7 @@ a.pl:hover{color:var(--uv2)}
 .tbl .ft{padding:8px 16px;font-size:12px;color:var(--mute)}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{padding:7px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line2)}
-th{position:sticky;top:0;z-index:1;background:rgba(19,21,26,.98);font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:400;cursor:pointer;user-select:none}
+th{position:sticky;top:0;z-index:1;background:rgba(15,17,21,.98);font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-weight:400;cursor:pointer;user-select:none}
 th button{all:unset;cursor:pointer}
 th.l,td.l{text-align:left;padding-left:16px}
 th[aria-sort]{color:var(--uv2)}
@@ -140,7 +140,7 @@ td.l a{font-weight:600}
 td.l small{color:var(--mute);font-weight:400;margin-left:6px;font-size:11px}
 td .bar{display:inline-block;height:6px;background:var(--c,var(--uv));opacity:.6;vertical-align:middle;margin-right:8px;width:var(--w)}
 tbody tr:hover td{background:rgba(154,107,255,.06)}
-.sticky1 th.l,.sticky1 td.l{position:sticky;left:0;background:rgba(19,21,26,.98);z-index:2}
+.sticky1 th.l,.sticky1 td.l{position:sticky;left:0;background:rgba(15,17,21,.98);z-index:2}
 .sticky1 th.l{z-index:3}
 
 /* блок 1: главная */
@@ -158,7 +158,8 @@ tbody tr:hover td{background:rgba(154,107,255,.06)}
 .home2{display:grid;grid-template-columns:1.15fr 1fr;gap:18px}
 .lastc{padding:14px 22px;display:grid;gap:10px;align-content:start}
 .lastc .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-.lastc .hd h3{font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.lastc .hd h3{font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+.lastc .hd .mono{white-space:nowrap}
 .gline{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}
 .gline .side{display:flex;align-items:center;gap:12px;min-width:0}
 .gline .side.r{flex-direction:row-reverse;text-align:right}
@@ -229,7 +230,7 @@ a.gtr:hover .n{color:var(--uv2)}
 .shead .allg i{font-style:normal;transition:transform .25s}.shead .allg:hover{background:rgba(154,107,255,.28)}.shead .allg:hover i{transform:translateX(4px)}
 .gbig{position:relative;overflow:hidden;isolation:isolate;padding:18px 24px;display:grid;gap:14px}
 .gbig .bgimg{position:absolute;inset:0;z-index:-1;background:var(--img) center 40%/cover no-repeat;opacity:.62;-webkit-mask:linear-gradient(90deg,rgba(0,0,0,.25) 0,#000 60%);mask:linear-gradient(90deg,rgba(0,0,0,.25) 0,#000 60%)}
-.gbig .bgimg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(19,21,26,.9),rgba(19,21,26,.2) 70%)}
+.gbig .bgimg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(15,17,21,.9),rgba(15,17,21,.2) 70%)}
 .gbh{display:flex;justify-content:space-between;align-items:end;gap:16px}
 .gbh h3{font-size:clamp(28px,3vw,40px);font-weight:800;text-transform:uppercase;line-height:1;margin-top:4px}
 .gbb{display:grid;grid-template-columns:1.1fr 1fr;gap:28px;align-items:center}
@@ -251,7 +252,7 @@ a.gtr:hover .n{color:var(--uv2)}
 .gstripw.at-end .gstrip{-webkit-mask:linear-gradient(90deg,transparent,#000 40px);mask:linear-gradient(90deg,transparent,#000 40px)}
 .gstripw.at-start.at-end .gstrip{-webkit-mask:none;mask:none}
 .gstrip::-webkit-scrollbar{display:none}.gstrip.drag{cursor:grabbing;scroll-snap-type:none}.gstrip.drag a{pointer-events:none}
-.gmini{flex:0 0 176px;scroll-snap-align:start;display:grid;gap:2px;padding:10px 14px;border:1px solid var(--line);background:rgba(19,21,26,.82);transition:border-color .2s,transform .2s}
+.gmini{flex:0 0 176px;scroll-snap-align:start;display:grid;gap:2px;padding:10px 14px;border:1px solid var(--line);background:rgba(15,17,21,.82);transition:border-color .2s,transform .2s}
 .gmini:hover{border-color:var(--uv2);transform:translateY(-2px)}
 .gmini.cur{border-color:var(--uv);box-shadow:inset 0 2px 0 var(--uv)}
 .gmini .dt{font-family:var(--disp);font-size:13px;text-transform:uppercase;letter-spacing:.04em}.gmini .dt b{font-size:20px}
@@ -260,7 +261,7 @@ a.gtr:hover .n{color:var(--uv2)}
 .gmini .r{font-size:9px}
 .gmon{flex:0 0 26px;scroll-snap-align:start;display:grid;place-items:center;border-left:1px solid var(--line)}
 .gmon span{writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--uv2)}
-.garr{position:absolute;top:50%;z-index:2;width:34px;height:34px;margin-top:-17px;border:1px solid var(--line);background:#13151a;color:var(--ink);font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center;transition:opacity .2s,border-color .2s}
+.garr{position:absolute;top:50%;z-index:2;width:34px;height:34px;margin-top:-17px;border:1px solid var(--line);background:#0f1115;color:var(--ink);font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center;transition:opacity .2s,border-color .2s}
 .garr:hover{border-color:var(--uv2)}.garr.l{left:-14px}.garr.r{right:-14px}
 .gstripw.at-start .garr.l,.gstripw.at-end .garr.r{opacity:0;pointer-events:none}
 .slide .gbig.A{--d:.1s}.slide .gstripw.A{--d:.45s}
@@ -407,7 +408,7 @@ a.lgmv:hover b,a.lgmvp:hover b{color:var(--uv2)}
 /* страницы разборов */
 .phero{position:relative;display:grid;grid-template-columns:1fr auto;gap:30px;align-items:end;padding:28px 32px;min-height:260px;overflow:hidden;isolation:isolate}
 .phero .bgimg{position:absolute;inset:0;z-index:-1;background:var(--img) center 45%/cover no-repeat;opacity:.6;-webkit-mask:linear-gradient(90deg,transparent,#000 40%);mask:linear-gradient(90deg,transparent,#000 40%)}
-.phero .bgimg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(19,21,26,.95),rgba(19,21,26,.2))}
+.phero .bgimg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(15,17,21,.95),rgba(15,17,21,.2))}
 .phero h1{font-size:clamp(34px,5vw,64px);font-weight:800;line-height:1;text-transform:uppercase;letter-spacing:-.01em}
 .phero .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--uv2);margin-bottom:10px}
 .facts{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:18px}
@@ -559,3 +560,575 @@ footer{color:var(--mute);font-size:12px;display:flex;justify-content:space-betwe
 
 [data-go]{cursor:pointer}
 [data-go]:hover{border-color:rgba(201,179,255,.35)}
+
+/* блок «Игры»: варианты компоновки большой карточки */
+.gbig .rlog.fill .rounds i{max-width:none}
+.gbig h3{font-size:clamp(28px,3vw,40px);font-weight:800;text-transform:uppercase;line-height:1;margin:4px 0 0}
+/* A: слева дата, счёт с MVP под каждой цифрой; справа топ-5 на всю высоту */
+.va{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:28px;align-items:stretch}
+.va-l{display:flex;flex-direction:column;gap:4px}
+.va-meta{margin-top:6px}
+.va-s{margin-top:auto;padding-top:14px;display:grid;grid-template-columns:1fr 1fr;align-items:start;gap:14px 20px}
+.va-s .sc{grid-column:1/-1;font-family:var(--disp);font-size:clamp(84px,8vw,120px);font-weight:800;line-height:.85;display:flex;gap:14px;align-items:baseline}
+.va-s .sc i{font-style:normal;color:var(--mute);font-size:.3em;font-weight:400}.va-s .sc small{display:none}
+.va-t{display:grid;gap:8px;justify-items:start}
+.va-t .va-n{font-family:var(--disp);font-weight:800;font-size:clamp(72px,7vw,104px);line-height:.85;color:var(--c)}
+.va-t .va-m{color:var(--c)}
+.va-x{font-style:normal;color:var(--mute);font-size:40px;line-height:2}
+.gv-a .gtop{align-self:stretch;display:flex;flex-direction:column;justify-content:space-between}
+.gv-a .gtr{padding:7px 0}
+/* B: шапка в строку, счёт по центру между MVP команд, топ-5 карточками */
+.vb-h{display:flex;justify-content:space-between;align-items:end;gap:16px}
+.vb-m{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px;padding:6px 0}
+.vb-m .sc{font-family:var(--disp);font-size:clamp(80px,8vw,120px);font-weight:800;line-height:.9;display:flex;gap:12px;align-items:baseline}
+.vb-m .sc i{font-style:normal;color:var(--mute);font-size:.3em;font-weight:400}.vb-m .sc small{display:none}
+.vb-t{display:grid;gap:10px;justify-items:start}.vb-t.r{justify-items:end;text-align:right}.vb-t.r .gbm{flex-direction:row-reverse}
+.vb-t .vb-n{color:var(--c)}
+.gv-b .gbm img{width:72px;height:72px}.gv-b .gbm b{font-size:22px}
+.vb-top{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.vb-c{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;align-items:baseline;padding:10px 12px;background:rgba(12,13,16,.6);border:1px solid var(--line2)}
+.vb-c .no{color:var(--uv2)}.vb-c .n{font-weight:600;display:flex;gap:6px;align-items:center;white-space:nowrap;overflow:hidden}
+.vb-c .n i{width:8px;height:8px;background:var(--c);flex:none}
+.vb-c .v{grid-column:1/-1;font-size:26px;font-weight:800;line-height:1.1}.vb-c .mono:last-child{grid-column:1/-1;font-size:9.5px}
+a.vb-c:hover{border-color:var(--uv2)}
+/* C: шапка с датой и счётом, ниже составы обеих команд целиком */
+.vc-h{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.vc-h .mono:last-child{margin-top:6px}
+.vc-h .sc{font-family:var(--disp);font-size:clamp(64px,6vw,92px);font-weight:800;line-height:.9;display:flex;gap:10px;align-items:baseline}
+.vc-h .sc i{font-style:normal;color:var(--mute);font-size:.3em;font-weight:400}.vc-h .sc small{display:none}
+.vc-b{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.vc-t{background:rgba(12,13,16,.55);border:1px solid var(--line2);border-top:2px solid var(--c);padding:6px 12px}
+.vc-th,.vc-r{display:grid;grid-template-columns:1fr 56px 64px 64px;gap:8px;align-items:center}
+.vc-th{padding:4px 0}.vc-th span{text-align:right}.vc-th span:first-child{text-align:left;color:var(--c)}
+.vc-r{padding:5px 0;border-top:1px solid var(--line2);font-size:14px}
+.vc-r .n{font-weight:600;display:flex;gap:8px;align-items:baseline;white-space:nowrap;overflow:hidden}
+.vc-r .n em{font-style:normal;font-size:9px;color:var(--uv2)}
+.vc-r .num{text-align:right;color:var(--mute)}.vc-r .v{color:var(--ink);font-weight:700;font-size:15px}
+.vc-r.mvp .n{color:var(--c)}a.vc-r:hover .n{color:var(--uv2)}
+@media (max-width:760px){
+  .va{grid-template-columns:1fr;gap:14px}.va-t .va-n{font-size:64px}.va-s .gbm img{width:40px;height:40px}.va-s .gbm b{font-size:14px}.va-s .gbm em{display:none}
+  .vb-h{flex-direction:column;align-items:start;gap:6px}.vb-m{grid-template-columns:1fr 1fr;gap:12px}.vb-m .sc{grid-column:1/-1;order:-1;justify-content:center;font-size:72px}.gv-b .gbm img{width:44px;height:44px}.gv-b .gbm b{font-size:15px}.vb-top{grid-template-columns:repeat(2,1fr)}.vb-c:first-child{grid-column:1/-1}
+  .vc-h{flex-direction:column;align-items:start}.vc-b{grid-template-columns:1fr;gap:10px}
+}
+
+/* главная, последняя игра: сетка 2×2 — счёт | MVP игры, MVP команд | цифры игры; строки общие, пустот нет */
+.lastc .lgb{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-areas:"s m" "t k";gap:0;align-items:stretch}
+.lastc .lgs{grid-area:s;display:grid;grid-template-columns:1fr 20px 1fr;align-items:center;justify-items:center;padding:4px 22px 14px 0}
+.lastc .lgn{font-family:var(--disp);font-weight:800;font-size:clamp(84px,7.2vw,108px);line-height:.8;color:var(--c)}
+.lastc .lgx{display:grid;gap:14px;font-style:normal}.lastc .lgx b{width:8px;height:8px;background:var(--mute);opacity:.7}
+.lastc .lgmvp{grid-area:m;align-self:stretch;align-items:center;border-left:1px solid var(--line);padding:4px 0 14px 22px;gap:14px}
+.lastc .lgmvp img{width:72px;height:72px}.lastc .lgmvp b{font-size:26px;line-height:1.1}
+.lastc .lgt2{grid-area:t;display:grid;grid-template-columns:1fr 20px 1fr;align-items:center;justify-items:center;border-top:1px solid var(--line);padding:14px 22px 2px 0}
+.lastc .lgmv{display:flex;flex-direction:row;align-items:center;gap:10px;text-align:left}
+.lastc .lgmv img{width:44px;height:44px;flex:none}.lastc .lgmv span{min-width:0}.lastc .lgmv b{overflow:hidden;text-overflow:ellipsis}
+.lastc .lgmv span{display:grid;line-height:1.2}
+.lastc .lgmv b{font-size:17px}
+.lastc .gkv{grid-area:k;display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;align-content:center;border-left:1px solid var(--line);border-top:1px solid var(--line);padding:14px 0 2px 22px}
+@media (max-width:760px){
+  .lastc .lgb{grid-template-columns:1fr;grid-template-areas:"s" "t" "m" "k"}
+  .lastc .lgs,.lastc .lgt2{padding-right:0}.lastc .lgn{font-size:72px}
+  .lastc .lgmv{flex-direction:column;text-align:center;gap:4px}.lastc .lgmv b{font-size:15px}
+  .lastc .lgmvp,.lastc .gkv{border-left:0;padding-left:0}.lastc .lgmvp{border-top:1px solid var(--line);padding-top:14px}.lastc .lgmvp img{width:60px;height:60px}.lastc .lgmvp b{font-size:22px}
+}
+.lastc .lgmv small{white-space:nowrap}.lastc .lgmvp span{min-width:0}.lastc .lgmvp em{white-space:normal}
+@media (max-width:1250px) and (min-width:761px){.lastc .lgmv{flex-direction:column;text-align:center;gap:4px}.lastc .lgmvp img{width:56px;height:56px}.lastc .lgmvp b{font-size:21px}}
+
+/* главная, последняя игра: варианты B / C / D */
+.lastc .lgx{align-self:center}
+.lastc [class$="-k"]>div b,.lastc .lb-k>div b{display:block;font-family:var(--disp);font-size:22px;font-weight:700;line-height:1}
+.lastc [class$="-k"]>div span{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+/* B «Табло» */
+.lb-m{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:14px;padding:6px 0 10px}
+.lb-s{display:flex;align-items:center;gap:16px}
+.lv-b .lgn{font-size:clamp(88px,7.6vw,116px)}
+.lv-b .lgmv{justify-self:start}.lv-b .lgmv.r{justify-self:end;flex-direction:row-reverse;text-align:right}
+.lv-b .lgmv img{width:52px;height:52px}
+.lb-k{display:grid;grid-template-columns:1.5fr repeat(4,1fr);border-top:1px solid var(--line);padding-top:12px}
+.lb-k>*{padding:0 14px;border-left:1px solid var(--line);display:grid;gap:3px;align-content:center;min-width:0}
+.lb-k>*:first-child{padding-left:0;border-left:0}
+.lb-g span{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--uv2)}
+.lb-g b{font-size:20px;font-weight:700;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lb-g em{font-style:normal;font-size:11px;color:var(--mute)}
+a.lb-g:hover b{color:var(--uv2)}
+/* C «Команды» */
+.lc-b{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.lc-t{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;border-top:2px solid var(--c);background:rgba(12,13,16,.5);padding:12px 14px}
+.lv-c .lgn{font-size:clamp(72px,6vw,92px);min-width:1.1em;text-align:center}
+.lc-l{display:grid;gap:0}
+.lc-h{display:flex;justify-content:space-between;padding-bottom:4px}.lc-h span:first-child{color:var(--c)}
+.lc-r{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:4px 0;border-top:1px solid var(--line2);font-size:15px}
+.lc-r .n{font-weight:600;display:flex;gap:6px;align-items:baseline;min-width:0;white-space:nowrap;overflow:hidden}
+.lc-r .n em{font-style:normal;font-size:9px;color:var(--uv2)}.lc-r .num{font-weight:700}
+a.lc-r:hover .n{color:var(--uv2)}
+.lc-k{display:grid;grid-template-columns:repeat(4,1fr)}
+.lc-k>div{padding:0 14px;border-left:1px solid var(--line);display:grid;gap:3px}.lc-k>div:first-child{padding-left:0;border-left:0}
+/* D «Герой» */
+.ld{display:grid;grid-template-columns:150px minmax(0,1fr);gap:20px;align-items:stretch}
+.ld-h{position:relative;overflow:hidden;isolation:isolate;border:1px solid color-mix(in srgb,var(--uv) 55%,transparent);background:#0e0f12;min-height:190px;display:block}
+.ld-h img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%;z-index:-1}
+.ld-h::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(12,13,16,.96) 0,rgba(12,13,16,.75) 34%,transparent 66%)}
+.ld-h span{position:absolute;left:10px;right:10px;bottom:8px;display:grid;line-height:1.15}
+.ld-h small{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--uv2)}
+.ld-h b{font-size:20px;font-weight:700}.ld-h em{font-style:normal;font-size:11px;color:var(--mute)}a.ld-h:hover b{color:var(--uv2)}
+.ld-r{display:grid;gap:10px;align-content:space-between;min-width:0}
+.ld-s{display:flex;align-items:center;gap:16px}
+.lv-d .lgn{font-size:clamp(76px,6.4vw,96px)}
+.ld-t{display:flex;gap:22px;margin-left:auto}
+.ld-s{flex-wrap:nowrap}
+.ld-t a{display:flex;gap:8px;align-items:center}.ld-t i{width:3px;align-self:stretch;background:var(--c)}
+.ld-t span{line-height:1.15}.ld-t small{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.ld-t b{font-size:16px}.ld-t em{font-style:normal;color:var(--mute);font-size:13px}.ld-t a:hover b{color:var(--uv2)}
+.ld-k{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);padding-top:10px}
+.ld-k>div{padding:0 12px;border-left:1px solid var(--line);display:grid;gap:3px}.ld-k>div:first-child{padding-left:0;border-left:0}
+@media (max-width:1250px) and (min-width:761px){.lv-b .lgmv{flex-direction:column!important;text-align:center!important}.lb-k>div b,.lc-k>div b,.ld-k>div b{font-size:18px}}
+@media (max-width:760px){
+  .lb-m{grid-template-columns:1fr 1fr}.lb-s{grid-column:1/-1;justify-content:center}.lv-b .lgmv,.lv-b .lgmv.r{justify-self:center;flex-direction:column;text-align:center}
+  .lb-k,.lc-k,.ld-k{grid-template-columns:1fr 1fr;row-gap:12px}.lb-k>*,.lc-k>div,.ld-k>div{padding:0;border-left:0}.lb-g{grid-column:1/-1}
+  .lc-b{grid-template-columns:1fr}.ld{grid-template-columns:1fr}.ld-h{min-height:150px}.ld-t{margin:0}
+}
+.ld-s{justify-content:space-between}.ld-n{display:flex;align-items:center;gap:16px}.ld-t{flex-direction:column;gap:10px;margin:0}
+@media (max-width:760px){.ld-s{flex-direction:column;align-items:start;gap:10px}.ld-t{flex-direction:row;gap:18px}}
+@media (max-width:760px){.lb-s{order:-1}.lv-b .lgn{font-size:76px}}
+
+/* B: MVP игры — отдельная плашка, цифры всей игры — своя группа с подписью */
+.lb-k2{display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px;align-items:stretch;border-top:1px solid var(--line);padding-top:12px}
+.lb-g{display:flex;align-items:center;gap:10px;padding:8px 14px 8px 8px;background:var(--uvd);border:1px solid color-mix(in srgb,var(--uv) 45%,transparent)}
+.lb-g img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--uv)}
+.lb-g span{display:grid;line-height:1.15;color:inherit;font:inherit;letter-spacing:0;text-transform:none}
+.lb-g small{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--uv2)}
+.lb-a{display:grid;gap:6px;align-content:center;min-width:0}
+.lb-a .lb-k{grid-template-columns:repeat(4,1fr);border-top:0;padding-top:0}
+.lb-a .lb-k>div{padding:0 12px}.lb-a .lb-k>div:first-child{padding-left:0}
+@media (max-width:760px){.lb-k2{grid-template-columns:1fr;gap:12px}.lb-a .lb-k{grid-template-columns:1fr 1fr}.lb-a .lb-k>div{padding:0}}
+
+/* два MVP: у MVP игры фиолетовый титул и второе кольцо вокруг портрета */
+.lgmv.g small,.gbm.g small,.le-c.g small{color:var(--uv2)}
+.lgmv.g img,.gbm.g img{box-shadow:0 0 0 2px var(--bg2),0 0 0 4px var(--uv),0 0 18px rgba(154,107,255,.45)}
+.lastc .lgmv em{white-space:nowrap}
+.lv-b .lb-k{grid-template-columns:repeat(4,1fr)}
+.lv-b .lb-k>div:first-child{padding-left:0;border-left:0}
+/* «Дуэль» */
+.le{display:grid;grid-template-columns:132px minmax(0,1fr) 132px;gap:18px;align-items:stretch}
+.le-c{position:relative;overflow:hidden;isolation:isolate;border:1px solid var(--line);border-top:2px solid var(--c);background:#0e0f12;min-height:176px;display:block}
+.le-c img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%;z-index:-1}
+.le-c::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(12,13,16,.96) 0,rgba(12,13,16,.78) 36%,transparent 68%)}
+.le-c span{position:absolute;left:10px;right:10px;bottom:8px;display:grid;line-height:1.15}
+.le-c small{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.le-c b{font-size:19px;font-weight:700}.le-c em{font-style:normal;font-size:11px;color:var(--mute);white-space:nowrap}a.le-c:hover b{color:var(--uv2)}
+.le-c.g{border-color:color-mix(in srgb,var(--uv) 70%,transparent);border-top-color:var(--c);box-shadow:0 0 22px rgba(154,107,255,.28)}
+.le-m{display:grid;align-content:space-between;justify-items:center;gap:10px;min-width:0}
+.le-s{display:flex;align-items:center;gap:14px}
+.lv-d .lgn{font-size:clamp(76px,6.2vw,96px)}
+.le-k{display:grid;grid-template-columns:1fr 1fr;gap:8px 22px;width:100%;border-top:1px solid var(--line);padding-top:10px}
+.le-k>div{display:grid;gap:3px;justify-items:center}
+@media (max-width:760px){.le{grid-template-columns:1fr 1fr;gap:10px}.le-m{grid-column:1/-1;order:-1}.le-c{min-height:150px}.le-k{grid-template-columns:repeat(4,auto);justify-content:space-between}.le-k>div b{font-size:18px}.lastc .lgmv em{white-space:normal}}
+.lv-b .lgmv,.lv-b .lgmv.r{flex-direction:column;text-align:center;justify-self:center;gap:6px}
+.lv-b .lgmv img{width:56px;height:56px}.lv-b .lgmv span{justify-items:center}
+.lv-b .lb-m{padding:2px 0 12px}
+/* титул «MVP команды» — цветом команды; «MVP игры» остаётся фиолетовым */
+.lastc .lgmv:not(.g) small,.gbm:not(.g) small,.le-c:not(.g) small{color:var(--c)}
+/* ---------- блок «Игры»: варианты большой карточки ---------- */
+.gb-s{display:flex;align-items:center;gap:16px}
+.gb-s .lgn{font-family:var(--disp);font-weight:800;font-size:clamp(96px,8.6vw,136px);line-height:.8;color:var(--c)}
+.gb-s .lgx{display:grid;gap:16px}.gb-s .lgx b{width:9px;height:9px;background:var(--mute);opacity:.7}
+.gbig .gbm{--c:var(--line)}.gbig .rlog .lnk{margin-left:auto}
+/* «Афиша» */
+.gv-g{min-height:400px;grid-template-rows:1fr auto}
+.gv-g .bgimg{opacity:.9;-webkit-mask:none;mask:none;background-position:center 35%}
+.gv-g .bgimg::after{background:linear-gradient(0deg,rgba(12,13,16,.96) 0,rgba(12,13,16,.55) 45%,rgba(12,13,16,.15) 100%),linear-gradient(90deg,rgba(12,13,16,.7),transparent 55%)}
+.ga{display:grid;align-content:space-between;gap:24px}
+.ga-t h3{font-size:clamp(44px,5vw,72px)!important;margin:6px 0 8px!important}
+.ga-b{display:flex;align-items:end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.ga-mv{display:flex;gap:28px}.ga-mv .gbm img{width:72px;height:72px}.ga-mv .gbm b{font-size:22px}
+/* «Дуэль» */
+.gv-h .bgimg{opacity:.35;-webkit-mask:none;mask:none}
+.gh{display:grid;grid-template-columns:220px minmax(0,1fr) 220px;gap:26px;align-items:stretch}
+.gh .le-c{min-height:300px}.gh .le-c b{font-size:26px}.gh .le-c em{font-size:12px}.gh .le-c small{font-size:10px}.gh .le-c span{left:14px;right:14px;bottom:12px}
+.gh-m{display:grid;justify-items:center;align-content:space-between;gap:10px;text-align:center}
+.gh-m h3{margin:0}
+.gh-k{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 20px;width:100%;border-top:1px solid var(--line);padding-top:12px}
+.gh-k>div{display:grid;gap:3px;justify-items:center}.gh-k b{font-family:var(--disp);font-size:24px;font-weight:700;line-height:1}.gh-k span{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+/* «Ход игры» */
+.gi{display:grid;grid-template-columns:auto minmax(0,1fr);gap:34px;align-items:stretch}
+.gi-l{display:grid;gap:10px;align-content:space-between;justify-items:start}.gi-l h3{margin:0}
+.gi-l .gb-s .lgn{font-size:clamp(84px,7vw,112px)}
+.gi-mv{display:grid;gap:12px;margin-top:6px}
+.gi-r{display:grid;gap:6px;align-content:start;background:rgba(12,13,16,.6);border:1px solid var(--line2);padding:12px 14px 8px}
+.race{width:100%;height:auto;display:block;overflow:visible}
+.race path{fill:none;stroke-width:3;stroke-linejoin:round}.race .gr{stroke:var(--line2);stroke-width:1}.race .gt{fill:var(--mute);font:10px var(--mono);text-anchor:start;opacity:.7}
+.race .end{font:800 20px var(--disp);text-anchor:start}.race rect.none{fill:none;stroke:var(--mute)}.race .sw{stroke:var(--ink);opacity:.35;stroke-dasharray:3 4}
+@media (max-width:980px){
+  .gb-s .lgn,.gi-l .gb-s .lgn{font-size:76px}.gv-g{min-height:0}.ga-t h3{font-size:36px!important}.ga-mv{gap:14px}.ga-mv .gbm img{width:44px;height:44px}.ga-mv .gbm b{font-size:15px}.ga-mv .gbm em{display:none}
+  .gh{grid-template-columns:1fr 1fr;gap:10px}.gh-m{grid-column:1/-1;order:-1}.gh .le-c{min-height:170px}.gh .le-c b{font-size:19px}.gh-k b{font-size:18px}
+  .gi{grid-template-columns:1fr;gap:14px}.gi-l{justify-items:center;text-align:center}.gi-mv{grid-template-columns:1fr 1fr}.gi-mv .gbm em{display:none}
+}
+/* блок игроков: таблица на всю ширину */
+.players{grid-template-columns:1fr}.players .tbl .sc{contain:none;max-height:min(60vh,540px)}
+.shead .r+.allg{margin-left:0}
+/* ---------- итоги сезона ---------- */
+.itogi .A{transition:opacity .5s ease,transform .7s cubic-bezier(.2,.8,.2,1);transition-delay:calc(.1s + var(--k,0) * 40ms)}
+.itogi:not(.in) .A{opacity:0;transform:translateY(20px)}
+.itc{display:flex;gap:10px;flex-wrap:wrap}
+.itc-c{display:flex;align-items:center;gap:10px;padding:8px 14px 8px 8px;border:1px solid var(--line);background:rgba(15,17,21,.82)}
+.itc-c:first-child{border-color:var(--uv);background:var(--uvd)}
+.itc-c img{width:40px;height:40px;border-radius:50%;object-fit:cover}.itc-c span{display:grid;line-height:1.15}.itc-c b{font-size:16px}.itc-c small{font-size:9px;color:var(--uv2)}
+.itc-c:hover{border-color:var(--uv2)}
+.sh{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-top:6px}.sh:not(:first-child){margin-top:22px}
+.nmcs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.nmcs.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.nmc{padding:12px 16px 10px;display:grid;gap:8px;align-content:start}
+.nmc .k{color:var(--uv2);font-size:11px;letter-spacing:.16em}
+.nmc .w{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center}
+.nmc .w img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:1px solid var(--uv)}
+.nmc .w span{display:grid;line-height:1.2;min-width:0}.nmc .w b{font-size:20px;font-weight:700}.nmc .w small{font-size:11px;color:var(--mute)}
+.nmc .w em{font-style:normal;font-family:var(--disp);font-size:30px;font-weight:800;line-height:1;white-space:nowrap}
+.nmc .w:hover b{color:var(--uv2)}
+.nmc .nx{display:grid;border-top:1px solid var(--line2);padding-top:4px}
+.nmc .nx a{display:grid;grid-template-columns:16px 1fr auto;gap:8px;align-items:baseline;padding:2px 0;font-size:13px;color:var(--mute)}
+.nmc .nx a span{color:var(--ink)}.nmc .nx em{font-style:normal}.nmc .nx a:hover span{color:var(--uv2)}
+.nmc.anti{border-style:dashed}.nmc.anti .k{color:var(--mute)}.nmc.anti .w img{border-color:var(--line);filter:grayscale(1)}
+.rccs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.rcc{padding:14px 16px;display:grid;gap:2px;align-content:start}
+.rcc .k{color:var(--uv2);font-size:10px;letter-spacing:.16em}.rcc .v{font-family:var(--disp);font-size:40px;font-weight:800;line-height:1.05}
+.rcc .n{font-size:17px;font-weight:700}.rcc .l{font-size:11px;color:var(--mute);line-height:1.35}
+.ach{display:grid;grid-template-columns:260px minmax(0,1fr);gap:16px;align-items:start}
+.ach-l{position:sticky;top:112px}
+.achp{padding:10px 12px;display:grid;gap:2px;max-height:calc(100vh - 150px);overflow:auto}
+.achp .hd{padding:2px 4px 8px}
+.ach-p{background:none;font:inherit;font-size:15px;position:relative;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;text-align:left;padding:6px 8px;color:var(--ink);border:1px solid transparent;cursor:pointer;isolation:isolate}
+.ach-p i{position:absolute;left:0;top:0;bottom:0;width:var(--w);background:rgba(154,107,255,.12);z-index:-1}
+.ach-p em{font-style:normal;font-weight:700}.ach-p:hover{border-color:var(--line)}.ach-p.on{border-color:var(--uv);background:var(--uvd)}
+.ach-f{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.ach-f .award[hidden]{display:none}
+.award .gd{grid-column:1/-1;font-size:10px;color:var(--uv2);justify-self:start}.award .gd:hover{color:var(--ink)}
+.dls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.dls .duel.main{border-color:var(--uv);box-shadow:0 0 22px rgba(154,107,255,.2)}
+@media (max-width:980px){
+  .players .tbl .sc{max-height:none}
+  .ach{grid-template-columns:1fr}.ach-l{position:static}.achp{display:flex;flex-wrap:nowrap;overflow-x:auto;max-height:none;gap:6px}.achp .hd{display:none}.ach-p{flex:none;border-color:var(--line)}
+  .dls{grid-template-columns:1fr}.nmcs,.nmcs.four{grid-template-columns:1fr}.rccs{grid-template-columns:1fr 1fr}.rcc .v{font-size:30px}
+}
+@media (max-width:980px){
+  .tabs a{padding:6px 5px;font-size:9.5px;letter-spacing:.06em}.tabs a::after{left:5px;right:5px}.logo{letter-spacing:.08em}}
+/* ---------- карточки ленты игр: «Постер» ---------- */
+.gmini .sb{display:none}.gmini .r b{font-weight:600}.gmini .r{white-space:nowrap}
+.gmini{position:relative;isolation:isolate;overflow:hidden}
+/* 5 «Постер»: сверху полоса с артом, под ней дата и счёт */
+.gm-5 .gmini{flex-basis:214px;padding:0;grid-template-columns:auto 1fr auto;grid-template-rows:1fr 36px;gap:0;align-items:stretch}
+.gm-5 .gmini::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(rgba(12,13,16,.3),rgba(12,13,16,.3)),var(--img) center 40%/cover}
+.gm-5 .gmini .s{grid-column:1/-1;grid-row:1;justify-content:center;align-items:center;padding:18px 0;font-size:42px;text-shadow:0 2px 10px rgba(0,0,0,.75)}.gm-5 .gmini .s i{color:var(--ink);opacity:.75}
+.gm-5 .gmini .dt,.gm-5 .gmini .pl,.gm-5 .gmini .r{grid-row:2;display:flex;align-items:center;margin:0;background:#0f1115;border-top:1px solid var(--line)}
+.gm-5 .gmini .dt{grid-column:1;padding:0 0 0 12px;line-height:1}.gm-5 .gmini .dt b{font-size:15px;line-height:1;}.gm-5 .gmini .pl,.gm-5 .gmini .r{line-height:1}.gm-5 .gmini .pl{grid-column:2;padding:0 8px 0 10px}.gm-5 .gmini .r{grid-column:3;gap:.5em;padding:0 12px 0 0}.gm-5 .gmini .dt,.gm-5 .gmini .pl,.gm-5 .gmini .r{padding-top:2px}
+@media (max-width:760px){.gm-5 .gmini{flex-basis:176px}}
+/* ---------- иконки показателей ---------- */
+.ic{width:1.15em;height:1.15em;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:square;stroke-linejoin:miter;vertical-align:-.2em}
+.sts{display:flex!important;gap:12px;align-items:center;font-style:normal;white-space:nowrap}
+.st{font-style:normal;display:inline-flex;align-items:center;gap:4px;font-weight:600;color:var(--ink);font-size:13px}.st .ic{color:var(--mute)}
+.st:first-child .ic{color:var(--uv2)}
+.le-c .sts,.gbm .sts{margin-top:3px}.gh .le-c .st{font-size:15px}
+.gcard .sts{gap:8px}.gcard .st{font-size:11px}.gcard .r .sts{justify-content:flex-end}
+.le-k span,.gh-k span{display:inline-flex;align-items:center;gap:5px}.le-k .ic,.gh-k .ic{width:13px;height:13px}
+th .ic{width:15px;height:15px;color:var(--uv2);vertical-align:-3px}.tcard .v em .ic{width:16px;height:16px;color:var(--m)}
+.fact .k .ic{width:16px;height:16px;color:var(--uv2)}.shead .r .ic,.ft .ic,.eyebrow .ic,.rcc .l .ic,.mono .ic{color:var(--uv2)}
+th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:var(--mute)}th[aria-sort] button .ic,th button .ic:only-child{color:var(--uv2)}
+/* иконка перед значением, высотой с цифру */
+.tcard .v .ic,.fact .v .ic{width:.74em;height:.74em;vertical-align:baseline;margin-right:.22em;stroke-width:2}
+.tcard .v .ic{color:var(--m)}.fact .v .ic{color:var(--uv2)}.tcard .v{gap:0}
+.st .ic{width:.95em;height:.95em}
+.segs{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+@media (min-width:981px){.guncard .art{height:150px}}
+#ptable th{vertical-align:bottom}#ptable th button{display:inline-block;line-height:1.4;text-align:right}
+@media (min-width:981px){#ptable{table-layout:fixed;width:100%}#ptable th:first-child{width:15%}#ptable th:nth-child(2){width:6%}}
+.pfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}.players{gap:0}.pfoot .ic{vertical-align:-3px}
+.slide .pfoot.A{--d:.4s}
+/* таблица игроков: числа и заголовки по центру своей колонки */
+@media (min-width:981px){
+  #ptable th:not(.l),#ptable td.num{text-align:center}#ptable th button{text-align:center}
+  #ptable th:first-child{width:auto}#ptable th:nth-child(2){width:6%}#ptable th:nth-child(3){width:12%}#ptable th:nth-child(n+4){width:9%}#ptable th:nth-child(n+10){width:8%}
+  #ptable td.num .bar{margin-right:8px}
+}
+@media (min-width:981px){#ptable td.num .bar{margin-left:calc(48px - var(--w))}}
+/* ---------- полосы прокрутки в стиле сайта: тонкие, прямоугольные, фиолетовый бегунок ---------- */
+*{scrollbar-width:thin;scrollbar-color:rgba(154,107,255,.55) transparent}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(154,107,255,.45);border-radius:0}
+::-webkit-scrollbar-thumb:hover{background:var(--uv2)}
+::-webkit-scrollbar-button,::-webkit-scrollbar-corner{display:none;width:0;height:0}
+@supports selector(::-webkit-scrollbar){*{scrollbar-width:auto;scrollbar-color:auto}}
+.gstrip{scrollbar-width:none}.gstrip::-webkit-scrollbar{display:none}
+
+.gbig.swap{animation:gbswap .45s cubic-bezier(.2,.8,.2,1)}@keyframes gbswap{from{opacity:.25;filter:blur(5px)}}
+/* ---------- большая карточка игры: k «Табло», x «Дуэль + табло», i «Ход игры» ---------- */
+.gv-k,.gv-x,.gv-y,.gv-i{min-height:400px;grid-template-rows:1fr auto}
+.gv-k .bgimg,.gv-x .bgimg{opacity:.3;-webkit-mask:none;mask:none}
+.gk,.gx{display:grid;gap:14px 30px;align-items:stretch;position:relative}
+.gk{grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto 1fr}.gx{grid-template-columns:220px minmax(0,1fr) 220px}
+.gk::before,.gk::after,.gx::before,.gx::after{content:"";position:absolute;top:-18px;bottom:-14px;width:50%;z-index:-1;pointer-events:none}
+.gk::before,.gx::before{left:-24px;background:linear-gradient(90deg,color-mix(in srgb,var(--c0) 22%,transparent),transparent)}.gk::after,.gx::after{right:-24px;background:linear-gradient(270deg,color-mix(in srgb,var(--c1) 22%,transparent),transparent)}
+.gk-h{grid-column:1/-1;display:grid;justify-items:center;text-align:center;gap:6px}.gk-h h3{margin:4px 0 0}
+.gk-t{display:grid;justify-items:center;align-content:center;gap:26px;min-width:270px}.gk-t .gbm img{width:68px;height:68px}.gk-t .gbm b{font-size:21px}
+.gk-t .lgn{font-family:var(--disp);font-weight:800;font-size:clamp(130px,12.5vw,196px);line-height:.8;color:var(--c);text-align:center}
+.gk-c{display:grid;align-content:center;gap:18px}.gx .gk-c{gap:11px;width:100%;border-top:1px solid var(--line);padding-top:14px}
+.gk-row{display:grid;grid-template-columns:4.6em 1fr auto 1fr 4.6em;align-items:center;gap:12px}
+.gk-row b{font-family:var(--disp);font-size:24px;font-weight:700;line-height:1}.gk-row b:first-child{text-align:right}.gk-row b.lo{color:var(--mute);font-weight:500}
+.gx .gk-row b{font-size:19px}
+.gk-row span{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);display:inline-flex;align-items:center;gap:5px;min-width:19em;justify-content:center;white-space:nowrap}.gk-row .ic{width:13px;height:13px}
+.gk-row i{height:8px;background:linear-gradient(90deg,var(--c),var(--c)) left/var(--w) 100% no-repeat,var(--line2)}.gk-row i.l{background-position:right}
+.gx::before,.gx::after{display:none}.gx .le-c.g{box-shadow:0 0 10px rgba(154,107,255,.14)}
+.gx .le-c{min-height:300px}.gx .le-c b{font-size:26px}.gx .le-c em{font-size:12px}.gx .le-c small{font-size:10px}.gx .le-c span{left:14px;right:14px;bottom:12px}.gx .le-c .st{font-size:15px}
+.gx-m{display:grid;justify-items:center;align-content:space-between;gap:10px}
+.gx-t{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:22px;align-items:center;width:100%}.gx-c{display:grid;justify-items:center;gap:8px}
+.gx-l{display:grid;gap:3px;align-content:center;border-left:2px solid var(--c);padding-left:12px}.gx-l.r{border-left:0;border-right:2px solid var(--c);padding:0 12px 0 0}
+.gx-l a{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px;line-height:1.3}.gx-l a span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gx-l a:hover span{color:var(--uv2)}
+.gx-l .st{font-size:13px;font-weight:700;flex:none}.gx-l.r a{flex-direction:row-reverse}.gx-m .gb-s .lgn{font-size:clamp(84px,7vw,112px)}
+.gv-y .bgimg{opacity:.3;-webkit-mask:none;mask:none}
+.gy-r{display:grid;grid-template-columns:1fr 1fr;gap:26px;width:100%;margin-top:4px}
+.gy-l{display:flex;gap:6px;justify-content:flex-end;min-width:0}.gy-l.r{justify-content:flex-start}
+.rb{font-style:normal;font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:var(--ink);display:inline-flex;align-items:center;gap:3px;white-space:nowrap}.rb .ic{width:10px;height:10px}
+.gy-c .rb{position:absolute;left:0;top:0;padding:2px 4px;background:rgba(12,13,16,.85)}.gx .le-c .rb{position:absolute;left:0;top:0;padding:4px 8px;font-size:10px;background:rgba(12,13,16,.85)}
+.gx-l .rb{margin-left:7px;color:var(--mute);vertical-align:1px}.gx-l a.sw span::after{content:none!important}
+.gy-c small,.gx-l small{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--uv2);white-space:nowrap}.gx-l small{margin-left:7px}
+.gy-c.g{border-color:var(--uv);border-style:solid;border-top-color:var(--c)}.gy-c.g img{opacity:1}.gy-c.g b{color:var(--ink)}
+.gy-c.sw{border-style:dashed;border-top-style:dashed}.gy-c.sw img{opacity:.45}.gy-c.sw b,.gx-l a.sw span{color:var(--mute)}.gx-l a.sw span::after{content:" ⇄";font-size:10px}
+.gy-l.many{flex-wrap:wrap;align-content:flex-start;gap:4px}.gy-l.many .gy-c{flex:0 0 calc(25% - 3px);max-width:none;height:50px}.gy-l.tight{gap:4px}.gy-l.tight .gy-c b{font-size:9.5px;letter-spacing:-.02em;text-overflow:clip}.gy-l.tight .gy-c .st{font-size:11px}.gy-l.tight .gy-c span{left:3px;right:0}.gy-l.many .gy-c img{display:none}.gy-l.many .gy-c::after{display:none}
+.gy-c{position:relative;overflow:hidden;isolation:isolate;flex:1 1 0;min-width:0;max-width:88px;height:104px;border:1px solid var(--line);border-top:2px solid var(--c);background:#0e0f12;transition:border-color .2s}
+.gy-c img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 15%;z-index:-1}
+.gy-c::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(12,13,16,.96) 0,rgba(12,13,16,.8) 34%,transparent 66%)}
+.gy-c span{position:absolute;left:6px;right:4px;bottom:5px;display:grid;gap:1px;line-height:1.15}
+.gy-c b{font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gy-c .st{font-size:12px;font-weight:700}a.gy-c:hover{border-color:var(--uv2);border-top-color:var(--c)}
+.gv-i .bgimg{opacity:.4}
+.gi2{display:grid;gap:18px;align-content:space-between}
+.gi2-t{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px}.gi2-h{display:grid;gap:8px}.gi2-h h3{margin:0}
+.gi2-t .gb-s .lgn{font-size:clamp(84px,7vw,112px)}.gi2-mv{display:grid;gap:12px;justify-self:end}
+.gi2-s{display:grid;gap:8px}.gi2-g{display:grid;gap:4px;background:rgba(12,13,16,.6);border:1px solid var(--line2);padding:10px 12px 12px}
+.gi2-g>div{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:3px}
+.gi2-g i{font-style:normal;display:grid;place-items:center;min-width:0}
+.gi2-g .ax i{font-family:var(--mono);font-size:9px;color:var(--mute);height:16px}
+.gi2-g .rw i{height:44px;border:1px solid var(--line2);font-family:var(--disp);font-size:20px;font-weight:800;color:#0c0d10}
+.gi2-g .rw i.on{background:var(--c);border-color:var(--c)}
+.gi2-g i.sw{box-shadow:-3px 0 0 -1px var(--uv)}
+@media (max-width:760px){
+  .gv-k,.gv-x,.gv-i{min-height:0}
+  .gk{grid-template-columns:1fr 1fr;gap:12px}.gk::before,.gx::before{left:-14px}.gk::after,.gx::after{right:-14px}.gk .gk-c{grid-column:1/-1;order:3}.gk-c{gap:10px}
+  .gk-t{min-width:0;gap:14px}.gk-t .lgn{font-size:84px}.gk-t .gbm img{width:44px;height:44px}.gk-t .gbm b{font-size:15px}.gk-t .gbm em{display:none}
+  .gk-row{grid-template-columns:3.4em 1fr auto 1fr 3.4em;gap:6px}.gk-row b,.gx .gk-row b{font-size:15px}.gk-row span{min-width:0;font-size:8px;letter-spacing:.06em}.gk-row .ic{display:none}
+  .gx{grid-template-columns:1fr 1fr;gap:10px}.gx-m{grid-column:1/-1;order:-1}.gy-r{gap:10px}.gy-l{gap:3px}.gy-c{height:84px}.gy-c b{font-size:10px}.gy-c .st{font-size:10px}.gy-c span{left:3px;right:2px}.gx-t{grid-template-columns:1fr 1fr;gap:12px}.gx-c{grid-column:1/-1;order:-1}.gx-l a{font-size:13px}.gx .le-c{min-height:170px}.gx .le-c b{font-size:19px}
+  .gi2-t{grid-template-columns:1fr;justify-items:center;text-align:center;gap:12px}.gi2-mv{justify-self:center;grid-template-columns:1fr 1fr}.gi2-mv .gbm em{display:none}
+  .gi2-g{padding:8px 6px}.gi2-g>div{gap:1px}.gi2-g .rw i{height:30px;font-size:9px;font-weight:700}.gi2-g .ax i{font-size:6px}
+}
+
+/* экран «Дуэли» */
+.du-f{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.du-r{display:flex;gap:12px;align-items:center}.du-r .mono{min-width:112px}
+.du-r input{-webkit-appearance:none;appearance:none;width:190px;height:22px;background:transparent;cursor:pointer;margin:0}
+.du-r input::-webkit-slider-runnable-track{height:2px;background:linear-gradient(90deg,var(--uv) var(--p,0%),var(--line) var(--p,0%))}
+.du-r input::-moz-range-track{height:2px;background:linear-gradient(90deg,var(--uv) var(--p,0%),var(--line) var(--p,0%))}
+.du-r input::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:18px;margin-top:-8px;background:var(--uv2);border:0;border-radius:0;box-shadow:0 0 12px rgba(154,107,255,.7)}
+.du-r input::-moz-range-thumb{width:12px;height:18px;background:var(--uv2);border:0;border-radius:0;box-shadow:0 0 12px rgba(154,107,255,.7)}
+.dmx{--c:var(--uv)}.dmx th{cursor:default}
+.dmx td{padding:8px 8px;border-left:1px solid var(--line2)}
+.dmx td.l{font-weight:700;white-space:nowrap}.dmx td.l small{font-family:var(--mono);font-weight:400;letter-spacing:.08em;text-transform:uppercase}
+.dmx td b{display:block;font-weight:600;white-space:nowrap}
+.dmx td em{display:block;font-style:normal;font-weight:700;font-size:15px;color:var(--mute)}.dmx em.up{color:var(--green)}.dmx em.dn{color:var(--red)}
+.dmx td.rt{font-family:var(--disp);font-size:24px;font-weight:800;color:var(--uv2);border-left:0;border-right:1px solid var(--line)}
+.dmx th.rt{color:var(--uv2);white-space:nowrap}.dmx th.rt svg{vertical-align:-2px}
+@media (max-width:760px){.du-f{gap:10px}.du-r input{width:140px}.dmx td{padding:6px 6px;font-size:13px}.dmx td em{font-size:13px}.dmx td.rt{font-size:19px}}
+
+/* попадания команд под счётом: и счёт, и попадания выровнены по двоеточию */
+.th{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.04em;line-height:1}
+.th span{justify-self:end;display:inline-flex;align-items:center;gap:5px}.th>b{justify-self:start}.th b{font-weight:600}
+.th i{font-style:normal;color:var(--mute);padding:0 6px;font-size:inherit!important;font-weight:400}.th .ic{width:13px;height:13px;color:var(--mute)}
+.gm-5 .gmini::before{background:linear-gradient(rgba(12,13,16,.3),rgba(12,13,16,.3) 45%,rgba(12,13,16,.78)),var(--img) center 40%/cover}
+.gm-5 .gmini .s{display:grid;grid-template-columns:1fr auto 1fr;column-gap:4px;row-gap:6px;align-content:center;align-items:center;padding:12px 0}
+.gm-5 .gmini .s>span:first-child{justify-self:end}.gm-5 .gmini .s>span:nth-child(3){justify-self:start}
+.gm-5 .gmini .s .th{grid-column:1/-1;font-size:13px;text-shadow:none}
+.gm-5 .gmini .s .th span,.gm-5 .gmini .s .th i,.gm-5 .gmini .s .th>b{background:rgba(12,13,16,.8);padding-top:4px;padding-bottom:3px;align-self:stretch;display:inline-flex;align-items:center}
+.gm-5 .gmini .s .th span{padding-left:10px}.gm-5 .gmini .s .th>b{padding-right:10px}.gm-5 .gmini .s .th i{opacity:1;color:var(--ink)}.gm-5 .gmini .s .th .ic{color:var(--ink)}
+.gb-s,.le-s{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+.gb-s>.lgn:first-child,.le-s>.lgn:first-child{justify-self:end}.gb-s>.lgn:nth-child(3),.le-s>.lgn:nth-child(3){justify-self:start}
+.gb-s>.th,.le-s>.th{grid-column:1/-1;font-size:17px;margin-top:2px}.gb-s>.th span,.le-s>.th span{gap:8px}.gb-s>.th .ic,.le-s>.th .ic{width:16px;height:16px}
+.gcard .sc .th{align-self:center;margin-left:auto;font-size:13px;grid-template-columns:auto auto auto}
+.le-s{width:max-content;max-width:none;justify-self:center;margin-inline:auto}
+@media (max-width:760px){.gcard .sc{flex-wrap:wrap}.gcard .sc small.th{display:grid;flex-basis:100%;margin:2px 0 0;grid-template-columns:auto auto 1fr;font-size:12px}}
+.gcard .sc small.th{color:var(--ink);letter-spacing:.04em;text-transform:none}
+.lv-d .le-s .lgn{font-size:clamp(64px,5.2vw,80px)}.le-s{column-gap:12px}
+/* большая карточка игры: z «Без полос», r «Диаграмма». Сверху небольшие портреты MVP по бокам от счёта, ниже на всю ширину составы и сравнение команд */
+.gv-z,.gv-r{min-height:400px;grid-template-rows:1fr auto}.gv-z .bgimg,.gv-r .bgimg{opacity:.3;-webkit-mask:none;mask:none}
+.gz{grid-template-columns:168px minmax(0,1fr) 168px;gap:16px 24px;align-items:stretch}
+.gz .gx-c{align-content:center}
+.gz .le-c{min-height:206px}.gz .le-c b{font-size:21px}.gz .le-c span{left:12px;right:10px;bottom:10px}.gz .le-c .st{font-size:14px}
+.le-c.g,.gx .le-c.g,.gx.gz .le-c.g{border-color:var(--line);border-top-color:var(--c);box-shadow:none}
+.gz-b{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:24px;align-items:center;border-top:1px solid var(--line);padding-top:16px}
+.gz-l{display:grid!important;gap:8px;justify-content:end;align-content:center;min-width:0}.gz-l.r{justify-content:start}
+.gz-l.c2{grid-template-columns:repeat(2,minmax(0,128px))}.gz-l.c3{grid-template-columns:repeat(3,minmax(0,118px))}.gz-l.c4,.gz-l.c5{grid-template-columns:repeat(4,minmax(0,100px))}
+.gz-l .gy-c{max-width:none;height:112px;flex:none}.gz-r .gz-l .gy-c{height:126px}.gz-l.c5 .gy-c,.gz-r .gz-l.c5 .gy-c{height:80px}
+.gz-l .gy-c b{font-size:14px}.gz-l .gy-c .st{font-size:13px}.gz-l .gy-c span{left:8px;right:6px;bottom:7px}
+.gz-c{display:grid;gap:14px;align-content:center}
+.gz-row{display:grid;grid-template-columns:3.4em 1fr 3.4em;align-items:center;gap:12px}
+.gz-row b{font-family:var(--disp);font-size:21px;font-weight:700;line-height:1}.gz-row b:first-child{text-align:right}.gz-row b.lo{color:var(--mute);font-weight:500}
+.gz-row span{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap}.gz-row .ic{width:13px;height:13px;color:var(--uv2)}
+.gr{position:relative;width:200px;height:200px;margin:30px 76px 30px}
+.gr svg{width:100%;height:100%;overflow:visible;display:block}
+.gr-g polygon{fill:none;stroke:var(--line2);stroke-width:1}.gr-g polygon:last-of-type{stroke:var(--line)}.gr-g line{stroke:var(--line2);stroke-width:1}
+.gr-p{fill:color-mix(in srgb,var(--c) 22%,transparent);stroke:var(--c);stroke-width:2;stroke-linejoin:round}
+.gr-l{position:absolute;display:grid;gap:3px;white-space:nowrap;line-height:1;transform:translate(-50%,-50%)}
+.gr-l.e{transform:translate(8px,-50%);justify-items:start}.gr-l.w{transform:translate(calc(-100% - 8px),-50%);justify-items:end}.gr-l.m{transform:translate(-50%,calc(-100% - 6px));justify-items:center}
+.gr-l small{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);display:inline-flex;align-items:center;gap:4px}.gr-l small .ic{width:11px;height:11px;color:var(--uv2)}
+.gr-l em{font-style:normal;display:inline-flex;gap:8px;font-family:var(--disp);font-size:16px;font-weight:700}
+.gr-l.e em,.gr-l.w em{display:grid;gap:2px;font-size:15px}.gr-l.w em{justify-items:end}
+@media (max-width:760px){.gv-z,.gv-r{min-height:0}.gz{grid-template-columns:1fr 1fr;gap:10px}.gz .gx-c{grid-column:1/-1;order:-1}.gz .le-c{min-height:170px}
+  .gz-b{grid-template-columns:1fr 1fr;gap:10px}.gz-c,.gr{grid-column:1/-1;order:-1;justify-self:center}.gz-l,.gz-l.r{justify-content:center;gap:4px}
+  .gz-l.c2{grid-template-columns:repeat(2,minmax(0,1fr))}.gz-l.c3{grid-template-columns:repeat(3,minmax(0,1fr))}.gz-l.c4,.gz-l.c5{grid-template-columns:repeat(4,minmax(0,1fr))}.gz-l .gy-c,.gz-r .gz-l .gy-c{height:92px}
+  .gz-l.c3 .gy-c b,.gz-l.c4 .gy-c b,.gz-l.c5 .gy-c b{font-size:9.5px;letter-spacing:-.02em;text-overflow:clip}.gz-l.c3 .gy-c span,.gz-l.c4 .gy-c span{left:3px;right:1px}.gz-l.c4 .gy-c .st,.gz-l.c3 .gy-c .st{font-size:10px}
+  .gz-row{gap:8px}.gz-row b{font-size:17px}.gz-row span{font-size:8px;letter-spacing:.06em}.gr{width:190px;height:190px;margin:24px 80px 24px}.gr-l small{font-size:7px;letter-spacing:.04em}.gr-l em,.gr-l.e em,.gr-l.w em{font-size:13px}}
+.z0{text-decoration:none;opacity:.32}
+.th i{display:inline-flex;align-items:center;padding:0 8px}.gm-5 .gmini .s .th i{padding:4px 7px 3px}
+.gm-5 .gmini .s .th span{min-width:calc(3ch + 18px);justify-content:flex-end}.gm-5 .gmini .s .th>b{min-width:calc(3ch + 18px);justify-content:flex-start}
+/* состав списком в карточке игры: строка-плашка с аватаркой у внешнего края, имя, средний до игры, за игру, сдвиг */
+.gq .gx-l{width:100%;max-width:440px;justify-self:end;gap:5px;border:0;padding:0}.gq .gx-l.r{justify-self:start;border:0;padding:0}
+.gq .gx-l a,.gq .gx-h{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center}
+.gq .gx-l a{height:48px;padding-right:12px;background:rgba(14,15,18,.72);border:1px solid var(--line2);font-size:18px;font-weight:700;line-height:1.2;transition:border-color .2s}
+.gq .gx-l a:hover{border-color:var(--uv2)}.gq .gx-l a:hover span{color:inherit}
+.gq .gx-l a img{width:48px;height:46px;object-fit:cover;object-position:50% 12%;border-left:2px solid var(--c)}
+.gq .gx-l a.sw img{opacity:.45}.gq .gx-l a>span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.gq .gx-l.d a{height:40px;font-size:16px}.gq .gx-l.d a img{height:38px}
+.gq .gx-h{height:14px;padding-right:12px}
+.gq .gx-l.r a,.gq .gx-l.r .gx-h{grid-template-columns:auto minmax(0,1fr) 48px;padding:0 0 0 12px}
+.gq .gx-l.r a>img,.gq .gx-l.r .gx-h>b{order:3}.gq .gx-l.r a>span:nth-child(2),.gq .gx-l.r .gx-h>span:nth-child(2){order:2;text-align:right}
+.gq .gx-l.r a img{border-left:0;border-right:2px solid var(--c)}
+.rr{display:grid;grid-template-columns:50px 62px 42px;justify-items:end;align-items:center}.rr i{font-style:normal}
+.gx-h .rr i{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
+.rr .b0{color:var(--mute);font-size:15px;font-weight:400}.rr .st{font-size:16px}.rr .dl{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--mute)}.rr .dl.up{color:var(--green)}.rr .dl.dn{color:var(--red)}
+.le-c .dl{font-style:normal;font-family:var(--mono);font-size:12px;font-weight:600;color:var(--mute);margin:0 8px 0 -4px}.le-c .dl.up{color:var(--green)}.le-c .dl.dn{color:var(--red)}
+.gr-l.s{transform:translate(-50%,6px);justify-items:center}
+@media (max-width:760px){.gq .gx-l,.gq .gx-l.r{grid-column:1/-1;max-width:none;justify-self:stretch}
+  .gq .gx-l a,.gq .gx-l.r a,.gq .gx-h,.gq .gx-l.r .gx-h{grid-template-columns:40px minmax(0,1fr) auto;padding:0 10px 0 0;gap:10px}.gq .gx-l a{height:40px;font-size:15px}.gq .gx-l a img,.gq .gx-l.r a img{width:40px;height:38px;border-right:0;border-left:2px solid var(--c)}
+  .gq .gx-l.r a>img,.gq .gx-l.r .gx-h>b{order:0}.gq .gx-l.r a>span:nth-child(2),.gq .gx-l.r .gx-h>span:nth-child(2){order:0;text-align:left}.rr{grid-template-columns:42px 56px 36px}.rr .b0{font-size:13px}.rr .st{font-size:14px}}
+/* карточка игры, раскладка «команда колонкой»: слева и справа MVP команды и под ним состав, по центру счёт и сравнение */
+.gq{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:28px;align-items:stretch;position:relative}
+.gq-s{display:grid;grid-template-rows:minmax(132px,1fr) auto;gap:8px;min-width:0}
+.gq-m{display:grid;justify-items:center;align-content:space-between;gap:12px;min-width:300px}
+.gq-m .gb-s .lgn{font-size:clamp(84px,7vw,112px)}.gq-m .gx-c{gap:8px}
+.gq .le-c{min-height:132px}.gq .le-c img{object-position:50% 18%}.gq .le-c b{font-size:26px}.gq .le-c small{font-size:10px}.gq .le-c span{left:14px;right:14px;bottom:12px}.gq .le-c .st{font-size:15px}
+.gq .le-c .rb{position:absolute;left:0;top:0;padding:4px 8px;font-size:10px;background:rgba(12,13,16,.85)}
+.gq-s.r .le-c span{text-align:right}.gq-s.r .le-c em{justify-content:flex-end}.gq-s.r .le-c .rb{left:auto;right:0}
+.gq .gx-l,.gq .gx-l.r{max-width:none;justify-self:stretch}
+.gq .gz-l,.gq .gz-l.r{justify-content:stretch;gap:6px}.gq .gz-l.c2,.gq .gz-l.c4,.gq .gz-l.c5{grid-template-columns:repeat(4,minmax(0,1fr))}.gq .gz-l.c3{grid-template-columns:repeat(3,minmax(0,1fr))}.gq .gz-l .gy-c,.gq-r .gz-l .gy-c{height:104px}.gq .gz-l.c3 .gy-c{height:84px}.gq .gz-l.c5 .gy-c{height:70px}
+.gq .gz-c{width:100%;border-top:1px solid var(--line);padding-top:14px}.gq .gr{margin:34px 76px 34px}
+@media (max-width:760px){.gq{grid-template-columns:minmax(0,1fr);gap:12px}.gq-m{order:-1;min-width:0}.gq-s{grid-template-rows:150px auto}.gq-s.r .le-c span{text-align:left}.gq-s.r .le-c em{justify-content:flex-start}.gq-s.r .le-c .rb{left:0;right:auto}.gq .gr{margin:24px 80px 28px}}
+.gq .gr{margin-top:26px}
+/* высота карточки рассчитана на 8 на 8: MVP и семь строк состава помещаются без сжатия, при меньшем составе вырастает плашка MVP */
+.gq .gx-l a{height:44px;font-size:17px}.gq .gx-l a img{width:48px;height:42px}.gq .gx-l.d a{height:36px;font-size:15px}.gq .gx-l.d a img{height:34px}
+@media (min-width:761px){.gq{min-height:504px}.gq-s{grid-template-rows:minmax(132px,1fr) auto}}
+@media (max-width:760px){.gq .gx-l a{height:40px;font-size:15px}.gq .gx-l a img{width:40px;height:38px}}
+.gq .gx-l a small{display:block;margin:2px 0 0;line-height:1}.gq .gx-l a>span:nth-child(2){line-height:1.1}
+@media (min-width:761px){.gq .gr{width:240px;height:240px;margin:30px 76px 30px}.gq .gr-l em{font-size:17px}.gq .gr-l small{font-size:9px}.gq .gz-c{gap:20px}.gq .gz-row b{font-size:24px}}
+
+/* сдвиг среднего — не колонкой, а «+X / −X» вплотную к рейтингу за игру */
+.rr{grid-template-columns:50px 62px 30px}.rr .dl{justify-self:start;margin-left:5px;font-size:11px}
+@media (max-width:760px){.rr{grid-template-columns:42px 56px 26px}.rr .dl{font-size:10px;margin-left:4px}}
+.rr{grid-template-columns:50px 30px 62px}.gx-h .rr i:first-child{grid-column:1/3;justify-self:center}.gx-h .rr i:nth-child(2){display:none}
+@media (max-width:760px){.rr{grid-template-columns:42px 26px 56px}}
+
+/* рейтинг убран: в составе у игрока только попадания; топ сезона — заглушки «Калибруется» */
+.rr{display:block}.gx-l .rr .st{font-size:16px}
+.tcard.cal img{object-fit:cover;object-position:50% 10%;filter:blur(3px) saturate(.4) brightness(.7);transform:scale(1.15)}.tcard.cal:hover img{transform:scale(1.15)}
+.tcard.cal .info b{font-size:17px;letter-spacing:.02em}.tcard.cal .info small{text-transform:uppercase;margin-top:3px}
+.calb{display:block;height:3px;margin-top:9px;background:rgba(255,255,255,.12)}.calb i{display:block;height:100%;background:var(--m)}
+@media (max-width:760px){.tcard.cal .info b{font-size:12px}.tcard.cal .info small{font-size:8px}}
+
+/* состав «все равны»: одинаковые строки с портретом, по попаданиям; MVP — значком-плашкой */
+.gq-s.eq{grid-template-rows:1fr;align-content:center}.gq .gx-l.eq{align-self:center;gap:6px}
+.gx-l.eq a>span:nth-child(2){display:flex;flex-direction:column;gap:3px;align-items:flex-start;white-space:normal}.gx-l.eq a>span b{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gx-l.eq.r a>span:nth-child(2){align-items:flex-end}
+.mt{font-style:normal;font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;line-height:1;padding:4px 6px 3px;border:1px solid var(--c);color:var(--c);white-space:nowrap}
+.mt.g{background:var(--ink);border-color:var(--ink);color:#0c0d10}
+@media (min-width:761px){.gq .gx-l.eq a{height:var(--h);grid-template-columns:calc(var(--h) + 2px) minmax(0,1fr) auto;font-size:clamp(17px,calc(var(--h)*.2 + 6px),24px)}
+  .gq .gx-l.eq.r a{grid-template-columns:auto minmax(0,1fr) calc(var(--h) + 2px)}.gq .gx-l.eq a img{width:calc(var(--h) + 2px);height:calc(var(--h) - 2px)}
+  .gx-l.eq .rr .st{font-size:clamp(16px,calc(var(--h)*.18 + 6px),22px)}}
+@media (max-width:760px){.gq .gx-l.eq a{height:46px}.gq .gx-l.eq a img{height:44px}.mt{font-size:8px;padding:3px 5px 2px}.gx-l.eq a>span:nth-child(2){gap:2px}}
+.calf{display:flex;align-items:center;gap:14px;margin-top:12px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);white-space:nowrap}.calf b{color:var(--ink);font-weight:600}
+.calf .calb{flex:1;margin:0}.calf .calb i{background:var(--uv2)}
+/* значок «MVP игры»: тот же контурный, но двухцветный — цвет команды переходит в цвет лучшего (приглушённое золото топа) */
+.mt.g{--b:#d6b46e;background:transparent;border:1px solid;border-image:linear-gradient(90deg,var(--c),var(--b)) 1;color:var(--b)}
+.mt.g::first-letter{color:inherit}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){.mt.g{background:linear-gradient(90deg,var(--c),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}}
+.mts{display:flex;gap:5px;flex-wrap:wrap}.gx-l.eq.r .mts{justify-content:flex-end}
+.mt{display:inline-flex;align-items:center;gap:4px}.mt .ic{width:10px;height:10px;flex:none;color:var(--c)}.mt.g .ic{color:var(--c)}
+@media (max-width:760px){.mts{gap:3px}.mt .ic{width:9px;height:9px}}
+.gx-l.eq .mts{flex-wrap:nowrap}.gx-l.eq .mt{font-size:8px;letter-spacing:.05em;padding:3px 5px 2px}.gx-l.eq a{gap:10px}
+/* значки — отдельной строкой под именем и числом попаданий, на всю ширину плашки */
+.gx-l.eq .mts{font-style:normal;flex-wrap:wrap;row-gap:3px}
+.gx-l.eq a>img{grid-column:1;grid-row:1/-1}.gx-l.eq a>span:nth-child(2){grid-column:2;grid-row:1}.gx-l.eq a>.rr{grid-column:3;grid-row:1}.gx-l.eq a>.mts{grid-column:2/4;grid-row:2;align-self:start;margin-top:-4px}
+.gx-l.eq a.hb{grid-template-rows:1fr 1fr;row-gap:0}.gx-l.eq a.hb>span{align-self:end;padding-bottom:5px}.gx-l.eq a.hb>.rr{padding-bottom:5px}
+@media (min-width:761px){.gx-l.eq.r a>img{grid-column:3;order:0}.gx-l.eq.r a>span:nth-child(2){grid-column:2;order:0}.gx-l.eq.r a>.rr{grid-column:1}.gx-l.eq.r a>.mts{grid-column:1/3}}
+@media (max-width:760px){.gq .gx-l.eq a.hb{height:56px}.gq .gx-l.eq a.hb img{height:54px}}
+/* «все равны», раскладка 2: под именем число попаданий, значки столбиком у внутреннего края плашки */
+.gx-l.eq a.hb{grid-template-rows:none}.gx-l.eq a.hb>span{align-self:center;padding-bottom:0}
+.gx-l.eq a>span:nth-child(2){gap:2px}.gx-l.eq .hn{font-style:normal;font-weight:600;font-size:.8em;color:var(--ink);opacity:.9;line-height:1}.gx-l.eq .hn .st{font-size:inherit}
+.gx-l.eq a>.mts{grid-column:3;grid-row:1;align-self:center;margin:0;flex-direction:column;align-items:flex-end;flex-wrap:nowrap;gap:4px}
+@media (min-width:761px){.gx-l.eq.r a>.mts{grid-column:1;align-items:flex-start}}
+@media (max-width:760px){.gq .gx-l.eq a,.gq .gx-l.eq a.hb{height:50px}.gq .gx-l.eq a img,.gq .gx-l.eq a.hb img{height:48px}.gx-l.eq a>.mts{gap:3px}}
+@media (min-width:761px) and (max-width:1250px){.gx-l.eq .mt{font-size:0;letter-spacing:0;gap:0;padding:4px}.gx-l.eq .mt .ic{width:12px;height:12px}.gx-l.eq a>.mts{flex-direction:row}}
+/* «лучший в игре»: без золота и градиента — рамка в цвете команды, слева залитый цветом команды квадрат с иконкой, текст белый */
+.mt.g,.gx-l.eq .mt.g{background:none;-webkit-background-clip:border-box;background-clip:border-box;border:1px solid var(--c);border-image:none;color:var(--ink);padding-left:0;gap:5px;overflow:hidden}
+.mt.g .ic,.gx-l.eq .mt.g .ic{color:#0c0d10;background:var(--c);box-sizing:content-box;padding:3px;margin:-3px 0 -2px;stroke-width:2.4}
+@media (min-width:761px) and (max-width:1250px){.gx-l.eq .mt.g{padding:0;background:var(--c)}.gx-l.eq .mt.g .ic{padding:4px;margin:0}}
+@media (min-width:1251px){.gx-l.eq a>.mts{flex-wrap:wrap;max-height:calc(var(--h) - 6px);column-gap:4px;align-content:flex-end}.gx-l.eq.r a>.mts{flex-wrap:wrap-reverse;align-content:flex-end}}
+@media (max-width:760px){.gx-l.eq a>.mts{flex-wrap:wrap;max-height:46px;column-gap:3px;align-content:flex-end}}
+/* «лучший в игре»: снова градиент, но из цвета команды в белый (золото плохо читалось с красным и жёлтым) */
+.mt.g,.gx-l.eq .mt.g{border:1px solid;border-image:linear-gradient(90deg,var(--c),var(--gb,var(--ink))) 1;padding-left:5px;gap:4px;background:linear-gradient(90deg,var(--c) 10%,var(--gb,var(--ink)) 75%);-webkit-background-clip:text;background-clip:text;color:transparent;overflow:visible}
+.mt.g .ic,.gx-l.eq .mt.g .ic{color:var(--c);background:none;padding:0;margin:0;stroke-width:inherit}
+@media (min-width:761px) and (max-width:1250px){.gx-l.eq .mt.g{padding:4px;background:none;border-image:linear-gradient(135deg,var(--c),var(--gb,var(--ink))) 1}.gx-l.eq .mt.g .ic{padding:0;color:var(--gb,var(--ink))}}
+/* значки: у левой команды прижаты к правому краю плашки, у правой — к левому */
+@media (min-width:761px){.gx-l.eq a>.mts{align-items:flex-end;align-content:flex-end;justify-content:center}.gx-l.eq.r a>.mts{flex-wrap:wrap;align-items:flex-start;align-content:flex-start}}
+@media (min-width:761px) and (max-width:1250px){.gx-l.eq a>.mts,.gx-l.eq.r a>.mts{flex-wrap:nowrap;align-items:center;justify-content:flex-end}.gx-l.eq.r a>.mts{justify-content:flex-start}}
+@media (min-width:761px){.gx-l.eq a>.mts,.gx-l.eq.r a>.mts{align-self:start;justify-content:flex-start;margin-top:8px}}
+@media (min-width:761px) and (max-width:1250px){.gx-l.eq a>.mts{justify-content:flex-end}.gx-l.eq.r a>.mts{justify-content:flex-start}}
+@media (max-width:760px){.gx-l.eq a>.mts{align-self:start;margin-top:4px;justify-content:flex-start}}
+@media (min-width:1251px){.gx-l.eq a>.mts{max-height:calc(var(--h) - 16px)}}
+.tip{position:fixed;z-index:80;max-width:280px;padding:9px 12px;background:#0c0d10;border:1px solid var(--uv);box-shadow:0 8px 24px rgba(0,0,0,.6);font-size:13px;line-height:1.35;color:var(--ink);pointer-events:none}.tip[hidden]{display:none}
+.mt[data-tip]{cursor:help}
+.mt b{font-weight:700;margin-left:3px;letter-spacing:0;font-size:1.15em;color:var(--ink);-webkit-text-fill-color:var(--ink)}
+@media (min-width:761px) and (max-width:1250px){.gx-l.eq .mt b{display:none}}
+@media (max-width:760px){.gq .gx-l.eq a.hb{height:auto;min-height:50px;padding-bottom:6px;row-gap:4px;align-items:start}.gq .gx-l.eq a.hb>span{align-self:center}
+  .gx-l.eq a>.mts{grid-column:2/4;grid-row:2;flex-direction:row;flex-wrap:wrap;max-height:none;margin:0;align-self:start;justify-content:flex-start;align-content:flex-start;gap:3px}.gx-l.eq a.hb>img{grid-row:1}}
+/* число в значке: у лучшего в команде в цвете команды, у лучшего в игре белое */
+.mt:not(.g) b{color:var(--c);-webkit-text-fill-color:var(--c)}.mt.g b{color:var(--gb,var(--ink));-webkit-text-fill-color:var(--gb,var(--ink))}
+.mt.n{border-color:var(--mute);color:var(--ink)}.mt.n .ic{color:var(--uv2)}
+/* значки-медальки: только иконка, без подписи и числа (они в подсказке); ряд внизу плашки, от внутреннего края к портрету */
+.gq .gx-l.eq a>.mts,.gq .gx-l.eq.r a>.mts{grid-column:3;grid-row:1;align-self:end;margin:0 0 8px;flex-direction:row-reverse;flex-wrap:nowrap;max-height:none;gap:5px;justify-content:flex-start;align-items:center;align-content:normal}
+.gq .gx-l.eq .mt,.gq .gx-l.eq .mt.g{font-size:0;letter-spacing:0;gap:0;padding:5px;border-width:1px}.gq .gx-l.eq .mt b{display:none}
+.gq .gx-l.eq .mt .ic,.gq .gx-l.eq .mt.g .ic{width:15px;height:15px;padding:0;margin:0}
+.gq .gx-l.eq .mt.g{background:none;border-image:linear-gradient(135deg,var(--c),var(--gb,var(--ink))) 1}.gq .gx-l.eq .mt.g .ic{color:var(--gb,var(--ink))}
+@media (min-width:761px){.gq .gx-l.eq.r a>.mts{grid-column:1;flex-direction:row}}
+@media (max-width:760px){.gq .gx-l.eq a.hb{height:50px;min-height:0;padding-bottom:0;align-items:center}.gq .gx-l.eq a>.mts,.gq .gx-l.eq.r a>.mts{align-self:center;margin:0;gap:4px}.gq .gx-l.eq .mt{padding:4px}.gq .gx-l.eq .mt .ic{width:13px;height:13px}}
+
+/* таблица дуэлей на странице игры */
+.gdt th.t{box-shadow:inset 0 3px var(--c);padding-top:10px;white-space:nowrap}.gdt th small{font-size:12px;color:var(--uv2);font-weight:700;margin-top:2px}
+.gdt th.wl{font-family:var(--mono);font-size:9px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);white-space:nowrap;line-height:1.5}
+.gdt td.l{box-shadow:inset 3px 0 var(--c)}.gdt td b.up{color:var(--green)}.gdt td b.dn{color:var(--red)}
+.gdt td.dk{font-weight:800;font-size:17px}.gdt td.dk.up{color:var(--green)}.gdt td.dk.dn{color:var(--red)}
+.gdt tr.sep td{border-top:2px solid var(--line)}.gdt th{cursor:default}
+.gdt td.dk,.gdt td.rt,.gdt td.num{text-align:center}.gdt td.dk{background:none;border-left:1px solid var(--line2)}
+td.cal{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
+
+/* таблица дуэлей игры: общий итог одной колонкой и галочка деления на команды */
+.gdt td.dk small{display:block;font-size:11px;font-weight:600;color:var(--mute);margin-top:2px;white-space:nowrap}
+.dsp{display:flex;align-items:center;gap:8px;padding:12px 16px;font-size:13px;cursor:pointer;width:max-content;user-select:none}
+.dsp input{width:16px;height:16px;accent-color:var(--ink);cursor:pointer}
+.sc[hidden]{display:none}
+/* таблица дуэлей: без зелёного и красного (могут совпасть с цветами команд): выиграл ярко, проиграл приглушённо */
+.gdt td b.up,.gdt td.dk.up{color:var(--ink)}
+.gdt td b.dn,.gdt td.dk.dn{color:var(--mute);font-weight:600}
+.gdt td b{color:var(--mute)}.gdt td b.up{font-weight:800}
+
+/* таблица дуэлей: рейтинг одной дуэли под счётом */
+.gdt td.cell small{display:block;font-size:11px;font-weight:700;color:var(--uv2);opacity:.8;margin-top:1px}
+
+/* менявшие команду: рядом с общим счётом — попадания за эту команду цветом команды */
+.tp{margin-left:8px;font-weight:800}
+.gx-l.r .rr .tp{margin-left:8px}
+.le-c .sts .tp{font-size:15px;font-weight:800;margin-left:0}
+/* менявшие команду не бледные: обычная яркость, как у остальных */
+.gq .gx-l a.sw img{opacity:1}.gx-l a.sw span{color:inherit}
+.grt{font-weight:800;color:var(--uv2)}
