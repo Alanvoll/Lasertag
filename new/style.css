@@ -1161,3 +1161,7 @@ td.grt small.rd{font-family:var(--mono);font-size:10px;font-weight:400;margin-le
 
 /* 13.11 таблица «рейтинг от игры к игре» */
 .stp-h{margin-top:34px}.stp td b{font-family:var(--disp);font-size:18px;font-weight:800;color:var(--ink)}.stp td.prov b{color:var(--mute);font-weight:600}.stp td em{font-family:var(--mono);font-size:11px;font-weight:400}.stp th a{color:inherit;text-decoration:none}.stp td.tot{color:var(--line)}
+
+.stp td s{display:block;text-decoration:none;font-size:12px;font-weight:700;color:var(--uv2);margin-top:4px;padding-top:4px;border-top:1px solid var(--line2)}.stp td s i{font-style:normal;font-family:var(--mono);font-size:9px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-right:5px}
+.stp td.prov{background:repeating-linear-gradient(135deg,transparent 0 6px,rgba(255,255,255,.04) 6px 12px)}.stp td.tot{background:rgba(0,0,0,.25)}
+.stp td.rt.prov{background:rgba(15,17,21,.98)}.stp td.rt.prov b{display:block;font-size:20px;color:var(--mute)}.stp td.rt .calv{font-size:9px}
