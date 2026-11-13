@@ -1158,3 +1158,6 @@ td.grt small.rd{font-family:var(--mono);font-size:10px;font-weight:400;margin-le
 .gx-l .rr{display:grid;grid-template-columns:50px 28px auto;align-items:baseline;justify-items:start;column-gap:0}
 .gx-l .rr .st{justify-self:stretch;justify-content:space-between;gap:4px}.gx-l .rr .tp{margin-left:6px;min-width:22px;text-align:right}
 .gx-l .rr .rgm{margin-left:14px}.gx-l .rr .rgm b{min-width:32px}.gx-l .rr .rgm u{min-width:36px}
+
+/* 13.11 таблица «рейтинг от игры к игре» */
+.stp-h{margin-top:34px}.stp td b{font-family:var(--disp);font-size:18px;font-weight:800;color:var(--ink)}.stp td.prov b{color:var(--mute);font-weight:600}.stp td em{font-family:var(--mono);font-size:11px;font-weight:400}.stp th a{color:inherit;text-decoration:none}.stp td.tot{color:var(--line)}

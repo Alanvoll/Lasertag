@@ -364,6 +364,16 @@ const rateOf = (S, name) => { const x = stepRating(S).cur[name]; return x && x.o
 // Рейтинг по дуэлям: каждому подбирается сила так, чтобы она лучше всего объясняла все личные перестрелки сразу
 // (модель Брэдли–Терри по попаданиям, 3 условных обмена со средним игроком как страховка, 100 = средний игрок).
 const DU = { loc: "", min: 3 }, PIST_W = 1; // поправка на пистолет выключена (13.11); если включать, договорились о 0,9
+// таблица «рейтинг от игры к игре»: строки игроки, столбцы игры, в клетке рейтинг после игры и сдвиг
+function stepTable(S) {
+  const st = stepRating(S), ms = [...S.models].sort((a, b) => String(a.g.date).localeCompare(String(b.g.date))), key = n => (S.rows.find(r => r.name === n) || {}).key;
+  const N = Object.keys(st.cur).sort((a, b) => st.cur[b].ok - st.cur[a].ok || st.cur[b].r - st.cur[a].r);
+  const dd = m => { const [, mo, d] = String(m.g.date).split("-"); return `${d}.${mo}`; };
+  return `<div class="shead A stp-h"><h2>Рейтинг от игры к игре</h2></div>${panel("tbl", `<div class="sc" style="--h:none"><table class="mx dmx stp sticky1"><thead><tr><th class="l">игрок</th>${ms.map(m => `<th><a href="#${gameKey(m.g)}">${dd(m)}</a></th>`).join("")}<th class="rt">${ic("star")} сейчас</th></tr></thead>
+    <tbody>${N.map(n => `<tr><td class="l"><a class="pl" href="#${key(n)}">${esc(n)}</a><small>${plural(st.cur[n].n, ["игра", "игры", "игр"])}</small></td>${ms.map(m => { const h = (st.by.get(m) || {})[n]; if (!h) return `<td class="tot">·</td>`; const d = h.prev == null ? 0 : h.r - h.prev;
+      return `<td class="num${h.k < CAL_N ? " prov" : ""}" title="Отыграл игру на ${h.g}${h.k <= CAL_N ? `. Калибровка, игра ${h.k} из ${CAL_N}` : ""}"><b>${h.r}</b><em class="${d > 0 ? "up" : d < 0 ? "dn" : ""}">${d > 0 ? "▲" : d < 0 ? "▼" : ""}${d ? Math.abs(d) : "&nbsp;"}</em></td>`; }).join("")}<td class="rt num">${st.cur[n].ok ? st.cur[n].r : `<span class="calv">калибруется</span>`}</td></tr>`).join("")}</tbody></table></div>
+    <div class="ft">В клетке рейтинг игрока после этой игры и на сколько он изменился. Перестрелял соперников лучше, чем ожидалось по рейтингам, получил пункты, хуже, потерял. Первые ${CAL_N} игры идёт калибровка: рейтинг двигается вдвое быстрее и показан серым, в общий список игрок попадает с ${CAL_N}-й игры.</div>`)}`;
+}
 function duelData(S, loc) {
   const ms = S.models.filter(m => !loc || m.g.location === loc), N = [], ix = {}, games = [];
   ms.forEach(m => m.P.forEach(p => { if (!(p.name in ix)) { ix[p.name] = N.length; N.push(p.name); games.push(0); } games[ix[p.name]]++; }));
@@ -384,6 +394,7 @@ function viewDuels(S) {
       <label class="du-r"><span class="mono">сыграл от <b id="duN"></b></span><input type="range" id="duMin" min="1" step="1"></label></div></div>
   ${panel("tbl", `<div class="sc" style="--h:none"><table class="mx dmx sticky1" id="duT"></table></div>
     <div class="ft">В клетке: попал : получил, под счётом коэффициент (попал, делённое на получил) и сколько игр встречались. Чем ярче фон, тем больше встреч и тем надёжнее счёт. ${ic("star")} по дуэлям: сила, которая лучше всего объясняет все личные перестрелки сразу. Перестрелять сильного стоит дороже, чем слабого, 100 это средний игрок. Считается по всем, кто играл, бегунок только прячет строки.</div>`)}
+  ${stepTable(S)}
   </div>`;
 }
 function duelsInit(S) {
