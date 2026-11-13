@@ -1140,3 +1140,5 @@ td.rtc small{font-family:var(--mono);font-size:10px;margin-left:8px;color:var(--
 .rmv{font-style:normal;display:inline-flex;align-items:center;gap:3px;color:var(--mute);font-size:12px;margin-right:10px;white-space:nowrap}.rmv .ic{width:11px;height:11px;color:var(--uv2)}.rmv u{text-decoration:none;opacity:.6}.rmv b{color:var(--uv2);font-weight:700}.rmv.prov b{color:var(--mute)}
 .le-c .sts .rmv{margin:0 0 0 10px;font-size:13px}
 .le-c .sts .rmv b{font:inherit;font-weight:700;color:var(--uv2);margin:0}.gx-l .rr .rmv{margin-right:8px;font-size:11px}.gx-l.r .rr .rmv{margin-right:8px}
+.rmv u{opacity:1;font-weight:700;font-size:1.15em;line-height:1;color:var(--ink)}.rmv u.up{color:var(--green)}.rmv u.dn{color:var(--red)}
+td.rtc small.up{color:var(--green)}td.rtc small.dn{color:var(--red)}
