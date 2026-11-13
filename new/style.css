@@ -1132,3 +1132,4 @@ td.cal{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transfor
 /* менявшие команду не бледные: обычная яркость, как у остальных */
 .gq .gx-l a.sw img{opacity:1}.gx-l a.sw span{color:inherit}
 .grt{font-weight:800;color:var(--uv2)}
+.dmx th.rt,.dmx td.rt{position:sticky;right:0;background:rgba(15,17,21,.98);z-index:2}.dmx th.rt{z-index:3}
