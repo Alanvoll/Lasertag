@@ -336,17 +336,17 @@ function viewDuels(S) {
     <div class="agf du-f"><div class="seg" data-dloc><button data-loc="">все игры</button>${locs.map(l => `<button data-loc="${esc(l)}">${esc(l)} · ${S.models.filter(m => m.g.location === l).length}</button>`).join("")}</div>
       <label class="du-r"><span class="mono">сыграл от <b id="duN"></b></span><input type="range" id="duMin" min="1" step="1"></label></div></div>
   ${panel("tbl", `<div class="sc" style="--h:none"><table class="mx dmx sticky1" id="duT"></table></div>
-    <div class="ft">В клетке: попал : получил, под счётом коэффициент (попал, делённое на получил) и сколько игр встречались. Чем ярче фон, тем больше встреч и тем надёжнее счёт. ${ic("star")} по дуэлям: сила, которая лучше всего объясняет все личные перестрелки сразу. Перестрелять сильного стоит дороже, чем слабого, 100 это средний игрок. Считается по всем, кто играл, бегунок только прячет строки.</div>`)}
+    <div class="ft">В клетке: попал : получил, под счётом коэффициент (попал, делённое на получил) и сколько игр встречались. Чем ярче фон, тем больше встреч и тем надёжнее счёт. Считается по всем, кто играл, бегунок только прячет строки.</div>`)}
   </div>`;
 }
 function duelsInit(S) {
   const root = document.querySelector(".dupage"); if (!root) return; const T = root.querySelector("#duT"), R = root.querySelector("#duMin"), key = n => (S.rows.find(r => r.name === n) || {}).key;
-  const draw = () => { const D = duelData(S, DU.loc); DU.min = Math.min(DU.min, D.max); R.max = D.max; R.value = DU.min; R.style.setProperty("--p", D.max > 1 ? (DU.min - 1) / (D.max - 1) * 100 + "%" : "100%");
+  const draw = () => { const D = duelData(S, DU.loc), ids = D.N.map((_, j) => j), tot = i => [sum(ids, j => D.G[i][j] || 0), sum(ids, j => D.G[j][i] || 0)], rat = i => { const [g, t] = tot(i); return t ? g / t : g ? 1e9 : 0; }; DU.min = Math.min(DU.min, D.max); R.max = D.max; R.value = DU.min; R.style.setProperty("--p", D.max > 1 ? (DU.min - 1) / (D.max - 1) * 100 + "%" : "100%");
     root.querySelector("#duN").textContent = plural(DU.min, ["игры", "игр", "игр"]);
     root.querySelectorAll("[data-dloc] button").forEach(b => b.setAttribute("aria-pressed", b.dataset.loc === DU.loc));
-    const I = D.N.map((_, i) => i).filter(i => D.games[i] >= DU.min).sort((a, b) => D.bt[b] - D.bt[a] || D.games[b] - D.games[a]);
-    T.innerHTML = `<thead><tr><th class="l">игрок \\ соперник</th><th class="rt">${ic("star")} по дуэлям</th>${I.map(j => `<th>${esc(D.N[j])}</th>`).join("")}</tr></thead>
-    <tbody>${I.map(i => `<tr><td class="l"><a class="pl" href="#${key(D.N[i])}">${esc(D.N[i])}</a><small>${plural(D.games[i], ["игра", "игры", "игр"])}</small></td><td class="rt num">${D.bt[i]}</td>${I.map(j => { if (i === j) return `<td class="tot">—</td>`; const m = D.MT[i][j]; if (!m) return `<td class="tot" title="не встречались">·</td>`; const g = D.G[i][j], t = D.G[j][i];
+    const I = D.N.map((_, i) => i).filter(i => D.games[i] >= DU.min).sort((a, b) => rat(b) - rat(a) || D.games[b] - D.games[a]);
+    T.innerHTML = `<thead><tr><th class="l">игрок \\ соперник</th>${I.map(j => `<th>${esc(D.N[j])}</th>`).join("")}</tr></thead>
+    <tbody>${I.map(i => `<tr><td class="l"><a class="pl" href="#${key(D.N[i])}">${esc(D.N[i])}</a><small>${plural(D.games[i], ["игра", "игры", "игр"])}</small></td>${I.map(j => { if (i === j) return `<td class="tot">—</td>`; const m = D.MT[i][j]; if (!m) return `<td class="tot" title="не встречались">·</td>`; const g = D.G[i][j], t = D.G[j][i];
       return `<td class="cell num" style="--a:${Math.min(46, 7 * m)}%"><b>${g} : ${t}</b><em class="${g > t ? "up" : g < t ? "dn" : ""}">${t ? r2(g / t) : "∞"}</em><small>${plural(m, ["игра", "игры", "игр"])}</small></td>`; }).join("")}</tr>`).join("")}</tbody>`; };
   R.oninput = () => { DU.min = +R.value; draw(); };
   root.querySelectorAll("[data-dloc] button").forEach(b => b.onclick = () => { DU.loc = b.dataset.loc; draw(); });
@@ -573,14 +573,15 @@ function gameInit(S, key) {
     document.querySelectorAll("[data-gmode] button").forEach(b => b.setAttribute("aria-pressed", b.dataset.gmode === gameMode));
     const cols = [["name", "Игрок", p => p.name], ["dealt", "Попал", p => pr(p, p.dealt)], ["recv", "Получил", p => pr(p, p.recv)], ["ratio", "Попал / получил", p => p.ratio], ["deaths", "Смерти", p => pr(p, p.deaths)], ["dpd", "Попал на смерть", p => div(p.dealt, p.deaths)], ["shots", "Выстрелы", p => pr(p, p.shots)], ["acc", "Точность", p => p.acc]];
     const pd = v => isFinite(v) ? one(v) : "∞";
-    cols.push(["rating", ic("star") + "Рейтинг", p => 0]); // рейтинг пока не считаем: у всех «калибруется»
+    const DG = duelData({ models: [m] }, ""), rt = p => DG.bt[DG.N.indexOf(p.name)] || 0; // рейтинг дуэлей внутри этой игры
+    cols.push(["rating", ic("star") + "Рейтинг", rt]);
     const bmax = Object.fromEntries(cols.slice(1).map(([k, , f]) => [k, Math.max(1e-9, ...m.P.map(f).filter(isFinite))]));
     const bar = (p, k, key) => { if (k !== key) return "";
       if (k === "dealt") return p.teams.map(t => { const n = sum(m.P, v => m.valT(p, v, t)); return `<span class="bar" style="--c:${tc(t)};--w:${Math.round(pr(p, n) / max * 80)}px;margin-right:${p.swap ? 1 : 8}px"></span>`; }).join("");
       const v = cols.find(c => c[0] === k)[2](p); return isFinite(v) ? `<span class="bar" style="--c:${tc(p.teams[p.teams.length - 1])};--w:${Math.round(v / bmax[k] * 80)}px;margin-right:8px"></span>` : ""; };
     sortable("gameTable", cols, m.P, (p, key) => `<tr><td class="l">${pLink(p.name, S)}<small>${esc(p.gun !== p.name ? p.gun : "")}${p.swap ? " · смена команды" : ""}</small></td>
       <td class="num">${bar(p, "dealt", key)}${A(p.e.dealt)}${nf(pr(p, p.dealt), fmt)}</td>
-      <td class="num">${bar(p, "recv", key)}${A(p.e.recv)}${nf(pr(p, p.recv), fmt)}</td><td class="num">${bar(p, "ratio", key)}${A(p.e.ratio)}${r2(p.ratio)}</td><td class="num">${bar(p, "deaths", key)}${A(p.e.deaths)}${nf(pr(p, p.deaths), fmt)}</td><td class="num">${bar(p, "dpd", key)}${pd(div(p.dealt, p.deaths))}</td><td class="num">${bar(p, "shots", key)}${A(p.e.shots)}${R ? one(pr(p, p.shots)) : fmt(p.shots)}</td><td class="num">${bar(p, "acc", key)}${A(p.e.acc)}${pct(p.acc)}</td><td class="num cal">калибруется</td></tr>`, "dealt");
+      <td class="num">${bar(p, "recv", key)}${A(p.e.recv)}${nf(pr(p, p.recv), fmt)}</td><td class="num">${bar(p, "ratio", key)}${A(p.e.ratio)}${r2(p.ratio)}</td><td class="num">${bar(p, "deaths", key)}${A(p.e.deaths)}${nf(pr(p, p.deaths), fmt)}</td><td class="num">${bar(p, "dpd", key)}${pd(div(p.dealt, p.deaths))}</td><td class="num">${bar(p, "shots", key)}${A(p.e.shots)}${R ? one(pr(p, p.shots)) : fmt(p.shots)}</td><td class="num">${bar(p, "acc", key)}${A(p.e.acc)}${pct(p.acc)}</td><td class="num grt">${bar(p, "rating", key)}${rt(p)}</td></tr>`, "dealt");
   };
   document.querySelectorAll("[data-gmode] button").forEach(b => b.onclick = () => { gameMode = b.dataset.gmode; draw(); });
   draw(); tabsInit(document.getElementById("app"));

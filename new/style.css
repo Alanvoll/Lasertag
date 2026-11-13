@@ -1131,3 +1131,4 @@ td.cal{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transfor
 .le-c .sts .tp{font-size:15px;font-weight:800;margin-left:0}
 /* менявшие команду не бледные: обычная яркость, как у остальных */
 .gq .gx-l a.sw img{opacity:1}.gx-l a.sw span{color:inherit}
+.grt{font-weight:800;color:var(--uv2)}
