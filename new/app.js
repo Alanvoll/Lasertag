@@ -357,7 +357,7 @@ const teamRt = (S, m, t) => { const rec = stepRating(S).by.get(m) || {}, L = m.P
 const rtMove = (S, m, name) => { const h = (stepRating(S).by.get(m) || {})[name]; return h ? `<i class="rmv num${h.k <= CAL_N ? " prov" : ""}" title="${h.k <= CAL_N ? `Калибровка, игра ${h.k} из ${CAL_N}. ` : ""}Рейтинг до игры и после неё">${ic("star")}${h.prev == null ? "" : `${h.prev}<u class="${h.r > h.prev ? "up" : h.r < h.prev ? "dn" : "eq"}">${h.r > h.prev ? "↗" : h.r < h.prev ? "↘" : "→"}</u>`}<b>${h.r}</b></i>` : ""; };
 // рейтинг игрока в блоке игры: одно число «на сколько отыграл эту игру» и рядом сдвиг сезонного рейтинга
 const rtGame = (S, m, name) => { const h = (stepRating(S).by.get(m) || {})[name]; if (!h) return ""; const d = h.prev == null ? null : h.r - h.prev;
-  return `<i class="rgm num" title="Отыграл игру на ${h.g}. Рейтинг сезона: ${h.prev == null ? `первая игра, старт ${h.r}` : `${h.prev} → ${h.r}`}${h.k <= CAL_N ? `, калибровка ${h.k} из ${CAL_N}` : ""}">${ic("star")}<b>${h.g}</b>${d == null ? `<u class="eq">нов.</u>` : `<u class="${d > 0 ? "up" : d < 0 ? "dn" : "eq"}">${d > 0 ? "▲" : d < 0 ? "▼" : ""}${Math.abs(d)}</u>`}</i>`; };
+  return `<i class="rgm num" title="Отыграл игру на ${h.g}. Рейтинг сезона: ${h.prev == null ? `первая игра, старт ${h.r}` : `${h.prev} → ${h.r}`}${h.k <= CAL_N ? `, калибровка ${h.k} из ${CAL_N}` : ""}">${ic("star")}<b>${h.g}</b>${d == null ? `<u class="eq">дебют</u>` : `<u class="${d > 0 ? "up" : d < 0 ? "dn" : "eq"}">${d > 0 ? "▲" : d < 0 ? "▼" : ""}${Math.abs(d)}</u>`}</i>`; };
 const rateOf = (S, name) => { const x = stepRating(S).cur[name]; return x && x.ok ? x.r : NaN; };
 
 // ---------- экран «Дуэли»: кто в кого сколько попал + рейтинг по дуэлям ----------
