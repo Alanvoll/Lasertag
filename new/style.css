@@ -1145,3 +1145,10 @@ td.rtc small.up{color:var(--green)}td.rtc small.dn{color:var(--red)}
 .gx-l.r .rb{margin:0 7px 0 0}
 @media (min-width:761px){.gq{gap:16px}.gq .gx-l a{gap:8px;font-size:16px}.gx-l .rr .rmv{margin-right:6px;gap:2px}.gx-l .rb{margin-left:5px}.gx-l.r .rb{margin:0 5px 0 0}}
 .gq .gx-l a[style*="--cb"] img{border-image:var(--cb) 1;border-left-width:3px}.gq .gx-l.r a[style*="--cb"] img{border-left-width:0;border-right-width:3px}
+/* блок игры: попадания, рейтинг за игру и сдвиг сезонного рейтинга */
+.rgm{font-style:normal;display:inline-flex;align-items:baseline;gap:3px;margin-left:12px;white-space:nowrap}.rgm .ic{width:12px;height:12px;color:var(--uv2);align-self:center}
+.rgm b{color:var(--uv2);font-weight:800;font-size:16px;min-width:30px;text-align:right}.rgm u{text-decoration:none;font-family:var(--mono);font-size:10px;font-weight:400;min-width:34px;text-align:left;margin-left:3px;color:var(--mute)}.rgm u.up{color:var(--green)}.rgm u.dn{color:var(--red)}
+.gx-l .rr{display:inline-flex;align-items:baseline}.gx-l .rr .st{font-size:14px;font-weight:600;color:var(--mute)}.gx-l .rr .st .ic{opacity:.7}.gx-l .rr .tp{font-size:12px;margin-left:5px}
+.le-c .sts .rgm b{font:inherit;font-weight:800;color:var(--uv2);min-width:0;margin:0}.le-c .sts .rgm u{min-width:0}
+.le-c .sts .rgm{margin-left:12px}.le-c .sts .rgm b{font-size:15px;font-weight:800}.le-c .sts .rgm .ic{width:13px;height:13px}.rgm u{font-size:11px}
+.le-c .sts{white-space:nowrap}.lg2 .le-c .sts .rgm{margin-left:8px;gap:2px}.lg2 .le-c .sts .rgm u{margin-left:2px}
