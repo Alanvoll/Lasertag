@@ -929,7 +929,7 @@ th button .ic{margin-right:5px;width:13px;height:13px;vertical-align:-2px;color:
 .dmx td.l{font-weight:700;white-space:nowrap}.dmx td.l small{font-family:var(--mono);font-weight:400;letter-spacing:.08em;text-transform:uppercase}
 .dmx td b{display:block;font-weight:600;white-space:nowrap}
 .dmx td em{display:block;font-style:normal;font-weight:700;font-size:15px;color:var(--mute)}.dmx em.up{color:var(--green)}.dmx em.dn{color:var(--red)}
-.dmx td.rt{font-family:var(--disp);font-size:24px;font-weight:800;color:var(--uv2);border-left:0;border-right:1px solid var(--line)}
+.dmx td.rt{font-family:var(--disp);font-size:24px;font-weight:800;color:var(--uv2);border-left:1px solid var(--line);border-right:0}
 .dmx th.rt{color:var(--uv2);white-space:nowrap}.dmx th.rt svg{vertical-align:-2px}
 @media (max-width:760px){.du-f{gap:10px}.du-r input{width:140px}.dmx td{padding:6px 6px;font-size:13px}.dmx td em{font-size:13px}.dmx td.rt{font-size:19px}}
 
@@ -1132,3 +1132,36 @@ td.cal{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transfor
 /* менявшие команду не бледные: обычная яркость, как у остальных */
 .gq .gx-l a.sw img{opacity:1}.gx-l a.sw span{color:inherit}
 .grt{font-weight:800;color:var(--uv2)}
+.dmx th.rt,.dmx td.rt{position:sticky;right:0;background:rgba(15,17,21,.98);z-index:2}.dmx th.rt{z-index:3}
+/* сезонный рейтинг: пошаговый рейтинг дуэлей */
+td .cal,.calv{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);white-space:nowrap}.calv{font-size:.5em}
+td.rtc{white-space:nowrap}td.rtc b{color:var(--uv2);font-weight:800}td.rtc.prov b{color:var(--mute)}
+td.rtc small{font-family:var(--mono);font-size:10px;margin-left:8px;color:var(--mute)}td.rtc small.up{color:var(--ink)}td.rtc small.rk{letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.rmv{font-style:normal;display:inline-flex;align-items:center;gap:3px;color:var(--mute);font-size:12px;margin-right:10px;white-space:nowrap}.rmv .ic{width:11px;height:11px;color:var(--uv2)}.rmv u{text-decoration:none;opacity:.6}.rmv b{color:var(--uv2);font-weight:700}.rmv.prov b{color:var(--mute)}
+.le-c .sts .rmv{margin:0 0 0 10px;font-size:13px}
+.le-c .sts .rmv b{font:inherit;font-weight:700;color:var(--uv2);margin:0}.gx-l .rr .rmv{margin-right:8px;font-size:11px}.gx-l.r .rr .rmv{margin-right:8px}
+.rmv u{opacity:1;font-weight:700;font-size:1.15em;line-height:1;color:var(--ink)}.rmv u.up{color:var(--green)}.rmv u.dn{color:var(--red)}
+td.rtc small.up{color:var(--green)}td.rtc small.dn{color:var(--red)}
+.gx-l.r .rb{margin:0 7px 0 0}
+@media (min-width:761px){.gq{gap:16px}.gq .gx-l a{gap:8px;font-size:16px}.gx-l .rr .rmv{margin-right:6px;gap:2px}.gx-l .rb{margin-left:5px}.gx-l.r .rb{margin:0 5px 0 0}}
+.gq .gx-l a[style*="--cb"] img{border-image:var(--cb) 1;border-left-width:3px}.gq .gx-l.r a[style*="--cb"] img{border-left-width:0;border-right-width:3px}
+/* блок игры: попадания, рейтинг за игру и сдвиг сезонного рейтинга */
+.rgm{font-style:normal;display:inline-flex;align-items:baseline;gap:3px;margin-left:12px;white-space:nowrap}.rgm .ic{width:12px;height:12px;color:var(--uv2);align-self:center}
+.rgm b{color:var(--uv2);font-weight:800;font-size:16px;min-width:30px;text-align:right}.rgm u{text-decoration:none;font-family:var(--mono);font-size:10px;font-weight:400;min-width:34px;text-align:left;margin-left:3px;color:var(--mute)}.rgm u.up{color:var(--green)}.rgm u.dn{color:var(--red)}
+.gx-l .rr{display:inline-flex;align-items:baseline}.gx-l .rr .st{font-size:14px;font-weight:600;color:var(--mute)}.gx-l .rr .st .ic{opacity:.7}.gx-l .rr .tp{font-size:12px;margin-left:5px}
+.le-c .sts .rgm b{font:inherit;font-weight:800;color:var(--uv2);min-width:0;margin:0}.le-c .sts .rgm u{min-width:0}
+.le-c .sts .rgm{margin-left:12px}.le-c .sts .rgm b{font-size:15px;font-weight:800}.le-c .sts .rgm .ic{width:13px;height:13px}.rgm u{font-size:11px}
+.le-c .sts{white-space:nowrap}.lg2 .le-c .sts .rgm{margin-left:8px;gap:2px}.lg2 .le-c .sts .rgm u{margin-left:2px}
+td.grt small.rd{font-family:var(--mono);font-size:10px;font-weight:400;margin-left:6px;color:var(--mute);display:inline-block;min-width:30px;text-align:left}td.grt small.up{color:var(--green)}td.grt small.dn{color:var(--red)}
+
+/* 13.11 составы: цифры по колонкам */
+.gx-l .rr{display:grid;grid-template-columns:50px 28px auto;align-items:baseline;justify-items:start;column-gap:0}
+.gx-l .rr .st{justify-self:stretch;justify-content:space-between;gap:4px}.gx-l .rr .tp{margin-left:6px;min-width:22px;text-align:right}
+.gx-l .rr .rgm{margin-left:14px}.gx-l .rr .rgm b{min-width:32px}.gx-l .rr .rgm u{min-width:36px}
+
+/* 13.11 таблица «рейтинг от игры к игре» */
+.stp-h{margin-top:34px}.stp td b{font-family:var(--disp);font-size:18px;font-weight:800;color:var(--ink)}.stp td.prov b{color:var(--mute);font-weight:600}.stp td em{font-family:var(--mono);font-size:11px;font-weight:400}.stp th a{color:inherit;text-decoration:none}.stp td.tot{color:var(--line)}
+
+.stp td s{display:block;text-decoration:none;font-size:12px;font-weight:700;color:var(--uv2);margin-top:4px;padding-top:4px;border-top:1px solid var(--line2)}.stp td s i{font-style:normal;font-family:var(--mono);font-size:9px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-right:5px}
+.stp td.prov{background:repeating-linear-gradient(135deg,transparent 0 6px,rgba(255,255,255,.04) 6px 12px)}.stp td.tot{background:rgba(0,0,0,.25)}
+.stp td.rt.prov{background:rgba(15,17,21,.98)}.stp td.rt.prov b{display:block;font-size:20px;color:var(--mute)}.stp td.rt .calv{font-size:9px}
