@@ -1165,3 +1165,16 @@ td.grt small.rd{font-family:var(--mono);font-size:10px;font-weight:400;margin-le
 .stp td s{display:block;text-decoration:none;font-size:12px;font-weight:700;color:var(--uv2);margin-top:4px;padding-top:4px;border-top:1px solid var(--line2)}.stp td s i{font-style:normal;font-family:var(--mono);font-size:9px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-right:5px}
 .stp td.prov{background:repeating-linear-gradient(135deg,transparent 0 6px,rgba(255,255,255,.04) 6px 12px)}.stp td.tot{background:rgba(0,0,0,.25)}
 .stp td.rt.prov{background:rgba(15,17,21,.98)}.stp td.rt.prov b{display:block;font-size:20px;color:var(--mute)}.stp td.rt .calv{font-size:9px}
+
+/* 14.11 мобильная версия: правки */
+@media (max-width:760px){
+  .le-k{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;justify-content:stretch}.le-k>div{min-width:0}.le-k>div b{font-size:16px;white-space:nowrap}.le-k span{font-size:8px;letter-spacing:.04em;gap:3px;white-space:nowrap}.le-k .ic{width:10px;height:10px}
+  .gcard .d{flex-wrap:wrap;gap:0 8px}.gcard .d b{font-size:18px;white-space:nowrap}
+  .sticky1 td .bar{display:none}.sticky1 td.l small{display:block;margin:1px 0 0}.sticky1 td,.sticky1 th{padding-left:8px;padding-right:8px}
+  .dmx td{padding:6px 5px}.dmx td.l{font-size:13px;white-space:normal;max-width:96px;padding-left:8px}.dmx td b{font-size:13px}.dmx td em{font-size:13px}.dmx td small{font-size:9px}
+  .dmx td.rt{font-size:18px;padding:6px 8px}.dmx th.rt{font-size:8px;padding:6px 6px;white-space:normal}
+  .stp td b{font-size:15px}.stp td em{font-size:10px}.stp td s{font-size:11px;margin-top:3px;padding-top:3px}.stp td s i{font-size:8px;margin-right:3px;letter-spacing:.04em}
+  .stp td.rt.prov b{font-size:16px}.stp td.rt .calv{display:block;white-space:normal;font-size:8px;letter-spacing:.04em;line-height:1.2;max-width:64px;margin:2px auto 0}
+  .gx-l .rr{grid-template-columns:40px 26px auto}.gx-l .rr .tp{margin-left:4px}.gx-l .rr .rgm{margin-left:9px;gap:2px}.gx-l .rr .rgm b{min-width:28px;font-size:15px}.gx-l .rr .rgm u{min-width:26px;margin-left:2px}
+  .facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px;align-items:start}.fact .k{font-size:9px;letter-spacing:.06em}.fact .v{display:block;min-height:26px}
+}
