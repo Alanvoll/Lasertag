@@ -1181,3 +1181,9 @@ td.grt small.rd{font-family:var(--mono);font-size:10px;font-weight:400;margin-le
 /* 16.11 карточка последней игры на главной: попадания и рейтинг в одну строку внутри портрета */
 .lg2 .le-c .sts{display:flex;align-items:baseline;justify-content:space-between;gap:6px;white-space:nowrap}
 .lg2 .le-c .sts .st{font-size:13px}.lg2 .le-c .sts .rgm{margin-left:0;gap:2px}.lg2 .le-c .sts .rgm b{font-size:14px}.lg2 .le-c .sts .rgm u{font-size:10px;margin-left:1px}.lg2 .le-c .sts .rgm .ic{width:11px;height:11px}
+
+/* 16.11 тенденция в таблице «рейтинг от игры к игре» */
+.stp td.trd{white-space:nowrap;padding:6px 10px;border-left:1px solid var(--line)}.stp th.trd{white-space:nowrap}.stp .spk{display:inline-block;vertical-align:middle;overflow:visible}
+.stp .spk line{stroke:var(--uv2);stroke-width:2;stroke-linecap:round}.stp .spk line.c{stroke:var(--mute);stroke-width:1.5;opacity:.6}.stp .spk circle{fill:var(--uv2)}.stp .spk circle.c{fill:var(--mute)}.stp .spk circle.e{fill:#fff;stroke:var(--uv2);stroke-width:2}
+.stp td.trd em{display:inline-block;vertical-align:middle;min-width:34px;margin-left:6px;text-align:left;font-size:11px}
+@media (max-width:760px){.stp td.trd{padding:6px}.stp .spk{width:84px;height:28px}.stp td.trd em{display:block;margin:0;text-align:center}}
