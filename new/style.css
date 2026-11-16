@@ -1195,3 +1195,7 @@ td.grt small.rd{font-family:var(--mono);font-size:10px;font-weight:400;margin-le
 .chk{display:inline-flex;align-items:center;gap:9px;cursor:pointer;user-select:none}.chk input{position:absolute;opacity:0;width:0;height:0}
 .chk i{width:16px;height:16px;border:1px solid var(--uv);display:grid;place-items:center;flex:none}.chk input:checked+i{background:var(--uv)}.chk input:checked+i::after{content:"";width:8px;height:4px;border-left:2px solid #0c0d10;border-bottom:2px solid #0c0d10;transform:rotate(-45deg) translate(1px,-1px)}
 .chk input:focus-visible+i{outline:2px solid var(--uv2);outline-offset:2px}.chk span{color:var(--mute)}.chk:hover span{color:var(--ink)}
+
+/* 16.11 таблица дуэлей игры: двойной цвет у менявшего сторону */
+.gdt th.t[style*="--cb"]{box-shadow:none;background-image:var(--cb);background-size:100% 3px;background-repeat:no-repeat}
+.gdt td.l[style*="--cb"]{box-shadow:none;background-image:var(--cb);background-size:3px 100%;background-repeat:no-repeat}
