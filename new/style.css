@@ -1189,3 +1189,5 @@ td.grt small.rd{font-family:var(--mono);font-size:10px;font-weight:400;margin-le
 @media (max-width:760px){.stp td.trd{padding:6px}.stp .spk{width:84px;height:28px}.stp td.trd em{display:block;margin:0;text-align:center}}
 
 .stp .spk circle{fill:#e9e2ff}.stp .spk circle.h{fill:transparent;stroke:none}.stp .spk g{cursor:default}.stp .spk g:hover circle:not(.h){fill:#fff;stroke:#fff;stroke-width:2}.stp .spk line{stroke-width:1.6;opacity:.85}
+
+.stp .spk line.c{stroke:var(--mute);stroke-width:1.4;opacity:.7}.stp .spk circle.c{fill:#8a8794}
