@@ -796,7 +796,7 @@ function viewGame(S, key) {
   return `${header("games")}
   <section><span class="eyebrow">${dateRu(g.date)}${g.location ? " · " + esc(g.location) : ""}</span><h1>${esc(g.title || "Игра " + dateShort(g.date))}</h1>
 </section>
-  <section><div class="board">${board}</div>${swapNote}${(g.notes || []).map(n => `<p class="note">${esc(n)}</p>`).join("")}</section>
+  <section><div class="board">${board}</div></section>
   ${roundsHtml}
   ${replayHtml}
   <section><div class="head"><h2>Игроки</h2><div class="seg" role="group" aria-label="Режим таблицы"><button data-gmode="tot">Всего</button><button data-gmode="rnd">За раунд</button></div></div><div class="scroll"><table id="gameTable"></table></div></section>
