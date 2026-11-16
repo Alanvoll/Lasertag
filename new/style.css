@@ -1178,3 +1178,6 @@ td.grt small.rd{font-family:var(--mono);font-size:10px;font-weight:400;margin-le
   .gx-l .rr{grid-template-columns:40px 26px auto}.gx-l .rr .tp{margin-left:4px}.gx-l .rr .rgm{margin-left:9px;gap:2px}.gx-l .rr .rgm b{min-width:28px;font-size:15px}.gx-l .rr .rgm u{min-width:26px;margin-left:2px}
   .facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px;align-items:start}.fact .k{font-size:9px;letter-spacing:.06em}.fact .v{display:block;min-height:26px}
 }
+/* 16.11 карточка последней игры на главной: попадания и рейтинг в одну строку внутри портрета */
+.lg2 .le-c .sts{display:flex;align-items:baseline;justify-content:space-between;gap:6px;white-space:nowrap}
+.lg2 .le-c .sts .st{font-size:13px}.lg2 .le-c .sts .rgm{margin-left:0;gap:2px}.lg2 .le-c .sts .rgm b{font-size:14px}.lg2 .le-c .sts .rgm u{font-size:10px;margin-left:1px}.lg2 .le-c .sts .rgm .ic{width:11px;height:11px}
